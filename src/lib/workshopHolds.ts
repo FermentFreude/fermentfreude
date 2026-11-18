@@ -2,7 +2,9 @@ import type { Payload } from 'payload'
 import { revalidateTag } from 'next/cache'
 
 import { releaseSpotsAtomic, reserveSpotsAtomic } from '@/lib/atomicSpots'
+import { getStripe } from '@/lib/stripe'
 import type { WorkshopBooking } from '@/payload-types'
+import { capacityOf } from '@/lib/appointmentCapacity'
 
 /* ═══════════════════════════════════════════════════════════════
  *  Workshop seat holds — the single source of truth.
@@ -72,9 +74,7 @@ async function getMaxCapacity(payload: Payload, appointmentId: string): Promise<
       depth: 1,
       overrideAccess: true,
     })
-    return typeof appt.workshop === 'object' && appt.workshop
-      ? (appt.workshop.maxCapacityPerSlot ?? 12)
-      : 12
+    return capacityOf(appt)
   } catch {
     return null // appointment deleted — nothing to give seats back to
   }
@@ -87,6 +87,108 @@ function bustAppointmentCache() {
     // Not in a request scope that allows revalidation — the overview's own
     // 2-minute revalidate window catches up.
   }
+}
+
+
+/**
+ * Give a hold's seats back — at most once per `releaseKey`, even if it is called
+ * again after a crash or by two requests at the same time.
+ *
+ * The appointment remembers the keys it already honoured (`releasedBookingIds`),
+ * and the check + the counter change + the remembering happen in ONE atomic
+ * update of that single document (works on Atlas M0, no transactions needed).
+ * Returns true if seats were given back now, false if this key was done before.
+ */
+export async function releaseSeatsOnce(
+  payload: Payload,
+  appointmentId: string,
+  releaseKey: string,
+  seats: number,
+  maxCapacity: number,
+): Promise<boolean> {
+  if (!isObjectId(appointmentId) || seats < 1) return false
+  const result = await payload.db.collections['workshop-appointments'].updateOne(
+    { _id: appointmentId, releasedBookingIds: { $ne: releaseKey } },
+    [
+      {
+        $set: {
+          availableSpots: { $min: [{ $add: ['$availableSpots', seats] }, maxCapacity] },
+          releasedBookingIds: {
+            $slice: [{ $concatArrays: [{ $ifNull: ['$releasedBookingIds', []] }, [releaseKey]] }, -400],
+          },
+        },
+      },
+    ],
+  )
+  return result.modifiedCount > 0
+}
+
+/**
+ * A payment that was started for a basket can still be completed later, even
+ * after the hold behind it ran out. When a basket's hold is cancelled, cancel
+ * that basket's open Stripe payments too, so an old checkout can never be paid.
+ * Best-effort: a Stripe problem must never block giving the seats back.
+ */
+export async function cancelOpenPaymentsForCart(payload: Payload, cartId: string): Promise<number> {
+  if (!cartId) return 0
+  let cancelled = 0
+  try {
+    const txs = await payload.find({
+      collection: 'transactions',
+      where: { and: [{ cart: { equals: cartId } }, { status: { equals: 'pending' } }] },
+      limit: 20,
+      depth: 0,
+      overrideAccess: true,
+    })
+    for (const tx of txs.docs) {
+      const piId = (tx as unknown as { stripe?: { paymentIntentID?: string } }).stripe?.paymentIntentID
+      if (!piId) continue
+      try {
+        const stripe = getStripe()
+        const pi = await stripe.paymentIntents.retrieve(piId)
+        if (['requires_payment_method', 'requires_confirmation', 'requires_action'].includes(pi.status)) {
+          await stripe.paymentIntents.cancel(piId, { cancellation_reason: 'abandoned' })
+          cancelled++
+        }
+      } catch (err) {
+        payload.logger.warn(
+          `[workshopHolds] Could not cancel payment ${piId} of expired basket ${cartId}: ${err instanceof Error ? err.message : String(err)}`,
+        )
+      }
+    }
+  } catch (err) {
+    payload.logger.warn(`[workshopHolds] Payment lookup for basket ${cartId} failed: ${err instanceof Error ? err.message : String(err)}`)
+  }
+  return cancelled
+}
+
+/**
+ * Finish releases that were started but not completed (the function was stopped
+ * between "cancelled" and "seats given back"). Safe to run any time and as often
+ * as you like: releaseSeatsOnce never gives the same hold back twice.
+ */
+export async function sweepPendingReleases(payload: Payload, limit = 50): Promise<number> {
+  let done = 0
+  try {
+    const stuck = (await bookingsModel(payload)
+      .find({ status: 'cancelled', releasePending: true, updatedAt: { $lt: new Date(Date.now() - 60 * 1000) } })
+      .select({ _id: 1, appointmentId: 1, guestCount: 1 })
+      .limit(limit)
+      .lean()) as RawBooking[]
+    for (const b of stuck) {
+      const seats = typeof b.guestCount === 'number' ? b.guestCount : 0
+      if (b.appointmentId && seats > 0) {
+        const maxCapacity = await getMaxCapacity(payload, b.appointmentId)
+        if (maxCapacity !== null) await releaseSeatsOnce(payload, b.appointmentId, String(b._id), seats, maxCapacity)
+      }
+      await bookingsModel(payload).updateOne({ _id: b._id }, { $set: { releasePending: false } })
+      done++
+    }
+    if (done > 0) payload.logger.info(`[workshopHolds] Finished ${done} unfinished seat release(s)`)
+  } catch (err) {
+    payload.logger.error(`[workshopHolds] Sweep of unfinished releases failed: ${err instanceof Error ? err.message : String(err)}`)
+  }
+  return done
 }
 
 /**
@@ -105,18 +207,23 @@ export async function cancelPendingBooking(
     ? { _id: bookingId, ...expiredHoldFilter(now) }
     : { _id: bookingId, status: 'pending' }
 
+  // Cancel AND mark "seats still to give back" in the same atomic step. If this
+  // function is stopped before the seats are back, sweepPendingReleases finishes it.
   const before = (await bookingsModel(payload)
-    .findOneAndUpdate(filter, { $set: { status: 'cancelled', updatedAt: now } }, { new: false })
-    .lean()) as RawBooking | null
+    .findOneAndUpdate(filter, { $set: { status: 'cancelled', releasePending: true, updatedAt: now } }, { new: false })
+    .lean()) as (RawBooking & { cartSlug?: string }) | null
   if (!before) return 0
 
   const seats = typeof before.guestCount === 'number' ? before.guestCount : 0
   if (before.appointmentId && seats > 0) {
     const maxCapacity = await getMaxCapacity(payload, before.appointmentId)
     if (maxCapacity !== null) {
-      await releaseSpotsAtomic(payload, before.appointmentId, seats, maxCapacity)
+      await releaseSeatsOnce(payload, before.appointmentId, String(before._id), seats, maxCapacity)
     }
   }
+  await bookingsModel(payload).updateOne({ _id: bookingId }, { $set: { releasePending: false } })
+  // An old payment for this basket must not be completable any more.
+  if (before.cartSlug) await cancelOpenPaymentsForCart(payload, before.cartSlug)
   bustAppointmentCache()
   return seats
 }
@@ -154,7 +261,8 @@ export async function removeGuestsFromPendingBooking(
   if (before.appointmentId) {
     const maxCapacity = await getMaxCapacity(payload, before.appointmentId)
     if (maxCapacity !== null) {
-      await releaseSpotsAtomic(payload, before.appointmentId, count, maxCapacity)
+      // keyed by booking + the guest count it had, so this step can only count once
+      await releaseSeatsOnce(payload, before.appointmentId, `${bookingId}#${before.guestCount}`, count, maxCapacity)
     }
   }
   bustAppointmentCache()
@@ -218,6 +326,8 @@ export async function cleanupExpiredHolds(payload: Payload, limit = 25): Promise
       const seats = await cancelPendingBooking(payload, String(doc._id), { onlyIfExpired: true })
       if (seats > 0) released++
     }
+    // Also finish any release that an earlier run did not complete.
+    await sweepPendingReleases(payload)
     if (released > 0) {
       payload.logger.info(`[workshopHolds] Released ${released} expired seat hold(s)`)
     }

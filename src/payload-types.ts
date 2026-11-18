@@ -72,19 +72,14 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
-    'backlog-items': BacklogItem;
-    pages: Page;
-    categories: Category;
-    'course-progress': CourseProgress;
-    enrollments: Enrollment;
-    media: Media;
-    'online-courses': OnlineCourse;
-    posts: Post;
+    'workshop-appointments': WorkshopAppointment;
     workshops: Workshop;
     'workshop-locations': WorkshopLocation;
-    'workshop-appointments': WorkshopAppointment;
     'workshop-bookings': WorkshopBooking;
+    pages: Page;
+    media: Media;
+    posts: Post;
+    categories: Category;
     vouchers: Voucher;
     quotes: Quote;
     'cancellation-invoices': CancellationInvoice;
@@ -95,8 +90,15 @@ export interface Config {
     'booking-magic-links': BookingMagicLink;
     'refund-requests': RefundRequest;
     'activity-events': ActivityEvent;
+    'online-courses': OnlineCourse;
+    enrollments: Enrollment;
+    'course-progress': CourseProgress;
+    'backlog-items': BacklogItem;
+    'attention-notes': AttentionNote;
     'brevo-email-templates': BrevoEmailTemplate;
+    'email-template-versions': EmailTemplateVersion;
     'brevo-templates': BrevoTemplate;
+    users: User;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -126,19 +128,14 @@ export interface Config {
     };
   };
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    'backlog-items': BacklogItemsSelect<false> | BacklogItemsSelect<true>;
-    pages: PagesSelect<false> | PagesSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
-    'course-progress': CourseProgressSelect<false> | CourseProgressSelect<true>;
-    enrollments: EnrollmentsSelect<false> | EnrollmentsSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    'online-courses': OnlineCoursesSelect<false> | OnlineCoursesSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
+    'workshop-appointments': WorkshopAppointmentsSelect<false> | WorkshopAppointmentsSelect<true>;
     workshops: WorkshopsSelect<false> | WorkshopsSelect<true>;
     'workshop-locations': WorkshopLocationsSelect<false> | WorkshopLocationsSelect<true>;
-    'workshop-appointments': WorkshopAppointmentsSelect<false> | WorkshopAppointmentsSelect<true>;
     'workshop-bookings': WorkshopBookingsSelect<false> | WorkshopBookingsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     vouchers: VouchersSelect<false> | VouchersSelect<true>;
     quotes: QuotesSelect<false> | QuotesSelect<true>;
     'cancellation-invoices': CancellationInvoicesSelect<false> | CancellationInvoicesSelect<true>;
@@ -149,8 +146,15 @@ export interface Config {
     'booking-magic-links': BookingMagicLinksSelect<false> | BookingMagicLinksSelect<true>;
     'refund-requests': RefundRequestsSelect<false> | RefundRequestsSelect<true>;
     'activity-events': ActivityEventsSelect<false> | ActivityEventsSelect<true>;
+    'online-courses': OnlineCoursesSelect<false> | OnlineCoursesSelect<true>;
+    enrollments: EnrollmentsSelect<false> | EnrollmentsSelect<true>;
+    'course-progress': CourseProgressSelect<false> | CourseProgressSelect<true>;
+    'backlog-items': BacklogItemsSelect<false> | BacklogItemsSelect<true>;
+    'attention-notes': AttentionNotesSelect<false> | AttentionNotesSelect<true>;
     'brevo-email-templates': BrevoEmailTemplatesSelect<false> | BrevoEmailTemplatesSelect<true>;
+    'email-template-versions': EmailTemplateVersionsSelect<false> | EmailTemplateVersionsSelect<true>;
     'brevo-templates': BrevoTemplatesSelect<false> | BrevoTemplatesSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -243,12 +247,508 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * ⭐ Manage workshop availability. **This is where you control dates, times, and available spots.** Changes here instantly update the booking pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-appointments".
+ */
+export interface WorkshopAppointment {
+  id: string;
+  /**
+   * Select the workshop (Kombucha, Lakto, Tempeh, Basics)
+   */
+  workshop: string | Workshop;
+  /**
+   * Select the location where this workshop takes place
+   */
+  location: string | WorkshopLocation;
+  /**
+   * Workshop date and time (must be in the future)
+   */
+  dateTime: string;
+  /**
+   * Wie viele Personen bei DIESEM Termin dabei sein können. Leer lassen = die Standard-Kapazität des Workshops gilt. Wird die Zahl später geändert, passen sich die freien Plätze automatisch an. Sie kann nicht unter die Zahl der schon gebuchten Plätze gesenkt werden.
+   */
+  capacity?: number | null;
+  /**
+   * Freie Plätze (0 = ausgebucht). Wird automatisch geführt: bei einem neuen Termin gleich der Kapazität, danach zählen Buchungen und Stornos mit. Nur im Ausnahmefall von Hand ändern.
+   */
+  availableSpots: number;
+  /**
+   * Internal: ids of checkout holds whose seats were already given back, so a seat can never be given back twice (or lost half-way). Do not edit.
+   */
+  releasedBookingIds?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Uncheck to hide this date from the website (useful for sold-out or cancelled sessions)
+   */
+  isPublished?: boolean | null;
+  /**
+   * Internal notes (not visible to customers)
+   */
+  notes?: string | null;
+  /**
+   * ⚠️ Auf "Abgesagt" setzen benachrichtigt automatisch JEDE Person mit einer bestätigten Buchung auf diesen Termin per E-Mail, mit einem Link zur Auswahl: Ersatztermin oder volle Rückerstattung. Der Termin wird dabei auch automatisch von der Website genommen (unpublished). Das kann nicht einfach rückgängig gemacht werden — nur für echte Absagen verwenden.
+   */
+  cancellationStatus?: ('scheduled' | 'cancelled_by_organiser') | null;
+  /**
+   * Grund, der den Kund:innen in der Absage-E-Mail angezeigt wird (z.B. "Krankheitsbedingt").
+   */
+  cancellationReason?: string | null;
+  /**
+   * Nur intern sichtbar — nicht Teil der Kunden-E-Mail.
+   */
+  cancellationInternalNote?: string | null;
+  cancelledAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Define workshop metadata. Price and standard capacity apply to all dates and locations. A single date can have its own capacity.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshops".
+ */
+export interface Workshop {
+  id: string;
+  /**
+   * URL-friendly identifier (e.g., kombucha, lakto, tempeh, basics)
+   */
+  slug: string;
+  /**
+   * Workshop name (displayed on frontend)
+   */
+  title: string;
+  /**
+   * Detailed workshop description
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Price per person in EUR (default: €99)
+   */
+  basePrice: number;
+  /**
+   * Standard-Kapazität: wie viele Personen pro Termin dabei sein können. Sie gilt für alle Termine dieses Workshops, die keine eigene Kapazität haben (bei einem einzelnen Termin kann sie unter „Workshop-Termine“ überschrieben werden). Eine Änderung passt die freien Plätze aller kommenden Termine ohne eigene Kapazität automatisch an.
+   */
+  maxCapacityPerSlot: number;
+  /**
+   * Workshop hero image
+   */
+  image?: (string | null) | Media;
+  /**
+   * What attendees should bring to the workshop. Plain text — line breaks are preserved in confirmation/reminder emails. Leave empty to omit the section.
+   */
+  whatToBring?: string | null;
+  /**
+   * Hide workshop from frontend if unchecked
+   */
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt: string;
+  caption?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Workshop locations. Used to organize appointments by geography.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-locations".
+ */
+export interface WorkshopLocation {
+  id: string;
+  /**
+   * Location name (e.g., Berlin Studio, Munich Workshop)
+   */
+  name: string;
+  /**
+   * Full address including street, city, and postal code
+   */
+  address: string;
+  /**
+   * Optional timezone (e.g., Europe/Berlin) for date/time clarity
+   */
+  timezone?: string | null;
+  /**
+   * Hide location from frontend if unchecked
+   */
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-bookings".
+ */
+export interface WorkshopBooking {
+  id: string;
+  /**
+   * Read-only here. Change bookings in the roster dashboard (Workshops → the date → Bearbeiten / Zahlung / Platz freigeben).
+   */
+  status: 'pending' | 'confirmed' | 'cancelled' | 'refunded';
+  /**
+   * ID of the WorkshopAppointment. Auto-populated for online bookings. For phone bookings: copy the ID from the correct appointment in the Workshop Appointments list — this is required for the booking to appear in the Roster dashboard.
+   */
+  appointmentId?: string | null;
+  /**
+   * Auto-populated for online bookings. Not needed for phone bookings.
+   */
+  cartSlug?: string | null;
+  /**
+   * Set automatically when payment is confirmed via Stripe.
+   */
+  orderId?: string | null;
+  /**
+   * Only matters while the booking is "Pending": the seats stay reserved for this customer until this time, then go back on sale automatically. Set by the website — no need to edit.
+   */
+  holdExpiresAt?: string | null;
+  /**
+   * Filled automatically by the daily reminder job (2 days before the workshop). Moving the booking to another date resets it, so the new date gets its own reminder.
+   */
+  workshopReminder?: {
+    appointmentId?: string | null;
+    sentTo?: string[] | null;
+    sentAt?: string | null;
+  };
+  /**
+   * Auto-generated on confirmation. Used for the guest receipt download link.
+   */
+  downloadToken?: string | null;
+  /**
+   * Customer first name. Auto-populated from checkout for online bookings.
+   */
+  firstName?: string | null;
+  lastName?: string | null;
+  /**
+   * The buyer. Receives the booking confirmation and the workshop reminder 2 days before.
+   */
+  email?: string | null;
+  phone?: string | null;
+  /**
+   * Dietary restrictions, allergies, intolerances, or any other special requests.
+   */
+  notes?: string | null;
+  /**
+   * e.g. "Kombucha Workshop"
+   */
+  workshopTitle: string;
+  /**
+   * e.g. "kombucha", "lakto", "tempeh"
+   */
+  workshopSlug: string;
+  /**
+   * Formatted date string, e.g. "14. Juni 2026"
+   */
+  date: string;
+  /**
+   * Formatted time string, e.g. "10:00 – 13:00"
+   */
+  time: string;
+  guestCount: number;
+  pricePerPerson: number;
+  totalPrice: number;
+  /**
+   * One entry per booked seat. Seat 1 is the buyer. Each seat can have a guest name, email and dietary notes. Confirmations go only to the buyer; the workshop reminder (2 days before) goes to the buyer and every guest with an email.
+   */
+  seats?:
+    | {
+        /**
+         * Name of the person attending this seat (optional).
+         */
+        recipientName?: string | null;
+        /**
+         * Optional. If set, this guest also receives the workshop reminder email 2 days before the workshop.
+         */
+        email?: string | null;
+        /**
+         * Dietary requirements, allergies, or accessibility needs for this guest.
+         */
+        giftNote?: string | null;
+        /**
+         * Lifecycle status of this individual seat — every seat resolves independently. Set automatically by the manage-booking flow; the booking-level Status field above is the order/payment state, not this.
+         */
+        seatStatus?:
+          | (
+              | 'active'
+              | 'cancelled_no_refund'
+              | 'rebooking_pending'
+              | 'rebooked'
+              | 'refund_requested'
+              | 'refunded'
+              | 'voucher_issued'
+              | 'organiser_cancelled_pending'
+              | 'no_show'
+            )
+          | null;
+        /**
+         * True once this seat has used its one-time rebooking right (AGB §4.6) — either rebook-now or rebook-later-via-code. No further self-service rebooking or refund is offered after this.
+         */
+        selfRebookingUsed?: boolean | null;
+        /**
+         * When this seat was cancelled or its rebooking right exercised.
+         */
+        cancelledAt?: string | null;
+        /**
+         * Reason the customer selected when cancelling/rebooking this seat.
+         */
+        cancelledReason?:
+          | ('cannot_attend' | 'personal_health' | 'wrong_workshop' | 'workshop_cancelled' | 'other')
+          | null;
+        /**
+         * Set when seatStatus = voucher_issued — the deferred-rebooking code issued for this seat.
+         */
+        linkedVoucherId?: (string | null) | Voucher;
+        /**
+         * Set when a refund was requested for this seat.
+         */
+        linkedRefundRequestId?: (string | null) | RefundRequest;
+        /**
+         * Traceability — the new WorkshopBooking created when this seat was rebooked (rebook-now).
+         */
+        rebookedToBookingId?: string | null;
+        /**
+         * Traceability — the original WorkshopBooking this seat was rebooked from, if this booking exists because of a rebooking.
+         */
+        rebookedFromBookingId?: string | null;
+        /**
+         * Traceability — the specific seat index on the original booking this seat was rebooked from. Paired with rebookedFromBookingId so rebook-now can detect an interrupted request (new booking created but the original seat never got marked resolved) and resume instead of creating a duplicate.
+         */
+        rebookedFromSeatIndex?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Internal: a cancelled checkout hold whose seats have not been given back yet. The background job finishes it. Do not edit.
+   */
+  releasePending?: boolean | null;
+  /**
+   * Wird im Dashboard ausgefüllt, wenn jemand von Hand eingetragen wird (E-Mail, Telefon, vor Ort, Wix-Gutschein …). Nicht hier bearbeiten, sondern im Dashboard unter „Zahlung“.
+   */
+  manualInfo?: {
+    channel?: ('email' | 'phone' | 'inperson' | 'wix' | 'other') | null;
+    paymentStatus?: ('paid' | 'open') | null;
+    paymentMethod?:
+      | ('transfer' | 'cash' | 'card_onsite' | 'voucher_wix' | 'voucher_shop' | 'wix_paid' | 'rebooking' | 'other')
+      | null;
+    voucherCode?: string | null;
+    paymentNote?: string | null;
+    paidAt?: string | null;
+  };
+  /**
+   * Everything that happened to this booking, newest last: how it was created, moves, emails sent (or not), link opened, customer choices, refunds. Written automatically — cannot be edited, so nothing gets lost.
+   */
+  history?:
+    | {
+        at?: string | null;
+        type?:
+          | (
+              | 'created_online'
+              | 'created_manual'
+              | 'created_rebooking'
+              | 'moved'
+              | 'alternate_offered'
+              | 'email_changed'
+              | 'reminder_sent'
+              | 'organiser_cancelled'
+              | 'link_opened'
+              | 'customer_rebooked'
+              | 'customer_voucher'
+              | 'customer_cancelled'
+              | 'refund_requested'
+              | 'refund_completed'
+              | 'details_edited'
+              | 'seats_changed'
+              | 'seat_released'
+              | 'payment_recorded'
+              | 'invoice_created'
+              | 'confirmation_sent'
+            )
+          | null;
+        summary?: string | null;
+        by?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Geschenkgutscheine — generische €99 Workshop-Erlebnis Gutscheine. Käufer wählt keinen Workshop; Empfänger löst den Gutschein beim Checkout für einen beliebigen Workshop ein.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vouchers".
+ */
+export interface Voucher {
+  id: string;
+  /**
+   * Auto-generated unique voucher code (e.g. FF-GIFT-A7K3M2X9)
+   */
+  code: string;
+  /**
+   * Voucher lifecycle status
+   */
+  status: 'active' | 'redeemed' | 'expired';
+  /**
+   * Voucher value in EUR (default €99 for workshop experience)
+   */
+  value: number;
+  /**
+   * How this voucher came to exist. "Cancellation — deferred rebooking" is issued automatically when a customer picks "rebook later via code" instead of a paid gift card.
+   */
+  origin?: ('gift-purchase' | 'cancellation-self-service' | 'admin-goodwill') | null;
+  /**
+   * Full name of the buyer (used in greeting of confirmation email). Optional for legacy vouchers.
+   */
+  purchaserName?: string | null;
+  /**
+   * Email of the buyer (receives purchase confirmation). Leave blank for manually-created vouchers.
+   */
+  purchaserEmail?: string | null;
+  /**
+   * Name of the recipient (used on the gift card and in the email greeting).
+   */
+  recipientName?: string | null;
+  /**
+   * Email of the recipient (used when deliveryMethod = email-recipient).
+   */
+  recipientEmail?: string | null;
+  /**
+   * Optional personal note from the buyer printed on the gift card (max 500 chars).
+   */
+  personalNote?: string | null;
+  /**
+   * How the voucher is delivered to the recipient
+   */
+  deliveryMethod: 'email-recipient' | 'email-self' | 'pdf' | 'email' | 'pickup';
+  /**
+   * Stripe Checkout Session ID for payment verification
+   */
+  stripeSessionId?: string | null;
+  /**
+   * Automatically set to true when voucher is used
+   */
+  redeemed?: boolean | null;
+  /**
+   * Date when voucher was redeemed
+   */
+  redeemedOn?: string | null;
+  /**
+   * Workshop name when voucher was redeemed at checkout
+   */
+  redeemedForWorkshop?: string | null;
+  /**
+   * User who redeemed the voucher
+   */
+  redeemedBy?: (string | null) | User;
+  /**
+   * Nummer aus der FF-Reihe (FF-JJJJ-NNNN), wird automatisch vergeben und steht nicht auf dem Gutschein-PDF (dort steht der Code FF-GIFT-…). Die Rechnung für einen Gutschein-Kauf ist aktuell die WEB-Rechnung der zugehörigen Bestellung. Beim Einlösen entsteht eine eigene Rechnung für den Workshop, die den Gutschein als bereits bezahlt abzieht: das ist kein zweiter Kauf.
+   */
+  invoiceNumber?: string | null;
+  /**
+   * Internal notes about this voucher
+   */
+  notes?: string | null;
+  /**
+   * Set automatically if the Brevo confirmation email failed to send. Check Vercel logs for the [Brevo] error and resend the voucher manually if needed.
+   */
+  emailDeliveryFailed?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: string;
   name?: string | null;
+  /**
+   * Only for the team: shown in the founders dashboard next to your notes and messages. Can also be changed in the dashboard.
+   */
+  avatar?: (string | null) | Media;
+  /**
+   * Only for the team: when the founders dashboard sends you an email about notes. Can also be changed in the dashboard.
+   */
+  noteEmailPref?: ('all' | 'urgent' | 'off') | null;
   /**
    * Whether the customer opted in to marketing emails during account creation.
    */
@@ -382,6 +882,18 @@ export interface Order {
    * Frozen invoice date. Set once when the order is paid and never overwritten — guarantees the PDF receipt shows the same date no matter when it is downloaded.
    */
   invoiceIssuedAt?: string | null;
+  /**
+   * Frozen invoice lines. Saved once when the invoice is issued, so moving a booking or changing a price later can never change an invoice that was already issued.
+   */
+  invoiceItemsSnapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   /**
    * Set automatically when this order is a voucher purchase — the voucher that was bought.
    */
@@ -665,67 +1177,6 @@ export interface Product {
   createdAt: string;
   deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  prefix?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    card?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    hero?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3338,63 +3789,6 @@ export interface ProductShowcaseBlock {
   blockType: 'productShowcase';
 }
 /**
- * Define workshop metadata. Price and capacity apply to all dates and locations.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "workshops".
- */
-export interface Workshop {
-  id: string;
-  /**
-   * URL-friendly identifier (e.g., kombucha, lakto, tempeh, basics)
-   */
-  slug: string;
-  /**
-   * Workshop name (displayed on frontend)
-   */
-  title: string;
-  /**
-   * Detailed workshop description
-   */
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Price per person in EUR (default: €99)
-   */
-  basePrice: number;
-  /**
-   * Maximum number of people per workshop session. Keep this matched to your real room/class size — it controls how many spots show as available on the booking page.
-   */
-  maxCapacityPerSlot: number;
-  /**
-   * Workshop hero image
-   */
-  image?: (string | null) | Media;
-  /**
-   * What attendees should bring to the workshop. Plain text — line breaks are preserved in confirmation/reminder emails. Leave empty to omit the section.
-   */
-  whatToBring?: string | null;
-  /**
-   * Hide workshop from frontend if unchecked
-   */
-  isActive?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "FermentationStoryBlock".
  */
@@ -5724,89 +6118,6 @@ export interface Cart {
   createdAt: string;
 }
 /**
- * Geschenkgutscheine — generische €99 Workshop-Erlebnis Gutscheine. Käufer wählt keinen Workshop; Empfänger löst den Gutschein beim Checkout für einen beliebigen Workshop ein.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "vouchers".
- */
-export interface Voucher {
-  id: string;
-  /**
-   * Auto-generated unique voucher code (e.g. FF-GIFT-A7K3M2X9)
-   */
-  code: string;
-  /**
-   * Voucher lifecycle status
-   */
-  status: 'active' | 'redeemed' | 'expired';
-  /**
-   * Voucher value in EUR (default €99 for workshop experience)
-   */
-  value: number;
-  /**
-   * How this voucher came to exist. "Cancellation — deferred rebooking" is issued automatically when a customer picks "rebook later via code" instead of a paid gift card.
-   */
-  origin?: ('gift-purchase' | 'cancellation-self-service' | 'admin-goodwill') | null;
-  /**
-   * Full name of the buyer (used in greeting of confirmation email). Optional for legacy vouchers.
-   */
-  purchaserName?: string | null;
-  /**
-   * Email of the buyer (receives purchase confirmation). Leave blank for manually-created vouchers.
-   */
-  purchaserEmail?: string | null;
-  /**
-   * Name of the recipient (used on the gift card and in the email greeting).
-   */
-  recipientName?: string | null;
-  /**
-   * Email of the recipient (used when deliveryMethod = email-recipient).
-   */
-  recipientEmail?: string | null;
-  /**
-   * Optional personal note from the buyer printed on the gift card (max 500 chars).
-   */
-  personalNote?: string | null;
-  /**
-   * How the voucher is delivered to the recipient
-   */
-  deliveryMethod: 'email-recipient' | 'email-self' | 'pdf' | 'email' | 'pickup';
-  /**
-   * Stripe Checkout Session ID for payment verification
-   */
-  stripeSessionId?: string | null;
-  /**
-   * Automatically set to true when voucher is used
-   */
-  redeemed?: boolean | null;
-  /**
-   * Date when voucher was redeemed
-   */
-  redeemedOn?: string | null;
-  /**
-   * Workshop name when voucher was redeemed at checkout
-   */
-  redeemedForWorkshop?: string | null;
-  /**
-   * User who redeemed the voucher
-   */
-  redeemedBy?: (string | null) | User;
-  /**
-   * Sequential invoice number (e.g. FF-2026-0001). Assigned automatically on purchase.
-   */
-  invoiceNumber?: string | null;
-  /**
-   * Internal notes about this voucher
-   */
-  notes?: string | null;
-  /**
-   * Set automatically if the Brevo confirmation email failed to send. Check Vercel logs for the [Brevo] error and resend the voucher manually if needed.
-   */
-  emailDeliveryFailed?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "addresses".
  */
@@ -5864,6 +6175,387 @@ export interface Address {
     | 'SE'
     | 'CH';
   phone?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Refund requests created by customers (self-service) or admins (organiser cancellation, goodwill). No refund is issued automatically — a founder actions it in Stripe's dashboard using the PaymentIntent ID here; the charge.refunded webhook then marks this row completed.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "refund-requests".
+ */
+export interface RefundRequest {
+  id: string;
+  booking: string | WorkshopBooking;
+  /**
+   * 0-based index into the booking's seats[] array — identifies exactly which seat this request is for.
+   */
+  seatIndex: number;
+  /**
+   * The seats[] array item's own Payload-generated id, for a lookup that survives array reordering.
+   */
+  seatId?: string | null;
+  /**
+   * Which policy-engine outcome produced this row — see docs/REFUND_REBOOKING_SYSTEM_PLAN.md §5.
+   */
+  policyResult:
+    | 'full_refund'
+    | 'rebook_now'
+    | 'rebook_later_voucher'
+    | 'no_entitlement'
+    | 'organiser_cancellation_refund'
+    | 'organiser_cancellation_rebook'
+    | 'goodwill';
+  /**
+   * Calculated from the seat's actually-paid components — never the current list price (matters if a price-adjusted rebooking already happened on this seat).
+   */
+  requestedAmount?: number | null;
+  paymentSource?: ('card' | 'purchased_voucher' | 'mixed') | null;
+  /**
+   * "Completed" is set automatically by the charge.refunded webhook once Stripe confirms the refund — founders don't need to set this manually.
+   */
+  status: 'requested' | 'acknowledged' | 'processing' | 'completed' | 'failed' | 'resolved';
+  initiatedBy: 'customer' | 'admin';
+  /**
+   * For founders' manual Stripe lookup — included in the admin alert email.
+   */
+  stripePaymentIntentId?: string | null;
+  /**
+   * Filled once the charge.refunded webhook reconciles this row.
+   */
+  stripeRefundId?: string | null;
+  /**
+   * What actually went back to the customer — can be less than the requested amount (partial refund). Filled when the refund is closed (Stripe webhook or "Mark as refunded" in Management → Requests). The Stornorechnung uses this amount.
+   */
+  refundedAmount?: number | null;
+  requestedAt?: string | null;
+  acknowledgedAt?: string | null;
+  /**
+   * Set by the founders in the Management dashboard (Refunds).
+   */
+  resolution?: ('refunded' | 'partial' | 'voucher' | 'rebooked' | 'declined' | 'other') | null;
+  /**
+   * What was done or agreed with the customer.
+   */
+  resolutionNote?: string | null;
+  handledByName?: string | null;
+  /**
+   * Never automatic: only made when a founder presses "Create Stornorechnung" in Management → Refunds.
+   */
+  cancellationInvoice?: (string | null) | CancellationInvoice;
+  completedAt?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Stornorechnungen — stornieren die referenzierte Bestellung vollständig.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cancellation-invoices".
+ */
+export interface CancellationInvoice {
+  id: string;
+  /**
+   * Auto-generated, erbt die Serie der Originalrechnung (MAN/WEB).
+   */
+  cancellationNumber?: string | null;
+  issueDate?: string | null;
+  order: string | Order;
+  originalInvoiceNumber: string;
+  originalSeries: 'MAN' | 'WEB';
+  originalIssueDate: string;
+  reason?: string | null;
+  clientName: string;
+  clientAddress?: string | null;
+  items: {
+    title: string;
+    quantity: number;
+    unitPriceCents: number;
+    id?: string | null;
+  }[];
+  /**
+   * Positive Cent-Summe — wird auf der PDF negativ dargestellt.
+   */
+  totalCents: number;
+  /**
+   * Rein informativ — die tatsächliche Rückerstattung erfolgt manuell im Stripe-Dashboard bzw. per Überweisung.
+   */
+  refundStatus: 'offen' | 'erstattet' | 'verrechnet';
+  refundDate?: string | null;
+  refundMethodOrReference?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Angebote (Kostenvoranschläge) für Sonder-, Partner- oder Firmenveranstaltungen.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quotes".
+ */
+export interface Quote {
+  id: string;
+  /**
+   * Auto-generated, e.g. ANG-2026-0001.
+   */
+  quoteNumber?: string | null;
+  issueDate?: string | null;
+  /**
+   * Rein informativ. Wird ein Angebot angenommen, erstellt ein Admin die reale Bestellung/Rechnung separat.
+   */
+  status: 'open' | 'accepted' | 'expired';
+  /**
+   * Gültig bis — standardmäßig 14 Tage ab Angebotsdatum.
+   */
+  validUntil: string;
+  clientName: string;
+  contactPersonName?: string | null;
+  /**
+   * Straße, PLZ Ort — eine Zeile pro Adressbestandteil.
+   */
+  clientAddress?: string | null;
+  projectName: string;
+  clientReference?: string | null;
+  items: {
+    title: string;
+    note?: string | null;
+    quantity: number;
+    /**
+     * In Cent, z.B. 45000 = € 450,00.
+     */
+    unitPriceCents: number;
+    id?: string | null;
+  }[];
+  /**
+   * Freitext, z.B. "voraussichtlich Oktober 2026".
+   */
+  eventDateText?: string | null;
+  eventLocationText?: string | null;
+  participantCountText?: string | null;
+  /**
+   * Standardmäßig "individuelle Vereinbarung" wenn leer.
+   */
+  cancellationTermsText?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Digitale Downloads für Kunden nach dem Kauf
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "downloads".
+ */
+export interface Download {
+  id: string;
+  user: string | User;
+  order?: (string | null) | Order;
+  product?: (string | null) | Product;
+  file?: (string | null) | Media;
+  downloadCount?: number | null;
+  /**
+   * Maximale Anzahl erlaubter Downloads
+   */
+  downloadLimit?: number | null;
+  /**
+   * Datum nach dem der Download nicht mehr verfügbar ist
+   */
+  expiresAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Kundenbewertungen für Produkte
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: string;
+  user: string | User;
+  product?: (string | null) | Product;
+  rating: number;
+  title?: string | null;
+  body?: string | null;
+  /**
+   * Bewertungen müssen manuell freigegeben werden
+   */
+  status?: ('pending' | 'approved' | 'rejected') | null;
+  /**
+   * Wird automatisch gesetzt wenn eine Bestellung gefunden wird
+   */
+  verifiedPurchase?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Rückgabeanfragen von Kunden
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "return-requests".
+ */
+export interface ReturnRequest {
+  id: string;
+  user: string | User;
+  order?: (string | null) | Order;
+  reason?: string | null;
+  status?: ('pending' | 'approved' | 'rejected' | 'completed') | null;
+  /**
+   * Nur für Admins sichtbar
+   */
+  adminNotes?: string | null;
+  items?:
+    | {
+        productId?: string | null;
+        quantity?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Stornierungsanfragen von Kunden
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cancellation-requests".
+ */
+export interface CancellationRequest {
+  id: string;
+  user: string | User;
+  order?: (string | null) | Order;
+  reason?: string | null;
+  status?: ('pending' | 'approved' | 'rejected' | 'completed') | null;
+  stripeRefundId?: string | null;
+  /**
+   * Betrag in Cent, z.B. 2500 = 25,00 €
+   */
+  refundAmount?: number | null;
+  processedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Tokens behind the "Buchung verwalten" links sent to customers. The underlying entitlement never expires — only the link does; an expired link is reissued (new row, same bookingId), never edited in place.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "booking-magic-links".
+ */
+export interface BookingMagicLink {
+  id: string;
+  /**
+   * Auto-generated unique token (UUID) — the credential in the manage-booking link.
+   */
+  token: string;
+  bookingId: string | WorkshopBooking;
+  /**
+   * Which branch of seatActionOptions() this link resolves to — organiser-cancellation links are only valid while the appointment is CANCELLED_BY_ORGANISER.
+   */
+  scope: 'self-service' | 'organiser-cancellation' | 'date-offer';
+  issuedAt: string;
+  /**
+   * Nullable — leave empty for no expiry. When set and passed, the route rejects the token and the customer must be issued a new link (via the confirmation email's "resend" path or an admin action) — the underlying entitlement is untouched.
+   */
+  expiresAt?: string | null;
+  /**
+   * When the customer first opened this link. Also recorded in the booking history.
+   */
+  openedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Audit trail powering the Roster dashboard's Activity feed. Written by hooks — not intended for manual editing.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity-events".
+ */
+export interface ActivityEvent {
+  id: string;
+  type:
+    | 'order_placed'
+    | 'voucher_purchased'
+    | 'voucher_redeemed'
+    | 'booking_rebooked'
+    | 'booking_cancelled_no_refund'
+    | 'refund_requested'
+    | 'refund_completed'
+    | 'appointment_cancelled_by_organiser'
+    | 'founder_exception';
+  /**
+   * The order / booking / voucher / refund-request id this event is about.
+   */
+  refId?: string | null;
+  /**
+   * Human-readable one-liner, e.g. "Thomas Huber — Kombucha 12.9., €99 refund requested".
+   */
+  summary: string;
+  /**
+   * The reason the customer chose in their booking link (cancellations, refunds, rebookings).
+   */
+  reason?: string | null;
+  /**
+   * Empty = the customer did it through their link. Otherwise the founder who made the exception.
+   */
+  actorName?: string | null;
+  /**
+   * Admin users who have seen this event — drives the unread-count badge on the Roster nav item.
+   */
+  readBy?: (string | User)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * One enrollment per user per course. Auto-created on successful order payment.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enrollments".
+ */
+export interface Enrollment {
+  id: string;
+  /**
+   * The enrolled user.
+   */
+  user: string | User;
+  /**
+   * e.g. "basic-fermentation". Matches product courseSlug and CourseProgress.courseSlug.
+   */
+  courseSlug: string;
+  /**
+   * The Payload order ID that triggered this enrollment.
+   */
+  orderId?: string | null;
+  /**
+   * When the enrollment was created.
+   */
+  enrolledAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Stores which lessons a user has completed per course. Used for "Dein Fortschritt" on course pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-progress".
+ */
+export interface CourseProgress {
+  id: string;
+  /**
+   * The user this progress belongs to.
+   */
+  user: string | User;
+  /**
+   * e.g. "basic-fermentation". One document per user per course.
+   */
+  courseSlug: string;
+  /**
+   * Payload array item IDs for completed lessons. Updated when user marks a lesson done.
+   */
+  completedLessonIds?:
+    | {
+        lessonId: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -5980,610 +6672,90 @@ export interface BacklogItem {
   createdAt: string;
 }
 /**
- * Stores which lessons a user has completed per course. Used for "Dein Fortschritt" on course pages.
+ * Notes and acknowledgements behind the "Needs a look" list. Managed in the Roster dashboard.
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "course-progress".
+ * via the `definition` "attention-notes".
  */
-export interface CourseProgress {
+export interface AttentionNote {
   id: string;
+  kind: 'note' | 'ack';
+  title?: string | null;
+  body?: string | null;
+  severity?: ('info' | 'attention' | 'urgent') | null;
+  status?: ('open' | 'done' | 'deleted') | null;
   /**
-   * The user this progress belongs to.
+   * Who moved this to the trash.
    */
-  user: string | User;
+  deletedByName?: string | null;
+  deletedAt?: string | null;
   /**
-   * e.g. "basic-fermentation". One document per user per course.
+   * Status to restore to (open or done).
    */
-  courseSlug: string;
+  statusBeforeDelete?: string | null;
   /**
-   * Payload array item IDs for completed lessons. Updated when user marks a lesson done.
-   */
-  completedLessonIds?:
-    | {
-        lessonId: string;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * One enrollment per user per course. Auto-created on successful order payment.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "enrollments".
- */
-export interface Enrollment {
-  id: string;
-  /**
-   * The enrolled user.
-   */
-  user: string | User;
-  /**
-   * e.g. "basic-fermentation". Matches product courseSlug and CourseProgress.courseSlug.
-   */
-  courseSlug: string;
-  /**
-   * The Payload order ID that triggered this enrollment.
-   */
-  orderId?: string | null;
-  /**
-   * When the enrollment was created.
-   */
-  enrolledAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Workshop locations. Used to organize appointments by geography.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "workshop-locations".
- */
-export interface WorkshopLocation {
-  id: string;
-  /**
-   * Location name (e.g., Berlin Studio, Munich Workshop)
-   */
-  name: string;
-  /**
-   * Full address including street, city, and postal code
-   */
-  address: string;
-  /**
-   * Optional timezone (e.g., Europe/Berlin) for date/time clarity
-   */
-  timezone?: string | null;
-  /**
-   * Hide location from frontend if unchecked
-   */
-  isActive?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * ⭐ Manage workshop availability. **This is where you control dates, times, and available spots.** Changes here instantly update the booking pages.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "workshop-appointments".
- */
-export interface WorkshopAppointment {
-  id: string;
-  /**
-   * Select the workshop (Kombucha, Lakto, Tempeh, Basics)
-   */
-  workshop: string | Workshop;
-  /**
-   * Select the location where this workshop takes place
-   */
-  location: string | WorkshopLocation;
-  /**
-   * Workshop date and time (must be in the future)
-   */
-  dateTime: string;
-  /**
-   * Number of spots available for booking (0 = sold out, max 12 per workshop)
-   */
-  availableSpots: number;
-  /**
-   * Uncheck to hide this date from the website (useful for sold-out or cancelled sessions)
-   */
-  isPublished?: boolean | null;
-  /**
-   * Internal notes (not visible to customers)
-   */
-  notes?: string | null;
-  /**
-   * ⚠️ Auf "Abgesagt" setzen benachrichtigt automatisch JEDE Person mit einer bestätigten Buchung auf diesen Termin per E-Mail, mit einem Link zur Auswahl: Ersatztermin oder volle Rückerstattung. Der Termin wird dabei auch automatisch von der Website genommen (unpublished). Das kann nicht einfach rückgängig gemacht werden — nur für echte Absagen verwenden.
-   */
-  cancellationStatus?: ('scheduled' | 'cancelled_by_organiser') | null;
-  /**
-   * Grund, der den Kund:innen in der Absage-E-Mail angezeigt wird (z.B. "Krankheitsbedingt").
-   */
-  cancellationReason?: string | null;
-  /**
-   * Nur intern sichtbar — nicht Teil der Kunden-E-Mail.
-   */
-  cancellationInternalNote?: string | null;
-  cancelledAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "workshop-bookings".
- */
-export interface WorkshopBooking {
-  id: string;
-  /**
-   * Set to "Confirmed" for phone/manual bookings where payment was received outside of Stripe.
-   */
-  status: 'pending' | 'confirmed' | 'cancelled' | 'refunded';
-  /**
-   * ID of the WorkshopAppointment. Auto-populated for online bookings. For phone bookings: copy the ID from the correct appointment in the Workshop Appointments list — this is required for the booking to appear in the Roster dashboard.
+   * Optional link to a workshop date.
    */
   appointmentId?: string | null;
   /**
-   * Auto-populated for online bookings. Not needed for phone bookings.
+   * Optional link to a booking.
    */
-  cartSlug?: string | null;
+  bookingId?: string | null;
+  dueDate?: string | null;
   /**
-   * Set automatically when payment is confirmed via Stripe.
+   * Key of the automatic item (kind "ack" only).
    */
-  orderId?: string | null;
+  autoKey?: string | null;
+  createdByName?: string | null;
+  doneByName?: string | null;
+  doneAt?: string | null;
   /**
-   * Only matters while the booking is "Pending": the seats stay reserved for this customer until this time, then go back on sale automatically. Set by the website — no need to edit.
+   * User id of the person who started the note.
    */
-  holdExpiresAt?: string | null;
+  createdById?: string | null;
   /**
-   * Filled automatically by the daily reminder job (2 days before the workshop). Moving the booking to another date resets it, so the new date gets its own reminder.
+   * Who is asked: a user id, or "all" for the whole team. Empty = nobody in particular.
    */
-  workshopReminder?: {
-    appointmentId?: string | null;
-    sentTo?: string[] | null;
-    sentAt?: string | null;
-  };
+  assignedTo?: string | null;
   /**
-   * Auto-generated on confirmation. Used for the guest receipt download link.
+   * Why an automatic item was marked as known (kind "ack").
    */
-  downloadToken?: string | null;
+  ackReason?: string | null;
   /**
-   * Customer first name. Auto-populated from checkout for online bookings.
+   * The conversation: messages and events (asked, done, reopened), oldest first.
    */
-  firstName?: string | null;
-  lastName?: string | null;
-  /**
-   * The buyer. Receives the booking confirmation and the workshop reminder 2 days before.
-   */
-  email?: string | null;
-  phone?: string | null;
-  /**
-   * Dietary restrictions, allergies, intolerances, or any other special requests.
-   */
-  notes?: string | null;
-  /**
-   * e.g. "Kombucha Workshop"
-   */
-  workshopTitle: string;
-  /**
-   * e.g. "kombucha", "lakto", "tempeh"
-   */
-  workshopSlug: string;
-  /**
-   * Formatted date string, e.g. "14. Juni 2026"
-   */
-  date: string;
-  /**
-   * Formatted time string, e.g. "10:00 – 13:00"
-   */
-  time: string;
-  guestCount: number;
-  pricePerPerson: number;
-  totalPrice: number;
-  /**
-   * One entry per booked seat. Seat 1 is the buyer. Each seat can have a guest name, email and dietary notes. Confirmations go only to the buyer; the workshop reminder (2 days before) goes to the buyer and every guest with an email.
-   */
-  seats?:
+  messages?:
     | {
+        byId?: string | null;
+        byName?: string | null;
+        at: string;
+        text?: string | null;
+        images?: (string | Media)[] | null;
+        event?: ('asked' | 'done' | 'reopened') | null;
         /**
-         * Name of the person attending this seat (optional).
+         * For "asked": the user id or "all".
          */
-        recipientName?: string | null;
-        /**
-         * Optional. If set, this guest also receives the workshop reminder email 2 days before the workshop.
-         */
-        email?: string | null;
-        /**
-         * Dietary requirements, allergies, or accessibility needs for this guest.
-         */
-        giftNote?: string | null;
-        /**
-         * Lifecycle status of this individual seat — every seat resolves independently. Set automatically by the manage-booking flow; the booking-level Status field above is the order/payment state, not this.
-         */
-        seatStatus?:
-          | (
-              | 'active'
-              | 'cancelled_no_refund'
-              | 'rebooking_pending'
-              | 'rebooked'
-              | 'refund_requested'
-              | 'refunded'
-              | 'voucher_issued'
-              | 'organiser_cancelled_pending'
-              | 'no_show'
-            )
-          | null;
-        /**
-         * True once this seat has used its one-time rebooking right (AGB §4.6) — either rebook-now or rebook-later-via-code. No further self-service rebooking or refund is offered after this.
-         */
-        selfRebookingUsed?: boolean | null;
-        /**
-         * When this seat was cancelled or its rebooking right exercised.
-         */
-        cancelledAt?: string | null;
-        /**
-         * Reason the customer selected when cancelling/rebooking this seat.
-         */
-        cancelledReason?:
-          | ('cannot_attend' | 'personal_health' | 'wrong_workshop' | 'workshop_cancelled' | 'other')
-          | null;
-        /**
-         * Set when seatStatus = voucher_issued — the deferred-rebooking code issued for this seat.
-         */
-        linkedVoucherId?: (string | null) | Voucher;
-        /**
-         * Set when a refund was requested for this seat.
-         */
-        linkedRefundRequestId?: (string | null) | RefundRequest;
-        /**
-         * Traceability — the new WorkshopBooking created when this seat was rebooked (rebook-now).
-         */
-        rebookedToBookingId?: string | null;
-        /**
-         * Traceability — the original WorkshopBooking this seat was rebooked from, if this booking exists because of a rebooking.
-         */
-        rebookedFromBookingId?: string | null;
-        /**
-         * Traceability — the specific seat index on the original booking this seat was rebooked from. Paired with rebookedFromBookingId so rebook-now can detect an interrupted request (new booking created but the original seat never got marked resolved) and resume instead of creating a duplicate.
-         */
-        rebookedFromSeatIndex?: number | null;
+        eventTo?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Everything that happened to this booking, newest last: how it was created, moves, emails sent (or not), link opened, customer choices, refunds. Written automatically — cannot be edited, so nothing gets lost.
+   * Per user id: how many messages that person has seen (for "new" badges).
    */
-  history?:
+  seenBy?:
     | {
-        at?: string | null;
-        type?:
-          | (
-              | 'created_online'
-              | 'created_manual'
-              | 'created_rebooking'
-              | 'moved'
-              | 'alternate_offered'
-              | 'email_changed'
-              | 'reminder_sent'
-              | 'organiser_cancelled'
-              | 'link_opened'
-              | 'customer_rebooked'
-              | 'customer_voucher'
-              | 'customer_cancelled'
-              | 'refund_requested'
-              | 'refund_completed'
-            )
-          | null;
-        summary?: string | null;
-        by?: string | null;
-        id?: string | null;
-      }[]
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
     | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Refund requests created by customers (self-service) or admins (organiser cancellation, goodwill). No refund is issued automatically — a founder actions it in Stripe's dashboard using the PaymentIntent ID here; the charge.refunded webhook then marks this row completed.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "refund-requests".
- */
-export interface RefundRequest {
-  id: string;
-  booking: string | WorkshopBooking;
-  /**
-   * 0-based index into the booking's seats[] array — identifies exactly which seat this request is for.
-   */
-  seatIndex: number;
-  /**
-   * The seats[] array item's own Payload-generated id, for a lookup that survives array reordering.
-   */
-  seatId?: string | null;
-  /**
-   * Which policy-engine outcome produced this row — see docs/REFUND_REBOOKING_SYSTEM_PLAN.md §5.
-   */
-  policyResult:
-    | 'full_refund'
-    | 'rebook_now'
-    | 'rebook_later_voucher'
-    | 'no_entitlement'
-    | 'organiser_cancellation_refund'
-    | 'organiser_cancellation_rebook'
-    | 'goodwill';
-  /**
-   * Calculated from the seat's actually-paid components — never the current list price (matters if a price-adjusted rebooking already happened on this seat).
-   */
-  requestedAmount?: number | null;
-  paymentSource?: ('card' | 'purchased_voucher' | 'mixed') | null;
-  /**
-   * "Completed" is set automatically by the charge.refunded webhook once Stripe confirms the refund — founders don't need to set this manually.
-   */
-  status: 'requested' | 'acknowledged' | 'processing' | 'completed' | 'failed';
-  initiatedBy: 'customer' | 'admin';
-  /**
-   * For founders' manual Stripe lookup — included in the admin alert email.
-   */
-  stripePaymentIntentId?: string | null;
-  /**
-   * Filled once the charge.refunded webhook reconciles this row.
-   */
-  stripeRefundId?: string | null;
-  requestedAt?: string | null;
-  acknowledgedAt?: string | null;
-  completedAt?: string | null;
-  notes?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Angebote (Kostenvoranschläge) für Sonder-, Partner- oder Firmenveranstaltungen.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quotes".
- */
-export interface Quote {
-  id: string;
-  /**
-   * Auto-generated, e.g. ANG-2026-0001.
-   */
-  quoteNumber?: string | null;
-  issueDate?: string | null;
-  /**
-   * Rein informativ. Wird ein Angebot angenommen, erstellt ein Admin die reale Bestellung/Rechnung separat.
-   */
-  status: 'open' | 'accepted' | 'expired';
-  /**
-   * Gültig bis — standardmäßig 14 Tage ab Angebotsdatum.
-   */
-  validUntil: string;
-  clientName: string;
-  contactPersonName?: string | null;
-  /**
-   * Straße, PLZ Ort — eine Zeile pro Adressbestandteil.
-   */
-  clientAddress?: string | null;
-  projectName: string;
-  clientReference?: string | null;
-  items: {
-    title: string;
-    note?: string | null;
-    quantity: number;
-    /**
-     * In Cent, z.B. 45000 = € 450,00.
-     */
-    unitPriceCents: number;
-    id?: string | null;
-  }[];
-  /**
-   * Freitext, z.B. "voraussichtlich Oktober 2026".
-   */
-  eventDateText?: string | null;
-  eventLocationText?: string | null;
-  participantCountText?: string | null;
-  /**
-   * Standardmäßig "individuelle Vereinbarung" wenn leer.
-   */
-  cancellationTermsText?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Stornorechnungen — stornieren die referenzierte Bestellung vollständig.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "cancellation-invoices".
- */
-export interface CancellationInvoice {
-  id: string;
-  /**
-   * Auto-generated, erbt die Serie der Originalrechnung (MAN/WEB).
-   */
-  cancellationNumber?: string | null;
-  issueDate?: string | null;
-  order: string | Order;
-  originalInvoiceNumber: string;
-  originalSeries: 'MAN' | 'WEB';
-  originalIssueDate: string;
-  reason?: string | null;
-  clientName: string;
-  clientAddress?: string | null;
-  items: {
-    title: string;
-    quantity: number;
-    unitPriceCents: number;
-    id?: string | null;
-  }[];
-  /**
-   * Positive Cent-Summe — wird auf der PDF negativ dargestellt.
-   */
-  totalCents: number;
-  /**
-   * Rein informativ — die tatsächliche Rückerstattung erfolgt manuell im Stripe-Dashboard bzw. per Überweisung.
-   */
-  refundStatus: 'offen' | 'erstattet' | 'verrechnet';
-  refundDate?: string | null;
-  refundMethodOrReference?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Digitale Downloads für Kunden nach dem Kauf
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "downloads".
- */
-export interface Download {
-  id: string;
-  user: string | User;
-  order?: (string | null) | Order;
-  product?: (string | null) | Product;
-  file?: (string | null) | Media;
-  downloadCount?: number | null;
-  /**
-   * Maximale Anzahl erlaubter Downloads
-   */
-  downloadLimit?: number | null;
-  /**
-   * Datum nach dem der Download nicht mehr verfügbar ist
-   */
-  expiresAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Kundenbewertungen für Produkte
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "reviews".
- */
-export interface Review {
-  id: string;
-  user: string | User;
-  product?: (string | null) | Product;
-  rating: number;
-  title?: string | null;
-  body?: string | null;
-  /**
-   * Bewertungen müssen manuell freigegeben werden
-   */
-  status?: ('pending' | 'approved' | 'rejected') | null;
-  /**
-   * Wird automatisch gesetzt wenn eine Bestellung gefunden wird
-   */
-  verifiedPurchase?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Rückgabeanfragen von Kunden
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "return-requests".
- */
-export interface ReturnRequest {
-  id: string;
-  user: string | User;
-  order?: (string | null) | Order;
-  reason?: string | null;
-  status?: ('pending' | 'approved' | 'rejected' | 'completed') | null;
-  /**
-   * Nur für Admins sichtbar
-   */
-  adminNotes?: string | null;
-  items?:
-    | {
-        productId?: string | null;
-        quantity?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Stornierungsanfragen von Kunden
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "cancellation-requests".
- */
-export interface CancellationRequest {
-  id: string;
-  user: string | User;
-  order?: (string | null) | Order;
-  reason?: string | null;
-  status?: ('pending' | 'approved' | 'rejected' | 'completed') | null;
-  stripeRefundId?: string | null;
-  /**
-   * Betrag in Cent, z.B. 2500 = 25,00 €
-   */
-  refundAmount?: number | null;
-  processedAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Tokens behind the "Buchung verwalten" links sent to customers. The underlying entitlement never expires — only the link does; an expired link is reissued (new row, same bookingId), never edited in place.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "booking-magic-links".
- */
-export interface BookingMagicLink {
-  id: string;
-  /**
-   * Auto-generated unique token (UUID) — the credential in the manage-booking link.
-   */
-  token: string;
-  bookingId: string | WorkshopBooking;
-  /**
-   * Which branch of seatActionOptions() this link resolves to — organiser-cancellation links are only valid while the appointment is CANCELLED_BY_ORGANISER.
-   */
-  scope: 'self-service' | 'organiser-cancellation';
-  issuedAt: string;
-  /**
-   * Nullable — leave empty for no expiry. When set and passed, the route rejects the token and the customer must be issued a new link (via the confirmation email's "resend" path or an admin action) — the underlying entitlement is untouched.
-   */
-  expiresAt?: string | null;
-  /**
-   * When the customer first opened this link. Also recorded in the booking history.
-   */
-  openedAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Audit trail powering the Roster dashboard's Activity feed. Written by hooks — not intended for manual editing.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "activity-events".
- */
-export interface ActivityEvent {
-  id: string;
-  type:
-    | 'order_placed'
-    | 'voucher_purchased'
-    | 'voucher_redeemed'
-    | 'booking_rebooked'
-    | 'booking_cancelled_no_refund'
-    | 'refund_requested'
-    | 'refund_completed'
-    | 'appointment_cancelled_by_organiser';
-  /**
-   * The order / booking / voucher / refund-request id this event is about.
-   */
-  refId?: string | null;
-  /**
-   * Human-readable one-liner, e.g. "Thomas Huber — Kombucha 12.9., €99 refund requested".
-   */
-  summary: string;
-  /**
-   * Admin users who have seen this event — drives the unread-count badge on the Roster nav item.
-   */
-  readBy?: (string | User)[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * 19 pre-built email templates from /public/email-templates — edit HTML content directly
+ * Retired. Edit email texts in the dashboard under "E-Mails".
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "brevo-email-templates".
@@ -6618,7 +6790,25 @@ export interface BrevoEmailTemplate {
   createdAt: string;
 }
 /**
- * Brevo email templates. Edit content and it syncs to Brevo API.
+ * Before-copies of the email templates, used by "Rückgängig" in the dashboard. Read-only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-template-versions".
+ */
+export interface EmailTemplateVersion {
+  id: string;
+  templateId: number;
+  templateName?: string | null;
+  subject: string;
+  htmlContent: string;
+  reason: 'before-edit' | 'before-restore';
+  savedByName?: string | null;
+  savedByEmail?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Retired — not connected to Brevo. Edit email texts in the dashboard under "E-Mails".
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "brevo-templates".
@@ -6697,40 +6887,8 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'backlog-items';
-        value: string | BacklogItem;
-      } | null)
-    | ({
-        relationTo: 'pages';
-        value: string | Page;
-      } | null)
-    | ({
-        relationTo: 'categories';
-        value: string | Category;
-      } | null)
-    | ({
-        relationTo: 'course-progress';
-        value: string | CourseProgress;
-      } | null)
-    | ({
-        relationTo: 'enrollments';
-        value: string | Enrollment;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: string | Media;
-      } | null)
-    | ({
-        relationTo: 'online-courses';
-        value: string | OnlineCourse;
-      } | null)
-    | ({
-        relationTo: 'posts';
-        value: string | Post;
+        relationTo: 'workshop-appointments';
+        value: string | WorkshopAppointment;
       } | null)
     | ({
         relationTo: 'workshops';
@@ -6741,12 +6899,24 @@ export interface PayloadLockedDocument {
         value: string | WorkshopLocation;
       } | null)
     | ({
-        relationTo: 'workshop-appointments';
-        value: string | WorkshopAppointment;
-      } | null)
-    | ({
         relationTo: 'workshop-bookings';
         value: string | WorkshopBooking;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'vouchers';
@@ -6789,12 +6959,40 @@ export interface PayloadLockedDocument {
         value: string | ActivityEvent;
       } | null)
     | ({
+        relationTo: 'online-courses';
+        value: string | OnlineCourse;
+      } | null)
+    | ({
+        relationTo: 'enrollments';
+        value: string | Enrollment;
+      } | null)
+    | ({
+        relationTo: 'course-progress';
+        value: string | CourseProgress;
+      } | null)
+    | ({
+        relationTo: 'backlog-items';
+        value: string | BacklogItem;
+      } | null)
+    | ({
+        relationTo: 'attention-notes';
+        value: string | AttentionNote;
+      } | null)
+    | ({
         relationTo: 'brevo-email-templates';
         value: string | BrevoEmailTemplate;
       } | null)
     | ({
+        relationTo: 'email-template-versions';
+        value: string | EmailTemplateVersion;
+      } | null)
+    | ({
         relationTo: 'brevo-templates';
         value: string | BrevoTemplate;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
       } | null)
     | ({
         relationTo: 'forms';
@@ -6880,75 +7078,119 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "workshop-appointments_select".
  */
-export interface UsersSelect<T extends boolean = true> {
-  name?: T;
-  marketingConsent?: T;
-  roles?: T;
-  orders?: T;
-  cart?: T;
-  addresses?: T;
-  stripeCustomerId?: T;
+export interface WorkshopAppointmentsSelect<T extends boolean = true> {
+  workshop?: T;
+  location?: T;
+  dateTime?: T;
+  capacity?: T;
+  availableSpots?: T;
+  releasedBookingIds?: T;
+  isPublished?: T;
+  notes?: T;
+  cancellationStatus?: T;
+  cancellationReason?: T;
+  cancellationInternalNote?: T;
+  cancelledAt?: T;
   updatedAt?: T;
   createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "backlog-items_select".
+ * via the `definition` "workshops_select".
  */
-export interface BacklogItemsSelect<T extends boolean = true> {
-  itemId?: T;
-  board?: T;
-  title?: T;
-  folderLabel?: T;
-  category?: T;
-  priority?: T;
-  status?: T;
-  effort?: T;
-  businessValue?: T;
-  billingScope?: T;
-  owners?: T;
+export interface WorkshopsSelect<T extends boolean = true> {
   slug?: T;
-  related?: T;
-  parent?: T;
-  plannedFor?: T;
+  title?: T;
   description?: T;
-  response?: T;
-  area?: T;
-  sourceContext?: T;
-  dependencies?: T;
-  nextActionText?: T;
+  basePrice?: T;
+  maxCapacityPerSlot?: T;
+  image?: T;
+  whatToBring?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-locations_select".
+ */
+export interface WorkshopLocationsSelect<T extends boolean = true> {
+  name?: T;
+  address?: T;
+  timezone?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-bookings_select".
+ */
+export interface WorkshopBookingsSelect<T extends boolean = true> {
+  status?: T;
+  appointmentId?: T;
+  cartSlug?: T;
+  orderId?: T;
+  holdExpiresAt?: T;
+  workshopReminder?:
+    | T
+    | {
+        appointmentId?: T;
+        sentTo?: T;
+        sentAt?: T;
+      };
+  downloadToken?: T;
+  firstName?: T;
+  lastName?: T;
+  email?: T;
+  phone?: T;
   notes?: T;
-  todos?:
+  workshopTitle?: T;
+  workshopSlug?: T;
+  date?: T;
+  time?: T;
+  guestCount?: T;
+  pricePerPerson?: T;
+  totalPrice?: T;
+  seats?:
     | T
     | {
-        text?: T;
-        done?: T;
+        recipientName?: T;
+        email?: T;
+        giftNote?: T;
+        seatStatus?: T;
+        selfRebookingUsed?: T;
+        cancelledAt?: T;
+        cancelledReason?: T;
+        linkedVoucherId?: T;
+        linkedRefundRequestId?: T;
+        rebookedToBookingId?: T;
+        rebookedFromBookingId?: T;
+        rebookedFromSeatIndex?: T;
         id?: T;
       };
-  links?:
+  releasePending?: T;
+  manualInfo?:
     | T
     | {
-        label?: T;
-        url?: T;
+        channel?: T;
+        paymentStatus?: T;
+        paymentMethod?: T;
+        voucherCode?: T;
+        paymentNote?: T;
+        paidAt?: T;
+      };
+  history?:
+    | T
+    | {
+        at?: T;
+        type?: T;
+        summary?: T;
+        by?: T;
         id?: T;
       };
-  decision?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -8924,45 +9166,6 @@ export interface GastronomyInquiryBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  title?: T;
-  generateSlug?: T;
-  slug?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "course-progress_select".
- */
-export interface CourseProgressSelect<T extends boolean = true> {
-  user?: T;
-  courseSlug?: T;
-  completedLessonIds?:
-    | T
-    | {
-        lessonId?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "enrollments_select".
- */
-export interface EnrollmentsSelect<T extends boolean = true> {
-  user?: T;
-  courseSlug?: T;
-  orderId?: T;
-  enrolledAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -9017,60 +9220,6 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "online-courses_select".
- */
-export interface OnlineCoursesSelect<T extends boolean = true> {
-  slug?: T;
-  title?: T;
-  description?: T;
-  cardImage?: T;
-  product?: T;
-  courseSlug?: T;
-  courseViewerUrl?: T;
-  isActive?: T;
-  isComingSoon?: T;
-  sortOrder?: T;
-  comingSoonBadge?: T;
-  instructor?: T;
-  durationText?: T;
-  levelText?: T;
-  heroEyebrow?: T;
-  heroSubtitle?: T;
-  heroDescription?: T;
-  heroImage?: T;
-  heroDuration?: T;
-  heroLessonsCount?: T;
-  heroProgressHeading?: T;
-  curriculumHeading?: T;
-  modules?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        lessons?:
-          | T
-          | {
-              title?: T;
-              description?: T;
-              durationMinutes?: T;
-              video?: T;
-              locked?: T;
-              id?: T;
-            };
-        id?: T;
-      };
-  learnHeading?: T;
-  learnItems?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -9086,106 +9235,12 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "workshops_select".
+ * via the `definition` "categories_select".
  */
-export interface WorkshopsSelect<T extends boolean = true> {
-  slug?: T;
+export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
-  description?: T;
-  basePrice?: T;
-  maxCapacityPerSlot?: T;
-  image?: T;
-  whatToBring?: T;
-  isActive?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "workshop-locations_select".
- */
-export interface WorkshopLocationsSelect<T extends boolean = true> {
-  name?: T;
-  address?: T;
-  timezone?: T;
-  isActive?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "workshop-appointments_select".
- */
-export interface WorkshopAppointmentsSelect<T extends boolean = true> {
-  workshop?: T;
-  location?: T;
-  dateTime?: T;
-  availableSpots?: T;
-  isPublished?: T;
-  notes?: T;
-  cancellationStatus?: T;
-  cancellationReason?: T;
-  cancellationInternalNote?: T;
-  cancelledAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "workshop-bookings_select".
- */
-export interface WorkshopBookingsSelect<T extends boolean = true> {
-  status?: T;
-  appointmentId?: T;
-  cartSlug?: T;
-  orderId?: T;
-  holdExpiresAt?: T;
-  workshopReminder?:
-    | T
-    | {
-        appointmentId?: T;
-        sentTo?: T;
-        sentAt?: T;
-      };
-  downloadToken?: T;
-  firstName?: T;
-  lastName?: T;
-  email?: T;
-  phone?: T;
-  notes?: T;
-  workshopTitle?: T;
-  workshopSlug?: T;
-  date?: T;
-  time?: T;
-  guestCount?: T;
-  pricePerPerson?: T;
-  totalPrice?: T;
-  seats?:
-    | T
-    | {
-        recipientName?: T;
-        email?: T;
-        giftNote?: T;
-        seatStatus?: T;
-        selfRebookingUsed?: T;
-        cancelledAt?: T;
-        cancelledReason?: T;
-        linkedVoucherId?: T;
-        linkedRefundRequestId?: T;
-        rebookedToBookingId?: T;
-        rebookedFromBookingId?: T;
-        rebookedFromSeatIndex?: T;
-        id?: T;
-      };
-  history?:
-    | T
-    | {
-        at?: T;
-        type?: T;
-        summary?: T;
-        by?: T;
-        id?: T;
-      };
+  generateSlug?: T;
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -9368,8 +9423,13 @@ export interface RefundRequestsSelect<T extends boolean = true> {
   initiatedBy?: T;
   stripePaymentIntentId?: T;
   stripeRefundId?: T;
+  refundedAmount?: T;
   requestedAt?: T;
   acknowledgedAt?: T;
+  resolution?: T;
+  resolutionNote?: T;
+  handledByName?: T;
+  cancellationInvoice?: T;
   completedAt?: T;
   notes?: T;
   updatedAt?: T;
@@ -9383,7 +9443,175 @@ export interface ActivityEventsSelect<T extends boolean = true> {
   type?: T;
   refId?: T;
   summary?: T;
+  reason?: T;
+  actorName?: T;
   readBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "online-courses_select".
+ */
+export interface OnlineCoursesSelect<T extends boolean = true> {
+  slug?: T;
+  title?: T;
+  description?: T;
+  cardImage?: T;
+  product?: T;
+  courseSlug?: T;
+  courseViewerUrl?: T;
+  isActive?: T;
+  isComingSoon?: T;
+  sortOrder?: T;
+  comingSoonBadge?: T;
+  instructor?: T;
+  durationText?: T;
+  levelText?: T;
+  heroEyebrow?: T;
+  heroSubtitle?: T;
+  heroDescription?: T;
+  heroImage?: T;
+  heroDuration?: T;
+  heroLessonsCount?: T;
+  heroProgressHeading?: T;
+  curriculumHeading?: T;
+  modules?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        lessons?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              durationMinutes?: T;
+              video?: T;
+              locked?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  learnHeading?: T;
+  learnItems?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enrollments_select".
+ */
+export interface EnrollmentsSelect<T extends boolean = true> {
+  user?: T;
+  courseSlug?: T;
+  orderId?: T;
+  enrolledAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-progress_select".
+ */
+export interface CourseProgressSelect<T extends boolean = true> {
+  user?: T;
+  courseSlug?: T;
+  completedLessonIds?:
+    | T
+    | {
+        lessonId?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "backlog-items_select".
+ */
+export interface BacklogItemsSelect<T extends boolean = true> {
+  itemId?: T;
+  board?: T;
+  title?: T;
+  folderLabel?: T;
+  category?: T;
+  priority?: T;
+  status?: T;
+  effort?: T;
+  businessValue?: T;
+  billingScope?: T;
+  owners?: T;
+  slug?: T;
+  related?: T;
+  parent?: T;
+  plannedFor?: T;
+  description?: T;
+  response?: T;
+  area?: T;
+  sourceContext?: T;
+  dependencies?: T;
+  nextActionText?: T;
+  notes?: T;
+  todos?:
+    | T
+    | {
+        text?: T;
+        done?: T;
+        id?: T;
+      };
+  links?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  decision?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "attention-notes_select".
+ */
+export interface AttentionNotesSelect<T extends boolean = true> {
+  kind?: T;
+  title?: T;
+  body?: T;
+  severity?: T;
+  status?: T;
+  deletedByName?: T;
+  deletedAt?: T;
+  statusBeforeDelete?: T;
+  appointmentId?: T;
+  bookingId?: T;
+  dueDate?: T;
+  autoKey?: T;
+  createdByName?: T;
+  doneByName?: T;
+  doneAt?: T;
+  createdById?: T;
+  assignedTo?: T;
+  ackReason?: T;
+  messages?:
+    | T
+    | {
+        byId?: T;
+        byName?: T;
+        at?: T;
+        text?: T;
+        images?: T;
+        event?: T;
+        eventTo?: T;
+        id?: T;
+      };
+  seenBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -9398,6 +9626,21 @@ export interface BrevoEmailTemplatesSelect<T extends boolean = true> {
   syncStatus?: T;
   lastSyncedAt?: T;
   syncError?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-template-versions_select".
+ */
+export interface EmailTemplateVersionsSelect<T extends boolean = true> {
+  templateId?: T;
+  templateName?: T;
+  subject?: T;
+  htmlContent?: T;
+  reason?: T;
+  savedByName?: T;
+  savedByEmail?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -9429,6 +9672,37 @@ export interface BrevoTemplatesSelect<T extends boolean = true> {
   syncError?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  avatar?: T;
+  noteEmailPref?: T;
+  marketingConsent?: T;
+  roles?: T;
+  orders?: T;
+  cart?: T;
+  addresses?: T;
+  stripeCustomerId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -9813,6 +10087,7 @@ export interface OrdersSelect<T extends boolean = true> {
   invoiceNumber?: T;
   downloadToken?: T;
   invoiceIssuedAt?: T;
+  invoiceItemsSnapshot?: T;
   purchasedVoucher?: T;
   updatedAt?: T;
   createdAt?: T;

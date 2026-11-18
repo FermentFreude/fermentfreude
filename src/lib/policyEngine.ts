@@ -156,6 +156,26 @@ export function seatActionOptions(
 }
 
 /**
+ * "Choose your own date" links sent by the founders from the dashboard
+ * (booking-magic-links scope 'date-offer'). The founders ask the customer to
+ * pick another date, so the usual 14-day window and the one-time self-rebook
+ * right do not apply — but ONLY rebooking is offered (no refund, no code), and
+ * only for seats still on the date. If the date was cancelled by the organiser
+ * in the meantime, the organiser-cancellation branch wins instead.
+ */
+export function dateOfferActions(
+  seat: PolicyEngineSeat,
+  appointment: PolicyEngineAppointment,
+  now: string | Date,
+  config: PolicyEngineConfig = DEFAULT_POLICY_CONFIG,
+): SeatAction[] {
+  if (appointment.status === 'CANCELLED_BY_ORGANISER') return seatActionOptions(seat, appointment, now, config)
+  if (seat.seatStatus !== 'active') return []
+  if (diffHours(appointment.dateTime, now) <= 0) return [] // the date has started — too late to move
+  return ['REBOOK_NOW']
+}
+
+/**
  * Maps a resolved seat action to the policyResult value stored on the
  * refund-requests row it creates (plan §4.3). Only actions that create a
  * refund-requests row are represented here.

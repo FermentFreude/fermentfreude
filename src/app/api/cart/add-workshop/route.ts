@@ -6,6 +6,7 @@ import configPromise from '@payload-config'
 import { revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
+import { capacityOf } from '@/lib/appointmentCapacity'
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/cart/add-workshop — Production Endpoint
@@ -68,12 +69,12 @@ export async function POST(request: NextRequest) {
     const guestCount =
       typeof rawGuestCount === 'string' ? parseInt(rawGuestCount, 10) : rawGuestCount
 
-    if (typeof guestCount !== 'number' || isNaN(guestCount) || guestCount < 1 || guestCount > 12) {
+    if (typeof guestCount !== 'number' || isNaN(guestCount) || guestCount < 1 || guestCount > 50) {
       return NextResponse.json(
         {
           success: false,
           error: 'Invalid guest count',
-          message: 'Guest count must be a number between 1 and 12.',
+          message: 'Guest count must be a number between 1 and 50.',
         },
         { status: 400 },
       )
@@ -367,7 +368,7 @@ export async function POST(request: NextRequest) {
       // are already on it). But with no booking at all, nothing would ever
       // give these seats back — release them now and report the failure.
       if (!bookingId) {
-        const maxCapacity = workshop.maxCapacityPerSlot ?? 12
+        const maxCapacity = capacityOf(appointment)
         await releaseSpotsAtomic(payload, appointmentId, guestCount, maxCapacity)
         revalidateTag('workshop-appointments')
         return NextResponse.json(

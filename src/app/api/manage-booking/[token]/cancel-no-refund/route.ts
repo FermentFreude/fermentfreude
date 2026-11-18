@@ -62,6 +62,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     'booking_cancelled_no_refund',
     String(booking.id),
     `${booking.firstName ?? 'Gast'} ${booking.lastName ?? ''} — ${booking.workshopTitle}, Platz ${seatIndex + 1}: storniert ohne Erstattung`.trim(),
+    { reason: cancelReasonLabel(reason) },
   )
 
   // ─── Customer confirmation email (best-effort) ───────────────────

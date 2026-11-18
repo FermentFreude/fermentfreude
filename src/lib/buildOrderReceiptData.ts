@@ -25,6 +25,38 @@ function bookingToReceiptItem(b: Record<string, unknown>): ReceiptItem {
   }
 }
 
+
+type FrozenInvoiceLines = { items: ReceiptItem[]; workshop: boolean; voucher: boolean }
+
+function readFrozenInvoiceLines(order: Record<string, unknown>): FrozenInvoiceLines | null {
+  const snap = order.invoiceItemsSnapshot as Partial<FrozenInvoiceLines> | null | undefined
+  if (!snap || !Array.isArray(snap.items) || snap.items.length === 0) return null
+  return { items: snap.items as ReceiptItem[], workshop: Boolean(snap.workshop), voucher: Boolean(snap.voucher) }
+}
+
+/** Saves the invoice lines once — only if nothing was saved before (atomic, first write wins). */
+export async function freezeInvoiceLines(payload: Payload, orderId: string, lines: FrozenInvoiceLines): Promise<void> {
+  try {
+    await payload.db.collections['orders'].updateOne(
+      { _id: orderId, invoiceItemsSnapshot: { $exists: false } },
+      { $set: { invoiceItemsSnapshot: { ...lines, frozenAt: new Date().toISOString() } } },
+      { timestamps: false },
+    )
+  } catch (err) {
+    payload.logger.warn(`[invoice] Could not freeze the lines of order ${orderId}: ${err instanceof Error ? err.message : String(err)}`)
+  }
+}
+
+/** Freeze an order's invoice lines right now (called when an invoice is issued). */
+export async function freezeInvoiceNow(payload: Payload, orderId: string): Promise<void> {
+  try {
+    const order = await payload.findByID({ collection: 'orders', id: orderId, depth: 2, overrideAccess: true })
+    await buildOrderReceiptData(payload, order as unknown as Record<string, unknown>)
+  } catch (err) {
+    payload.logger.warn(`[invoice] Could not freeze invoice of order ${orderId}: ${err instanceof Error ? err.message : String(err)}`)
+  }
+}
+
 export async function buildOrderReceiptData(
   payload: Payload,
   order: Record<string, unknown>,
@@ -75,7 +107,15 @@ export async function buildOrderReceiptData(
   let receiptItems: ReceiptItem[] = []
   let hasWorkshopItems = false
 
-  try {
+  // An issued invoice never changes: once its lines were frozen, only those are used.
+  const frozen = readFrozenInvoiceLines(order)
+  const live = !frozen
+  if (frozen) {
+    receiptItems = frozen.items
+    hasWorkshopItems = frozen.workshop
+  }
+
+  if (live) try {
     const bookings = await payload.find({
       collection: 'workshop-bookings',
       where: {
@@ -96,7 +136,7 @@ export async function buildOrderReceiptData(
 
   // Fallback: voucher orders placed before the orderId fix — find confirmed bookings
   // by customer email + workshop slugs resolved from the order items.
-  if (receiptItems.length === 0 && customerEmail) {
+  if (live && receiptItems.length === 0 && customerEmail) {
     try {
       const rawItems = (order.items as Record<string, unknown>[] | undefined) ?? []
       const workshopSlugs: string[] = []
@@ -148,12 +188,38 @@ export async function buildOrderReceiptData(
 
   // A voucher bought online: its order has no product items, only the link
   // to the voucher (/api/voucher/confirm). One line for the voucher itself.
-  let isVoucherOrder = false
-  if (receiptItems.length === 0 && order.purchasedVoucher) {
+  let isVoucherOrder = frozen?.voucher ?? false
+
+  // Older gift-voucher orders have no link to their voucher. Find it the same way the dashboard's
+  // order detail does: same buyer email, same amount, created within an hour of the order.
+  let legacyVoucher: Record<string, unknown> | null = null
+  if (live && receiptItems.length === 0 && !order.purchasedVoucher && ((order.items as unknown[] | undefined) ?? []).length === 0 && customerEmail) {
+    try {
+      const created = new Date(String(order.createdAt)).getTime()
+      const candidates = await payload.find({
+        collection: 'vouchers',
+        where: { and: [{ or: [{ origin: { equals: 'gift-purchase' } }, { origin: { exists: false } }] }, { purchaserEmail: { equals: customerEmail } }] },
+        limit: 20,
+        depth: 0,
+        overrideAccess: true,
+      })
+      legacyVoucher =
+        (candidates.docs.find(
+          (v) =>
+            Math.round(Number(v.value) * 100) === Number(order.amount) &&
+            Math.abs(new Date(v.createdAt).getTime() - created) < 60 * 60 * 1000,
+        ) as unknown as Record<string, unknown>) ?? null
+    } catch {
+      /* no match — the invoice then keeps its total only, as before */
+    }
+  }
+
+  if (live && receiptItems.length === 0 && (order.purchasedVoucher || legacyVoucher)) {
     try {
       const ref = order.purchasedVoucher
-      const voucher =
-        typeof ref === 'object' && ref !== null
+      const voucher = legacyVoucher
+        ? legacyVoucher
+        : typeof ref === 'object' && ref !== null
           ? (ref as Record<string, unknown>)
           : ((await payload.findByID({
               collection: 'vouchers',
@@ -180,7 +246,7 @@ export async function buildOrderReceiptData(
   // plugin's Orders.items schema has no per-item price field (only
   // product/variant/quantity) — the current price is resolved live from the
   // (depth >= 1 populated) product/variant, same as decrementInventory.ts.
-  if (receiptItems.length === 0) {
+  if (live && receiptItems.length === 0) {
     const rawItems = (order.items as Record<string, unknown>[] | undefined) ?? []
     receiptItems = rawItems.map((item) => {
       const productRef = item.product
@@ -224,6 +290,11 @@ export async function buildOrderReceiptData(
       }
     }
     receiptItems = Array.from(merged.values())
+  }
+
+  // First time this invoice is built after it was issued: freeze its lines (first write wins).
+  if (live && receiptItems.length > 0 && (order as { invoiceNumber?: string | null }).invoiceNumber) {
+    await freezeInvoiceLines(payload, String(order.id), { items: receiptItems, workshop: hasWorkshopItems, voucher: isVoucherOrder })
   }
 
   // ── Monetary totals ────────────────────────────────────────────────────

@@ -1,6 +1,12 @@
 import { adminOnly } from '@/access/adminOnly'
 import type { CollectionConfig } from 'payload'
 
+/**
+ * RETIRED from the admin UI (Nov 2026): despite the old description, nothing
+ * here was ever synced to Brevo — edits had no effect on real emails. Email
+ * texts are edited in the Roster dashboard → "E-Mails" instead. Kept (hidden)
+ * because seed scripts and /api/brevo-templates/[id]/preview still read it.
+ */
 export const BrevoTemplates: CollectionConfig = {
   slug: 'brevo-templates',
   access: {
@@ -11,7 +17,8 @@ export const BrevoTemplates: CollectionConfig = {
   },
   admin: {
     group: 'Integrations',
-    description: 'Brevo email templates. Edit content and it syncs to Brevo API.',
+    hidden: true,
+    description: 'Retired — not connected to Brevo. Edit email texts in the dashboard under "E-Mails".',
     useAsTitle: 'templateName',
     defaultColumns: ['templateName', 'brevoTemplateId', 'syncStatus', 'updatedAt'],
   },

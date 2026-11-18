@@ -2,6 +2,8 @@
 
 import React from 'react'
 
+import { ORIGIN_INFO, type BookingOrigin } from './bookingOrigin'
+
 /**
  * Shared visual language for the roster admin dashboard — brand colors
  * (docs/BRAND.md), workshop-type identity, stat cards, and status badges.
@@ -21,20 +23,21 @@ export const BRAND = {
 }
 
 export const STATUS = {
-  success: { accent: '#16a34a', bg: '#dcfce7', color: '#166534' },
-  warning: { accent: '#d97706', bg: '#fef3c7', color: '#92400e' },
-  danger: { accent: '#dc2626', bg: '#fee2e2', color: '#991b1b' },
-  info: { accent: '#3b82f6', bg: '#dbeafe', color: '#1e40af' },
-  purple: { accent: '#8b5cf6', bg: '#ede9fe', color: '#5b21b6' },
+  // On brand: warm gray (done / fine), gold (needs a look), charcoal (problem). No green, red or orange.
+  success: { accent: '#4B4F4A', bg: '#ECE5DE', color: '#3A3E3A' },
+  warning: { accent: '#D4A654', bg: '#F6E7BC', color: '#6B470A' },
+  danger: { accent: '#3A3E3A', bg: '#3A3E3A', color: '#F9F0DC' },
+  info: { accent: '#8A8D84', bg: '#F0EDE5', color: '#55584F' },
+  purple: { accent: '#A8957A', bg: '#F3ECE0', color: '#6B5A3F' },
   neutral: { accent: '#9ca3af', bg: 'var(--theme-elevation-100)', color: 'var(--theme-text)' },
 }
 
 /** Distinct accent per workshop type — used for icon chips throughout. */
 export const WORKSHOP_COLORS: Record<string, { accent: string; bg: string; icon: string }> = {
-  kombucha: { accent: '#0d9488', bg: '#ccfbf1', icon: '🫧' },
-  tempeh: { accent: '#b45309', bg: '#fef3c7', icon: '🫘' },
-  lakto: { accent: '#15803d', bg: '#dcfce7', icon: '🥬' },
-  'vom feld': { accent: '#c2410c', bg: '#ffedd5', icon: '🌾' },
+  kombucha: { accent: '#4B4F4A', bg: '#ECE5DE', icon: '🫧' },
+  tempeh: { accent: '#8C7A5E', bg: '#F3ECE0', icon: '🫘' },
+  lakto: { accent: '#C9A04E', bg: '#FBF3E1', icon: '🥬' },
+  'vom feld': { accent: '#A9A296', bg: '#F0EDE5', icon: '🌾' },
 }
 
 export function workshopColor(title: string) {
@@ -43,25 +46,14 @@ export function workshopColor(title: string) {
   return match ? WORKSHOP_COLORS[match] : { accent: BRAND.gold, bg: BRAND.goldTint, icon: '🍽️' }
 }
 
-/** Continuous booked/capacity → color, for progress bars + capacity badges. */
-export function fillLevel(booked: number, capacity: number) {
-  if (capacity <= 0) return { pct: 0, ...STATUS.neutral }
-  const pct = Math.min(100, Math.round((booked / capacity) * 100))
-  if (booked > capacity) return { pct: 100, accent: STATUS.warning.accent, bg: STATUS.warning.bg, color: STATUS.warning.color } // overbooked
-  if (booked === capacity) return { pct: 100, accent: STATUS.danger.accent, bg: STATUS.danger.bg, color: STATUS.danger.color } // full
-  if (pct >= 70) return { pct, accent: '#ea580c', bg: '#ffedd5', color: '#9a3412' } // filling up
-  if (pct > 0) return { pct, accent: STATUS.success.accent, bg: STATUS.success.bg, color: STATUS.success.color } // open, has bookings
-  return { pct, ...STATUS.neutral } // empty
-}
-
 /** Rotating palette for generic stat cards (not tied to a workshop type). */
 export const STAT_ACCENTS = {
-  indigo: { accent: '#4f46e5', bg: '#e0e7ff' },
-  green: { accent: '#16a34a', bg: '#dcfce7' },
-  orange: { accent: '#ea580c', bg: '#ffedd5' },
-  purple: { accent: '#c026d3', bg: '#fae8ff' },
+  indigo: { accent: '#4B4F4A', bg: '#ECE5DE' },
+  green: { accent: '#6B6B6B', bg: '#F0EDE5' },
+  orange: { accent: '#B8892F', bg: '#F6E7BC' },
+  purple: { accent: '#8C7A5E', bg: '#F3ECE0' },
   gold: { accent: BRAND.goldDark, bg: BRAND.goldTint },
-  blue: { accent: '#2563eb', bg: '#dbeafe' },
+  blue: { accent: '#55584F', bg: '#F0EDE5' },
 }
 
 export function StatCard({
@@ -106,28 +98,13 @@ export function StatCard({
           justifyContent: 'center',
           fontSize: '18px',
           flexShrink: 0,
+          filter: 'grayscale(1)', // emoji carry their own colours; keep them on brand
         }}
       >
         {icon}
       </div>
     </div>
   )
-}
-
-/** Branded primary action button (gold), replacing the generic near-black CTA. */
-export const primaryButtonStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  padding: '10px 18px',
-  borderRadius: '8px',
-  border: 'none',
-  cursor: 'pointer',
-  background: BRAND.gold,
-  color: BRAND.nearBlack,
-  fontSize: '14px',
-  fontWeight: 700,
-  whiteSpace: 'nowrap',
 }
 
 export function PageHeader({
@@ -150,4 +127,47 @@ export function PageHeader({
       {action}
     </div>
   )
+}
+
+/** Small rounded label used for statuses, origins and payment kinds. */
+export function Pill({
+  label,
+  tone = 'neutral',
+  title,
+}: {
+  label: string
+  tone?: keyof typeof STATUS
+  title?: string
+}) {
+  const t = STATUS[tone]
+  return (
+    <span
+      title={title}
+      style={{
+        display: 'inline-block',
+        padding: '2px 9px',
+        borderRadius: '999px',
+        background: t.bg,
+        color: t.color,
+        fontSize: '11px',
+        fontWeight: 600,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {label}
+    </span>
+  )
+}
+
+const ORIGIN_TONE: Record<BookingOrigin, keyof typeof STATUS> = {
+  website: 'neutral',
+  manual: 'purple',
+  wix: 'info',
+  unmarked: 'warning',
+}
+
+/** Shows where a booking came from: website, added by hand, Wix import, or unmarked. */
+export function OriginBadge({ origin }: { origin: BookingOrigin }) {
+  const info = ORIGIN_INFO[origin]
+  return <Pill label={info.label} tone={ORIGIN_TONE[origin]} title={info.hint} />
 }

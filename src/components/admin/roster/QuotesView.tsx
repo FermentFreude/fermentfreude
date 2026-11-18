@@ -5,7 +5,6 @@ import React, { useState } from 'react'
 import { updateQuoteStatus } from './actions'
 import { CreateQuoteForm } from './CreateQuoteForm'
 import type { QuoteRow } from './types'
-import { BRAND } from './rosterTheme'
 
 interface Props {
   quotes: QuoteRow[]
@@ -13,8 +12,8 @@ interface Props {
 }
 
 const STATUS_CONFIG: Record<QuoteRow['status'], { label: string; bg: string; color: string; dot: string }> = {
-  open: { label: 'Offen', bg: '#dbeafe', color: '#1e40af', dot: '#3b82f6' },
-  accepted: { label: 'Angenommen', bg: '#dcfce7', color: '#166534', dot: '#22c55e' },
+  open: { label: 'Offen', bg: '#F0EDE5', color: '#55584F', dot: '#8A8D84' },
+  accepted: { label: 'Angenommen', bg: '#ECE5DE', color: '#3A3E3A', dot: '#4B4F4A' },
   expired: { label: 'Abgelaufen', bg: '#f3f4f6', color: '#374151', dot: '#9ca3af' },
 }
 
@@ -38,7 +37,7 @@ export function QuotesView({ quotes, onRefresh }: Props) {
   const [showForm, setShowForm] = useState(false)
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: '1200px' }}>
+    <div className="ff-page">
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '4px' }}>
         <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--theme-text)', margin: 0 }}>
           Angebote
@@ -48,7 +47,7 @@ export function QuotesView({ quotes, onRefresh }: Props) {
           style={{
             display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
             borderRadius: '8px', border: 'none', cursor: 'pointer',
-            background: BRAND.gold, color: BRAND.nearBlack, fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
+            background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
           }}
         >
           <span style={{ fontSize: '16px', lineHeight: 1 }}>{showForm ? '×' : '+'}</span>

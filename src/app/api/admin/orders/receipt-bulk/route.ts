@@ -8,6 +8,8 @@ import { getPayload } from 'payload'
 
 /* ═══════════════════════════════════════════════════════════════
  *  GET /api/admin/orders/receipt-bulk?status=<all|completed|processing|cancelled|refunded>
+ *  GET /api/admin/orders/receipt-bulk?ids=<orderId,orderId,…>&label=<file-name-part>
+ *      (one workshop date's invoices, from the dashboard's day sheet)
  *
  *  Session-authenticated endpoint for founders/admins: bundles every
  *  matching order's invoice PDF into a single ZIP for download. No status
@@ -25,6 +27,12 @@ export async function GET(request: NextRequest) {
   try {
     const statusParam = request.nextUrl.searchParams.get('status') ?? 'all'
     const status = (VALID_STATUSES as readonly string[]).includes(statusParam) ? statusParam : 'all'
+    const ids = (request.nextUrl.searchParams.get('ids') ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => /^[a-f0-9]{24}$/i.test(s))
+      .slice(0, 200)
+    const label = (request.nextUrl.searchParams.get('label') ?? '').replace(/[^a-z0-9-]+/gi, '-').slice(0, 60)
 
     const payload = await getPayload({ config: await configPromise })
 
@@ -46,7 +54,7 @@ export async function GET(request: NextRequest) {
     // ── Fetch matching orders ───────────────────────────────────────────────
     const result = await payload.find({
       collection: 'orders',
-      where: status === 'all' ? {} : { status: { equals: status } },
+      where: ids.length > 0 ? { id: { in: ids } } : status === 'all' ? {} : { status: { equals: status } },
       sort: '-createdAt',
       limit: 1000,
       depth: 1,
@@ -88,7 +96,9 @@ export async function GET(request: NextRequest) {
     const zipBuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' })
 
     const dateStr = new Date().toISOString().slice(0, 10)
-    const zipFilename = `fermentfreude-rechnungen-${status}-${dateStr}.zip`
+    const zipFilename = ids.length > 0
+      ? `fermentfreude-rechnungen-${label || 'auswahl'}-${dateStr}.zip`
+      : `fermentfreude-rechnungen-${status}-${dateStr}.zip`
 
     return new NextResponse(zipBuffer, {
       status: 200,

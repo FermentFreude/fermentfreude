@@ -11,6 +11,10 @@
  *   node --env-file=.env scripts/push-brevo-templates.mjs --dry     # show what would happen
  *   node --env-file=.env scripts/push-brevo-templates.mjs --test 72 # send test
  *   node --env-file=.env scripts/push-brevo-templates.mjs --test    # send test of all
+ *
+ * ⚠ Since Nov 2026 the founders edit texts in the dashboard (Roster → E-Mails).
+ *   Pushing now requires --overwrite-dashboard-edits, because the repo HTML
+ *   does not contain their edits.
  */
 import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -466,6 +470,19 @@ if (testMode) {
   }
   console.log()
   process.exit(0)
+}
+
+// Since Nov 2026 the founders edit these texts in the dashboard (E-Mails tab).
+// The HTML files in public/email-templates/v2 do NOT contain those edits, so a
+// push would silently overwrite David's copy in LIVE customer emails.
+const forceOverwrite = args.includes('--overwrite-dashboard-edits')
+if (!dryRun && !forceOverwrite) {
+  console.error(
+    '\n⛔ Refusing to push: email texts are now edited by the founders in the dashboard\n' +
+      '   (Roster → E-Mails). Pushing the repo HTML would overwrite their edits in live emails.\n' +
+      '   Use --dry to compare, or --overwrite-dashboard-edits only if they agreed.\n',
+  )
+  process.exit(1)
 }
 
 console.log(`\n📧 ${dryRun ? 'DRY-RUN' : 'PUSH'} — ${targetIds.length} V2 template(s)\n`)

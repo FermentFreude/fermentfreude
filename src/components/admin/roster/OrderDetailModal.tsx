@@ -134,7 +134,7 @@ export function OrderDetailModal({ orderId, onClose }: Props) {
           </button>
         </div>
 
-        {error && <p style={{ marginTop: '16px', fontSize: '13px', color: '#dc2626' }}>{error}</p>}
+        {error && <p style={{ marginTop: '16px', fontSize: '13px', color: 'var(--ff-alert)' }}>{error}</p>}
         {!order && !error && <p style={{ marginTop: '16px', fontSize: '13px', opacity: 0.5 }}>Wird geladen…</p>}
 
         {order && (
@@ -253,7 +253,7 @@ export function OrderDetailModal({ orderId, onClose }: Props) {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  padding: '8px 14px', borderRadius: '8px', background: BRAND.gold, color: BRAND.nearBlack,
+                  padding: '8px 14px', borderRadius: '8px', background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)',
                   fontSize: '13px', fontWeight: 700, textDecoration: 'none',
                 }}
               >

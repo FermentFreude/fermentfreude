@@ -29,6 +29,12 @@ export const BOOKING_HISTORY_TYPES = [
   { label: 'Storniert (ohne Erstattung)', value: 'customer_cancelled' },
   { label: 'Erstattung angefragt', value: 'refund_requested' },
   { label: 'Erstattung abgeschlossen', value: 'refund_completed' },
+  { label: 'Daten geändert', value: 'details_edited' },
+  { label: 'Plätze geändert', value: 'seats_changed' },
+  { label: 'Platz vom Team freigegeben', value: 'seat_released' },
+  { label: 'Zahlung erfasst', value: 'payment_recorded' },
+  { label: 'Rechnung erstellt', value: 'invoice_created' },
+  { label: 'Bestätigung gesendet', value: 'confirmation_sent' },
 ] as const
 
 export type BookingHistoryType = (typeof BOOKING_HISTORY_TYPES)[number]['value']
@@ -87,7 +93,9 @@ export async function recordMagicLinkOpened(
       summary:
         magicLink.scope === 'organiser-cancellation'
           ? 'Link "Ersatztermin oder Erstattung" zum ersten Mal geöffnet'
-          : 'Link "Buchung verwalten" zum ersten Mal geöffnet',
+          : magicLink.scope === 'date-offer'
+            ? 'Link "Neuen Termin wählen" zum ersten Mal geöffnet'
+            : 'Link "Buchung verwalten" zum ersten Mal geöffnet',
       by: 'Kund:in',
     })
   } catch (err) {

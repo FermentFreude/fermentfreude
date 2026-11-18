@@ -105,6 +105,7 @@ export const RefundRequests: CollectionConfig = {
         { label: 'Processing', value: 'processing' },
         { label: 'Completed', value: 'completed' },
         { label: 'Failed', value: 'failed' },
+        { label: 'Resolved without refund', value: 'resolved' },
       ],
       admin: {
         position: 'sidebar',
@@ -140,6 +141,16 @@ export const RefundRequests: CollectionConfig = {
       },
     },
     {
+      name: 'refundedAmount',
+      type: 'number',
+      label: 'Refunded Amount (cents)',
+      admin: {
+        readOnly: true,
+        description:
+          'What actually went back to the customer — can be less than the requested amount (partial refund). Filled when the refund is closed (Stripe webhook or "Mark as refunded" in Management → Requests). The Stornorechnung uses this amount.',
+      },
+    },
+    {
       name: 'requestedAt',
       type: 'date',
       admin: { position: 'sidebar', readOnly: true },
@@ -148,6 +159,43 @@ export const RefundRequests: CollectionConfig = {
       name: 'acknowledgedAt',
       type: 'date',
       admin: { position: 'sidebar' },
+    },
+    {
+      name: 'resolution',
+      type: 'select',
+      label: 'How it was handled',
+      options: [
+        { label: 'Refund started in Stripe', value: 'refunded' },
+        { label: 'Partial refund', value: 'partial' },
+        { label: 'Voucher instead', value: 'voucher' },
+        { label: 'Moved to another date', value: 'rebooked' },
+        { label: 'Declined', value: 'declined' },
+        { label: 'Other solution', value: 'other' },
+      ],
+      admin: { position: 'sidebar', description: 'Set by the founders in the Management dashboard (Refunds).' },
+    },
+    {
+      name: 'resolutionNote',
+      type: 'textarea',
+      label: 'Note on the solution',
+      admin: { description: 'What was done or agreed with the customer.' },
+    },
+    {
+      name: 'handledByName',
+      type: 'text',
+      label: 'Handled by',
+      admin: { position: 'sidebar', readOnly: true },
+    },
+    {
+      name: 'cancellationInvoice',
+      type: 'relationship',
+      relationTo: 'cancellation-invoices',
+      label: 'Stornorechnung',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Never automatic: only made when a founder presses "Create Stornorechnung" in Management → Refunds.',
+      },
     },
     {
       name: 'completedAt',

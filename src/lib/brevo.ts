@@ -18,6 +18,8 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
+import { filterRecipients, isAllowedTestRecipient, isLiveEmailEnvironment } from './emailSafety'
+
 const BREVO_API_URL = 'https://api.brevo.com/v3'
 
 /**
@@ -103,6 +105,9 @@ export const BREVO_TEMPLATES = {
   WORKSHOP_BOOKING_CONFIRMATION_GUEST: 102, // Guest: manage-booking magic link instead of an account link, ends with a "create an account" upsell
   ADMIN_WORKSHOP_NOTIFICATION: 94, // Admin notification for new workshop bookings
   WORKSHOP_ALTERNATE_DATE_OFFER: 100, // Roster: offer an overbooked guest a different date, manual follow-up
+  // Roster: "everyone chooses their own date" — personal manage-booking link (scope 'date-offer').
+  // Created 2026-11-13 by src/scripts/create-brevo-date-offer-template.ts (text-only copy of 99).
+  WORKSHOP_DATE_OFFER: 104,
   // Sent 2 days before the workshop to the buyer + every guest with an email
   // (src/lib/workshopReminders.ts).
   WORKSHOP_REMINDER: 103,
@@ -185,7 +190,10 @@ export async function sendTemplateEmail({
   params,
   subject,
   attachments,
-}: SendTemplateEmailParams): Promise<{ success: boolean; messageId?: string }> {
+}: SendTemplateEmailParams): Promise<{ success: boolean; messageId?: string; blocked?: boolean }> {
+  const safe = filterRecipients(to, `template ${templateId}`)
+  if (safe.allowed.length === 0) return { success: true, blocked: true }
+  to = safe.allowed
   const apiKey = getBrevoApiKey()
   if (!apiKey) {
     console.warn('[Brevo] BREVO_API_KEY (or SENDINBLUE_API_KEY) not set — skipping email send')
@@ -241,7 +249,10 @@ export async function sendTransactionalEmail({
   to,
   subject,
   htmlContent,
-}: SendTransactionalEmailParams): Promise<{ success: boolean; messageId?: string }> {
+}: SendTransactionalEmailParams): Promise<{ success: boolean; messageId?: string; blocked?: boolean }> {
+  const safe = filterRecipients(to, `"${subject}"`)
+  if (safe.allowed.length === 0) return { success: true, blocked: true }
+  to = safe.allowed
   const apiKey = getBrevoApiKey()
   if (!apiKey) {
     console.warn('[Brevo] BREVO_API_KEY (or SENDINBLUE_API_KEY) not set — skipping email send')
@@ -303,6 +314,12 @@ export async function upsertContact({
   listIds,
   attributes,
 }: BrevoContact): Promise<{ success: boolean }> {
+  // The Brevo account is shared with production: test environments must not
+  // add or change real contacts (or create junk ones).
+  if (!isLiveEmailEnvironment() && !isAllowedTestRecipient(email)) {
+    console.warn('[Email safety] Not production — Brevo contact sync skipped')
+    return { success: true }
+  }
   const apiKey = getBrevoApiKey()
   if (!apiKey) {
     console.warn(

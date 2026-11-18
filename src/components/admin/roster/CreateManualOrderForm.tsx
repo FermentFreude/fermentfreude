@@ -3,7 +3,6 @@
 import React, { useState, useTransition } from 'react'
 
 import { createManualOrder, searchProducts } from './actions'
-import { BRAND } from './rosterTheme'
 
 interface ProductResult {
   id: string
@@ -288,7 +287,7 @@ export function CreateManualOrderForm({ onDone }: { onDone: () => void }) {
                   <td style={{ padding: '10px 14px', width: '32px' }}>
                     <button
                       onClick={() => removeItem(item.key)}
-                      style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#dc2626', fontSize: '16px' }}
+                      style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--ff-alert)', fontSize: '16px' }}
                     >
                       ×
                     </button>
@@ -309,14 +308,14 @@ export function CreateManualOrderForm({ onDone }: { onDone: () => void }) {
         </div>
       )}
 
-      {error && <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#dc2626' }}>{error}</p>}
+      {error && <p style={{ margin: '0 0 12px', fontSize: '13px', color: 'var(--ff-alert)' }}>{error}</p>}
 
       <button
         onClick={handleCreate}
         disabled={isCreating}
         style={{
           padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-          background: BRAND.gold, color: BRAND.nearBlack, fontSize: '14px', fontWeight: 700,
+          background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)', fontSize: '14px', fontWeight: 700,
           opacity: isCreating ? 0.5 : 1,
         }}
       >

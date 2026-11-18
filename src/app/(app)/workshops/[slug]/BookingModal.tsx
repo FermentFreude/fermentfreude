@@ -32,6 +32,8 @@ export function BookingModal({
 
   const availableSpots = selectedDate.availableSpots ?? selectedDate.spotsLeft
   const canBook = guestCount <= availableSpots
+  // The counter may go as high as this date's free seats (a date can hold more than the old default of 12).
+  const guestLimit = Math.max(maxCapacity, availableSpots)
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -51,7 +53,7 @@ export function BookingModal({
   }, [handleKeyDown])
 
   const handleGuestCountChange = (newCount: number) => {
-    const clamped = Math.max(1, Math.min(newCount, maxCapacity))
+    const clamped = Math.max(1, Math.min(newCount, guestLimit))
     setGuestCount(clamped)
 
     // Show warning if trying to book more than available
@@ -168,7 +170,7 @@ export function BookingModal({
                 </span>
                 <button
                   onClick={() => handleGuestCountChange(guestCount + 1)}
-                  disabled={guestCount >= maxCapacity}
+                  disabled={guestCount >= guestLimit}
                   className="flex size-9 items-center justify-center rounded-full border-2 border-[#e8e4d9] bg-white text-[#555954] transition-all hover:border-[#555954] hover:bg-[#f9f7f3] disabled:opacity-30 disabled:hover:border-[#e8e4d9] disabled:hover:bg-white"
                   aria-label="Increase guest count"
                 >

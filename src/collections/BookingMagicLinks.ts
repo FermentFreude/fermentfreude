@@ -60,6 +60,7 @@ export const BookingMagicLinks: CollectionConfig = {
       options: [
         { label: 'Self-service (customer-initiated)', value: 'self-service' },
         { label: 'Organiser cancellation', value: 'organiser-cancellation' },
+        { label: 'Date offer (founders asked the customer to choose a new date)', value: 'date-offer' },
       ],
       admin: {
         description:

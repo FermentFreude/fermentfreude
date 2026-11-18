@@ -93,6 +93,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     'booking_rebooked',
     String(booking.id),
     `${booking.firstName ?? 'Gast'} ${booking.lastName ?? ''} — ${booking.workshopTitle}, Platz ${seatIndex + 1}: Gutschein-Code für spätere Umbuchung ausgestellt (${voucher.code})`.trim(),
+    { reason: cancelReasonLabel(reason) },
   )
 
   // ─── Customer email with the code (best-effort) ───────────────────

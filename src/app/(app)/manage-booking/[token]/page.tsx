@@ -33,7 +33,7 @@ export default async function ManageBookingPage({
   }
 
   const { booking, appointment, magicLink } = resolved
-  const seats = getAllSeatBundles(booking, appointment, new Date())
+  const seats = getAllSeatBundles(booking, appointment, new Date(), magicLink.scope)
   await recordMagicLinkOpened(await getPayloadClient(), magicLink, String(booking.id))
 
   return (

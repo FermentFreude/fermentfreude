@@ -3,7 +3,6 @@
 import React, { useState, useTransition } from 'react'
 
 import { createQuote } from './actions'
-import { BRAND } from './rosterTheme'
 
 interface FormItem {
   key: string
@@ -144,7 +143,7 @@ export function CreateQuoteForm({ onDone }: { onDone: () => void }) {
             <input type="number" min={0} step="0.01" placeholder="€ Einzelpreis" value={item.unitPriceEuro} onChange={(e) => updateItem(item.key, { unitPriceEuro: e.target.value })} style={inputStyle} />
             <button
               onClick={() => setItems((prev) => (prev.length > 1 ? prev.filter((i) => i.key !== item.key) : prev))}
-              style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#dc2626', fontSize: '18px' }}
+              style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--ff-alert)', fontSize: '18px' }}
             >
               ×
             </button>
@@ -173,14 +172,14 @@ export function CreateQuoteForm({ onDone }: { onDone: () => void }) {
         </div>
       </div>
 
-      {error && <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#dc2626' }}>{error}</p>}
+      {error && <p style={{ margin: '0 0 12px', fontSize: '13px', color: 'var(--ff-alert)' }}>{error}</p>}
 
       <button
         onClick={handleCreate}
         disabled={isCreating}
         style={{
           padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-          background: BRAND.gold, color: BRAND.nearBlack, fontSize: '14px', fontWeight: 700,
+          background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)', fontSize: '14px', fontWeight: 700,
           opacity: isCreating ? 0.5 : 1,
         }}
       >

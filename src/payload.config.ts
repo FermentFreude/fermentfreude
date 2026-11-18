@@ -16,9 +16,11 @@ import path from 'path'
 import { buildConfig } from 'payload'
 
 import { ActivityEvents } from '@/collections/ActivityEvents'
+import { AttentionNotes } from '@/collections/AttentionNotes'
 import { BacklogItems } from '@/collections/BacklogItems'
 import { BookingMagicLinks } from '@/collections/BookingMagicLinks'
 import { BrevoEmailTemplates } from '@/collections/BrevoEmailTemplates'
+import { EmailTemplateVersions } from '@/collections/EmailTemplateVersions'
 import { BrevoTemplates } from '@/collections/BrevoTemplates'
 import { CancellationInvoices } from '@/collections/CancellationInvoices'
 import { CancellationRequests } from '@/collections/CancellationRequests'
@@ -108,9 +110,10 @@ export default buildConfig({
         Logo: '/components/admin/Logo#Logo',
         Icon: '/components/admin/Icon#Icon',
       },
+      beforeDashboard: ['/components/admin/DashboardShortcuts#DashboardShortcuts'],
       beforeNavLinks: [
+        '/components/admin/NavLogo#NavLogo',
         '/components/admin/WorkshopRosterNavLink#WorkshopRosterNavLink',
-        '/components/admin/BacklogNavLink#BacklogNavLink',
         '/components/admin/AnalyticsNavLink#AnalyticsNavLink',
       ],
       views: {
@@ -166,20 +169,16 @@ export default buildConfig({
     defaultLocale: 'de',
     fallback: true,
   },
+  // Order = order on the CMS dashboard and in the sidebar: what the founders use most first, Users last.
   collections: [
-    Users,
-    BacklogItems,
-    Pages,
-    Categories,
-    CourseProgress,
-    Enrollments,
-    Media,
-    OnlineCourses,
-    Posts,
+    WorkshopAppointments,
     Workshops,
     WorkshopLocations,
-    WorkshopAppointments,
     WorkshopBookings,
+    Pages,
+    Media,
+    Posts,
+    Categories,
     Vouchers,
     Quotes,
     CancellationInvoices,
@@ -190,8 +189,15 @@ export default buildConfig({
     BookingMagicLinks,
     RefundRequests,
     ActivityEvents,
+    OnlineCourses,
+    Enrollments,
+    CourseProgress,
+    BacklogItems,
+    AttentionNotes,
     BrevoEmailTemplates,
+    EmailTemplateVersions,
     BrevoTemplates,
+    Users,
   ],
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',

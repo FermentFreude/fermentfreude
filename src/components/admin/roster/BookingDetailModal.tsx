@@ -204,7 +204,7 @@ export function BookingDetailModal({ booking, onClose }: Props) {
             key={entry.id}
             style={{ display: 'flex', gap: '10px', padding: '8px 0', borderBottom: '1px solid var(--theme-elevation-100)' }}
           >
-            <span aria-hidden style={{ fontSize: '14px', width: '20px', flexShrink: 0 }}>
+            <span aria-hidden style={{ fontSize: '14px', width: '20px', flexShrink: 0, filter: 'grayscale(1)' }}>
               {HISTORY_ICONS[entry.type] ?? '•'}
             </span>
             <div style={{ flex: 1 }}>

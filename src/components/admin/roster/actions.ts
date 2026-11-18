@@ -2,44 +2,41 @@
 
 import { randomUUID } from 'crypto'
 
-import { headers as getHeaders } from 'next/headers.js'
 import configPromise from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 
 import { releaseSpotsAtomic, reserveSpotsAtomic } from '@/lib/atomicSpots'
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
 import { addBookingHistory, BOOKING_HISTORY_TYPES, emailOutcome } from '@/lib/bookingHistory'
+import {
+  CHANNEL_LABEL,
+  cleanPayment,
+  createInvoice,
+  isChannel,
+  paymentSummary,
+  sendConfirmation,
+  type ManualChannel,
+  type PaymentInput,
+} from '@/lib/manualBooking'
+import { capacityOf } from '@/lib/appointmentCapacity'
+import { editSeatCore } from '@/lib/bookingEdit'
+import { completeRefundRequest } from '@/lib/completeRefundRequest'
+import { isOutsideSelfServiceWindow, lateness, logFounderException } from '@/lib/founderException'
+import { noteCapacityException, reserveSeatsAllowingException, revertCapacityException } from '@/lib/seatException'
+import { alignCounterCore } from '@/lib/seatCounter'
+import { moveSeatsCore } from '@/lib/moveSeats'
 import { seatsHoldingPlace } from '@/lib/seatCapacity'
-import { isValidEmail } from '@/lib/workshopSeats'
 import { getServerSideURL } from '@/utilities/getURL'
 import { fmtDate, fmtTime, toBookingRow } from './fetchRosterData'
+import { refreshPublicAvailability } from './publicAvailability'
+import { adminDisplayName, requireAdminUser } from './requireAdmin'
 import type { BookingRow } from './types'
 
 /**
- * Server Actions are network-callable independent of which page rendered
- * them — the Roster admin view being gated doesn't protect the action
- * itself once its client bundle has shipped. Same check as
- * /api/admin/roster/route.ts, enforced again here at the point of mutation.
+ * Server Actions are network-callable independent of which page rendered them, so every
+ * mutating action checks the caller here (shared rule in ./requireAdmin).
  */
-async function requireAdmin(payload: Payload) {
-  const { user } = await payload.auth({ headers: await getHeaders() })
-  const userAny = user as { role?: string; roles?: string[] } | null
-  const isAdmin =
-    userAny?.role === 'admin' ||
-    userAny?.roles?.includes('admin') ||
-    (user as Record<string, unknown> | null)?.['admin'] === true
-
-  if (!user || !isAdmin) {
-    throw new Error('Unauthorized')
-  }
-
-  return user
-}
-
-/** How an admin is named in a booking's history. */
-function adminName(user: { email?: string | null; name?: unknown }): string {
-  return (typeof user.name === 'string' && user.name.trim()) || user.email || 'Admin'
-}
+const requireAdmin = (payload: Payload) => requireAdminUser(payload)
 
 export async function updatePickupStatus(
   orderId: string,
@@ -243,7 +240,17 @@ export async function createManualWorkshopBooking(params: {
   phone?: string
   guestCount: number
   notes?: string
-}): Promise<{ id: string }> {
+  /** How the booking came in (email, phone, in person, Wix …). */
+  channel?: ManualChannel
+  /** Paid or still open, and how. */
+  payment?: PaymentInput
+  /** Create the invoice right away (only for paid seats). */
+  createInvoice?: boolean
+  /** Send the normal booking confirmation email (needs an email address). */
+  sendConfirmation?: boolean
+  /** Exception: the date is full or has too few free seats. Its capacity is raised by the missing seats. */
+  allowException?: boolean
+}): Promise<{ id: string; invoiceNumber?: string; warnings: string[] }> {
   const payload = await getPayload({ config: configPromise })
   const user = await requireAdmin(payload)
 
@@ -253,8 +260,8 @@ export async function createManualWorkshopBooking(params: {
   if (!params.firstName.trim()) {
     throw new Error('Bitte Vorname angeben.')
   }
-  if (!Number.isInteger(params.guestCount) || params.guestCount < 1 || params.guestCount > 12) {
-    throw new Error('Anzahl der Plätze muss zwischen 1 und 12 liegen.')
+  if (!Number.isInteger(params.guestCount) || params.guestCount < 1 || params.guestCount > 50) {
+    throw new Error('Anzahl der Plätze muss zwischen 1 und 50 liegen.')
   }
 
   // Re-fetch server-side for integrity — the client's AppointmentRow has no
@@ -270,12 +277,18 @@ export async function createManualWorkshopBooking(params: {
     throw new Error('Workshop-Daten konnten nicht geladen werden.')
   }
 
-  const reserveResult = await reserveSpotsAtomic(payload, params.appointmentId, params.guestCount)
-  if (!reserveResult.success) {
-    throw new Error(`Nur noch ${reserveResult.availableSpots ?? 0} Platz/Plätze verfügbar.`)
-  }
+  const payment = params.payment ? cleanPayment(params.payment) : undefined
+  if (params.channel !== undefined && !isChannel(params.channel)) throw new Error('Ungültige Herkunft der Buchung.')
+  if (params.createInvoice && payment?.paymentStatus !== 'paid') throw new Error('Eine Rechnung gibt es nur für bezahlte Plätze.')
+  if (params.sendConfirmation && !params.email?.trim()) throw new Error('Für die Bestätigung wird eine E-Mail-Adresse gebraucht.')
 
-  const maxCapacity = Number(workshop.maxCapacityPerSlot ?? 12)
+  const reserve = await reserveSeatsAllowingException(payload, appointment, params.guestCount, Boolean(params.allowException))
+  if (!reserve.ok) {
+    throw new Error(`Nur noch ${reserve.available} Platz/Plätze verfügbar.`)
+  }
+  const raised = reserve.raised
+
+  const maxCapacity = reserve.capacityNow
   try {
     const dateTimeStr = String(appointment.dateTime ?? '')
     const created = await payload.create({
@@ -292,24 +305,94 @@ export async function createManualWorkshopBooking(params: {
         ...(params.email?.trim() ? { email: params.email.trim() } : {}),
         ...(params.phone?.trim() ? { phone: params.phone.trim() } : {}),
         guestCount: params.guestCount,
-        pricePerPerson: workshop.basePrice ?? 0,
-        totalPrice: (workshop.basePrice ?? 0) * params.guestCount,
+        // A rebooking (already paid on the original booking) is not a new sale: 0 €.
+        pricePerPerson: payment?.paymentMethod === 'rebooking' ? 0 : (workshop.basePrice ?? 0),
+        totalPrice: payment?.paymentMethod === 'rebooking' ? 0 : (workshop.basePrice ?? 0) * params.guestCount,
         ...(params.notes?.trim() ? { notes: params.notes.trim() } : {}),
         seats: Array.from({ length: params.guestCount }, () => ({ seatStatus: 'active' as const })),
+        ...(params.channel || payment
+          ? {
+              manualInfo: {
+                ...(params.channel ? { channel: params.channel } : {}),
+                ...(payment
+                  ? {
+                      paymentStatus: payment.paymentStatus,
+                      ...(payment.paymentMethod ? { paymentMethod: payment.paymentMethod } : {}),
+                      ...(payment.voucherCode ? { voucherCode: payment.voucherCode } : {}),
+                      ...(payment.paymentNote ? { paymentNote: payment.paymentNote } : {}),
+                      ...(payment.paymentStatus === 'paid' ? { paidAt: new Date().toISOString() } : {}),
+                    }
+                  : {}),
+              },
+            }
+          : {}),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       overrideAccess: true,
     })
-    await addBookingHistory(payload, String(created.id), {
+    const id = String(created.id)
+    const by = adminDisplayName(user)
+    await addBookingHistory(payload, id, {
       type: 'created_manual',
-      summary: `Manuell hinzugefügt · ${params.guestCount} ${params.guestCount === 1 ? 'Platz' : 'Plätze'} · keine Bestätigungs-E-Mail${params.email?.trim() ? '' : ' · keine E-Mail hinterlegt'}`,
-      by: adminName(user),
+      summary: [
+        `Manuell hinzugefügt · ${params.guestCount} ${params.guestCount === 1 ? 'Platz' : 'Plätze'}`,
+        params.channel ? `gebucht ${CHANNEL_LABEL[params.channel]}` : '',
+        payment ? paymentSummary(payment) : '',
+        params.email?.trim() ? '' : 'keine E-Mail hinterlegt',
+      ]
+        .filter(Boolean)
+        .join(' · '),
+      by,
     })
-    return { id: String(created.id) }
+
+    if (raised) {
+      await addBookingHistory(payload, id, {
+        type: 'seats_changed',
+        summary: `Ausnahme: Der Termin war voll. Die Kapazität dieses Termins wurde von ${raised.from} auf ${raised.to} erhöht, damit diese Person noch dazukommt.`,
+        by,
+      })
+      await noteCapacityException(payload, params.appointmentId, raised, by, [params.firstName, params.lastName].filter(Boolean).join(' ').trim())
+    }
+    if (raised || payment?.paymentMethod === 'rebooking') {
+      const who = [params.firstName, params.lastName].filter(Boolean).join(' ').trim()
+      const what = [
+        payment?.paymentMethod === 'rebooking' ? 'als Umbuchung (bereits bezahlt) hinzugefügt' : 'von Hand hinzugefügt',
+        raised ? `Termin war voll, Kapazität ${raised.from} → ${raised.to}` : '',
+        payment?.paymentNote ? `Notiz: ${payment.paymentNote}` : '',
+      ].filter(Boolean).join(' · ')
+      await logFounderException(payload, {
+        bookingId: id,
+        summary: `${who} — ${String(workshop.title ?? '')} (${fmtDate(String(appointment.dateTime ?? ''))}): ${what}`,
+        actorName: adminDisplayName(user as Parameters<typeof adminDisplayName>[0]),
+        actorId: user.id,
+      })
+    }
+
+    // The seat is booked. The optional extras must never undo that — failures come back as warnings.
+    const warnings: string[] = []
+    let invoiceNumber: string | undefined
+    if (params.createInvoice) {
+      try {
+        invoiceNumber = (await createInvoice(payload, id, by)).invoiceNumber
+      } catch (e) {
+        warnings.push(`Rechnung konnte nicht erstellt werden: ${e instanceof Error ? e.message : String(e)}`)
+      }
+    }
+    if (params.sendConfirmation) {
+      try {
+        const r = await sendConfirmation(payload, id, by)
+        if (!r.sent) warnings.push(r.blocked ? 'Bestätigung nicht gesendet: Testumgebung, Adresse nicht freigegeben.' : (r.reason ?? 'Bestätigung konnte nicht gesendet werden.'))
+      } catch (e) {
+        warnings.push(`Bestätigung konnte nicht gesendet werden: ${e instanceof Error ? e.message : String(e)}`)
+      }
+    }
+    refreshPublicAvailability()
+    return { id, invoiceNumber, warnings }
   } catch (err) {
     // Booking create failed AFTER the atomic reserve succeeded — release the
     // spot back so it isn't silently lost.
     await releaseSpotsAtomic(payload, params.appointmentId, params.guestCount, maxCapacity)
+    if (raised) await revertCapacityException(payload, params.appointmentId, raised)
     throw err
   }
 }
@@ -351,9 +434,7 @@ export async function deleteManualWorkshopBooking(bookingId: string): Promise<vo
         depth: 1,
         overrideAccess: true,
       })
-      const workshop = appointment.workshop
-      const maxCapacity =
-        typeof workshop === 'object' && workshop !== null ? Number(workshop.maxCapacityPerSlot ?? 12) : 12
+      const maxCapacity = capacityOf(appointment)
       // Only seats still on the date — rebooked/cancelled seats already gave theirs back.
       const holding = seatsHoldingPlace(booking)
       if (holding > 0) await releaseSpotsAtomic(payload, booking.appointmentId, holding, maxCapacity)
@@ -369,6 +450,7 @@ export async function deleteManualWorkshopBooking(bookingId: string): Promise<vo
     id: bookingId,
     overrideAccess: true,
   })
+  refreshPublicAvailability()
 }
 
 /**
@@ -395,72 +477,7 @@ export async function updateBookingSeatDetails(params: {
 }): Promise<void> {
   const payload = await getPayload({ config: configPromise })
   const user = await requireAdmin(payload)
-
-  const booking = await payload.findByID({
-    collection: 'workshop-bookings',
-    id: params.bookingId,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  const name = params.name.trim()
-  const notes = params.notes.trim()
-
-  const email = params.email.trim()
-  if (email && !isValidEmail(email)) {
-    throw new Error('Bitte eine gültige E-Mail-Adresse angeben.')
-  }
-
-  const previousEmail =
-    (params.seatIndex === 0 ? booking.email : booking.seats?.[params.seatIndex]?.email)?.trim() ?? ''
-  const recordEmailChange = async () => {
-    if (previousEmail.toLowerCase() === email.toLowerCase()) return
-    await addBookingHistory(payload, params.bookingId, {
-      type: 'email_changed',
-      summary: `Platz ${params.seatIndex + 1}: E-Mail ${previousEmail || '(leer)'} → ${email || '(leer)'}`,
-      by: adminName(user),
-    })
-  }
-
-  if (params.seatIndex === 0) {
-    // Only re-split the name when it was actually changed — otherwise saving
-    // just an email would turn "Anna Maria" + "Müller" into "Anna" + "Maria Müller".
-    const currentName = [booking.firstName, booking.lastName].filter(Boolean).join(' ').trim()
-    const [firstName, ...rest] = name.split(' ')
-    const nameData = name === currentName ? {} : { firstName: firstName ?? '', lastName: rest.join(' ') }
-    await payload.update({
-      collection: 'workshop-bookings',
-      id: params.bookingId,
-      data: {
-        ...nameData,
-        notes,
-        email: email || null,
-      },
-      overrideAccess: true,
-    })
-    await recordEmailChange()
-    return
-  }
-
-  const seats = Array.isArray(booking.seats) ? [...booking.seats] : []
-  while (seats.length <= params.seatIndex) {
-    seats.push({ seatStatus: 'active' })
-  }
-  seats[params.seatIndex] = {
-    ...seats[params.seatIndex],
-    recipientName: name,
-    email: email || null,
-    giftNote: notes,
-  }
-
-  await payload.update({
-    collection: 'workshop-bookings',
-    id: params.bookingId,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { seats } as any,
-    overrideAccess: true,
-  })
-  await recordEmailChange()
+  await editSeatCore(payload, params, adminDisplayName(user))
 }
 
 /**
@@ -471,7 +488,8 @@ export async function updateBookingSeatDetails(params: {
  */
 export async function getAlternateAppointments(
   excludeAppointmentId: string,
-): Promise<{ id: string; date: string; time: string; totalBooked: number; capacity: number }[]> {
+  opts?: { anyWorkshop?: boolean },
+): Promise<{ id: string; date: string; time: string; totalBooked: number; capacity: number; workshopTitle: string; dateTime: string }[]> {
   const payload = await getPayload({ config: configPromise })
   await requireAdmin(payload)
 
@@ -483,29 +501,27 @@ export async function getAlternateAppointments(
   })
   const workshopId =
     typeof current.workshop === 'object' && current.workshop !== null ? current.workshop.id : current.workshop
-  const capacity =
-    typeof current.workshop === 'object' && current.workshop !== null
-      ? Number(current.workshop.maxCapacityPerSlot ?? 12)
-      : 12
-
   const appointments = await payload.find({
     collection: 'workshop-appointments',
     where: {
       and: [
-        { workshop: { equals: workshopId } },
+        ...(opts?.anyWorkshop ? [] : [{ workshop: { equals: workshopId } }]),
         { id: { not_equals: excludeAppointmentId } },
         { isPublished: { equals: true } },
         { dateTime: { greater_than: new Date().toISOString() } },
       ],
     },
-    limit: 50,
+    limit: 80,
     sort: 'dateTime',
-    depth: 0,
+    depth: 1, // the workshop is needed for its title and standard capacity
     overrideAccess: true,
   })
 
   const results = []
   for (const appt of appointments.docs) {
+    const ws = typeof appt.workshop === 'object' && appt.workshop !== null ? appt.workshop : null
+    const apptCapacity = capacityOf(appt)
+    const workshopTitle = ws ? String(ws.title ?? '') : typeof current.workshop === 'object' && current.workshop ? String(current.workshop.title ?? '') : ''
     const bookings = await payload.find({
       collection: 'workshop-bookings',
       where: { and: [{ appointmentId: { equals: appt.id } }, { status: { equals: 'confirmed' } }] },
@@ -519,7 +535,9 @@ export async function getAlternateAppointments(
       date: fmtDate(String(appt.dateTime)),
       time: `${fmtTime(String(appt.dateTime))} Uhr`,
       totalBooked,
-      capacity,
+      capacity: apptCapacity,
+      workshopTitle,
+      dateTime: String(appt.dateTime),
     })
   }
   return results
@@ -552,6 +570,10 @@ export async function moveWorkshopBooking(params: {
   if (!oldAppointmentId) {
     throw new Error('Diese Buchung hat keinen zugeordneten Termin.')
   }
+  const oldDateTime = await payload
+    .findByID({ collection: 'workshop-appointments', id: oldAppointmentId, depth: 0, overrideAccess: true })
+    .then((a) => (a.dateTime ? String(a.dateTime) : null))
+    .catch(() => null)
   if (oldAppointmentId === params.newAppointmentId) {
     throw new Error('Das ist bereits der aktuelle Termin.')
   }
@@ -566,7 +588,7 @@ export async function moveWorkshopBooking(params: {
   if (typeof workshop !== 'object' || workshop === null) {
     throw new Error('Workshop-Daten konnten nicht geladen werden.')
   }
-  const maxCapacity = Number(workshop.maxCapacityPerSlot ?? 12)
+  const maxCapacity = capacityOf(newAppointment)
   // Only the seats still on this date move — a seat the customer already
   // rebooked or cancelled has nothing to take along.
   const guestCount = seatsHoldingPlace(booking)
@@ -590,6 +612,11 @@ export async function moveWorkshopBooking(params: {
         workshopSlug: workshop.slug,
         date: dateTimeStr ? fmtDate(dateTimeStr) : booking.date,
         time: dateTimeStr ? `${fmtTime(dateTimeStr)} Uhr` : booking.time,
+        // The price follows the new workshop — except for bookings that belong to an
+        // order: what was paid stays as it was.
+        ...(!booking.orderId && typeof workshop.basePrice === 'number'
+          ? { pricePerPerson: workshop.basePrice, totalPrice: workshop.basePrice * (booking.guestCount ?? 1) }
+          : {}),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       overrideAccess: true,
@@ -613,9 +640,7 @@ export async function moveWorkshopBooking(params: {
       depth: 1,
       overrideAccess: true,
     })
-    const oldWorkshop = oldAppointment.workshop
-    const oldMaxCapacity =
-      typeof oldWorkshop === 'object' && oldWorkshop !== null ? Number(oldWorkshop.maxCapacityPerSlot ?? 12) : 12
+    const oldMaxCapacity = capacityOf(oldAppointment)
     await releaseSpotsAtomic(payload, oldAppointmentId, guestCount, oldMaxCapacity)
   } catch (err) {
     payload.logger.error(
@@ -673,10 +698,115 @@ export async function moveWorkshopBooking(params: {
     summary: params.notifyCustomer
       ? `${fromTo} · ${emailOutcome(booking.email, emailSent)}`
       : `${fromTo} · ohne E-Mail (bewusst nicht benachrichtigt)`,
-    by: adminName(user),
+    by: adminDisplayName(user),
   })
 
+  if (isOutsideSelfServiceWindow(oldDateTime)) {
+    const who = [booking.firstName, booking.lastName].filter(Boolean).join(' ').trim() || booking.email || 'Gast'
+    await logFounderException(payload, {
+      bookingId: params.bookingId,
+      summary: `${who} — ${booking.workshopTitle}: ${fromTo} (${lateness(oldDateTime as string)}, außerhalb der 14-Tage-Regel)`,
+      actorName: adminDisplayName(user as Parameters<typeof adminDisplayName>[0]),
+      actorId: user.id,
+    })
+  }
+
+  refreshPublicAvailability()
   return { id: params.bookingId, emailSent }
+}
+
+/**
+ * Set (or clear) the capacity of ONE date. Clearing it makes the workshop's
+ * standard capacity apply again. The appointment's hooks move the free-spots
+ * counter by the same amount and refuse a capacity below the seats already booked.
+ */
+export async function setAppointmentCapacity(params: {
+  appointmentId: string
+  capacity: number | null
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    await requireAdmin(payload)
+    const cap = params.capacity
+    if (cap !== null && (!Number.isInteger(cap) || cap < 1 || cap > 200)) {
+      return { ok: false, error: 'Bitte eine ganze Zahl zwischen 1 und 200 angeben, oder das Feld leeren.' }
+    }
+    await payload.update({
+      collection: 'workshop-appointments',
+      id: params.appointmentId,
+      data: { capacity: cap } as never,
+      overrideAccess: true,
+      context: { skipAutoTranslate: true },
+    })
+    refreshPublicAvailability()
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Unbekannter Fehler.' }
+  }
+}
+
+/**
+ * "Zähler angleichen": make the free-seat counter that the website shows equal to
+ * what the bookings say (capacity − confirmed seats that still hold a place − unpaid
+ * holds). Only moves the counter, never a booking.
+ *
+ * Safeguards: upcoming dates only; it must still be the number the person saw
+ * (otherwise someone booked in the meantime and they must look again); refused while a
+ * checkout hold was touched in the last minute (a customer is right in the middle of it);
+ * the change is written into the date's internal notes (who, from → to).
+ */
+export async function alignAppointmentCounter(params: {
+  appointmentId: string
+  seen: number
+}): Promise<{ ok: true; from: number; to: number } | { ok: false; error: string }> {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const user = await requireAdmin(payload)
+    const r = await alignCounterCore(payload, params, adminDisplayName(user))
+    if (r.ok) refreshPublicAvailability()
+    return r
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Unbekannter Fehler.' }
+  }
+}
+
+/**
+ * Move only SOME of a booking's seats to another date (e.g. one person of a
+ * group of 5). The logic lives in lib/moveSeats.ts; moving every remaining
+ * seat is the normal whole-booking move.
+ */
+export async function moveWorkshopSeats(params: {
+  bookingId: string
+  seatIndexes: number[]
+  newAppointmentId: string
+  notifyCustomer: boolean
+}): Promise<{ id: string; newBookingId: string; emailSent: boolean | null }> {
+  const payload = await getPayload({ config: configPromise })
+  const user = await requireAdmin(payload)
+  const before = await payload.findByID({ collection: 'workshop-bookings', id: params.bookingId, depth: 0, overrideAccess: true })
+  const oldDateTime = before.appointmentId
+    ? await payload
+        .findByID({ collection: 'workshop-appointments', id: before.appointmentId, depth: 0, overrideAccess: true })
+        .then((a) => (a.dateTime ? String(a.dateTime) : null))
+        .catch(() => null)
+    : null
+  const r = await moveSeatsCore(payload, params, adminDisplayName(user))
+  refreshPublicAvailability()
+  if (!r.whole && isOutsideSelfServiceWindow(oldDateTime)) {
+    const who = [before.firstName, before.lastName].filter(Boolean).join(' ').trim() || before.email || 'Gast'
+    const n = params.seatIndexes.length
+    await logFounderException(payload, {
+      bookingId: params.bookingId,
+      summary: `${who} — ${before.workshopTitle} (${before.date}): ${n} ${n === 1 ? 'Platz' : 'Plätze'} auf einen anderen Termin verschoben (${lateness(oldDateTime as string)}, außerhalb der 14-Tage-Regel)`,
+      actorName: adminDisplayName(user as Parameters<typeof adminDisplayName>[0]),
+      actorId: user.id,
+    })
+  }
+  if (r.whole) {
+    const w = await moveWorkshopBooking({ bookingId: params.bookingId, newAppointmentId: params.newAppointmentId, notifyCustomer: params.notifyCustomer })
+    return { id: params.bookingId, newBookingId: params.bookingId, emailSent: w.emailSent }
+  }
+  return { id: r.id, newBookingId: r.newBookingId, emailSent: r.emailSent }
 }
 
 /**
@@ -724,7 +854,7 @@ export async function sendAlternateDateEmail(params: {
       await addBookingHistory(payload, bookingId, {
         type: 'alternate_offered',
         summary: `${offered} · nicht gesendet, keine E-Mail hinterlegt`,
-        by: adminName(user),
+        by: adminDisplayName(user),
       })
       continue
     }
@@ -744,7 +874,7 @@ export async function sendAlternateDateEmail(params: {
     await addBookingHistory(payload, bookingId, {
       type: 'alternate_offered',
       summary: `${offered} · ${emailOutcome(booking.email, result.success)}`,
-      by: adminName(user),
+      by: adminDisplayName(user),
     })
     if (result.success) {
       sent.push(name)
@@ -882,29 +1012,6 @@ export async function createCancellationInvoice(
   return { id: String(cancellation.id), cancellationNumber: cancellation.cancellationNumber ?? null }
 }
 
-/** Updates the Erstattung/Verrechnung status on a Stornorechnung after the founder has actually issued the refund. */
-export async function updateCancellationRefundStatus(
-  cancellationId: string,
-  params: {
-    refundStatus: 'offen' | 'erstattet' | 'verrechnet'
-    refundDate?: string
-    refundMethodOrReference?: string
-  },
-): Promise<void> {
-  const payload = await getPayload({ config: configPromise })
-  await requireAdmin(payload)
-  await payload.update({
-    collection: 'cancellation-invoices',
-    id: cancellationId,
-    data: {
-      refundStatus: params.refundStatus,
-      ...(params.refundDate ? { refundDate: params.refundDate } : {}),
-      ...(params.refundMethodOrReference ? { refundMethodOrReference: params.refundMethodOrReference } : {}),
-    },
-    overrideAccess: true,
-  })
-}
-
 /**
  * Best-effort Stornorechnung for a single refunded seat. Deliberately NOT
  * the same path as createCancellationInvoice(orderId) — that snapshots the
@@ -917,7 +1024,7 @@ export async function updateCancellationRefundStatus(
 async function createCancellationInvoiceForRefundRequest(
   payload: Payload,
   refundRequest: Record<string, unknown>,
-): Promise<void> {
+): Promise<{ id: string; number: string } | null> {
   const bookingRef = refundRequest.booking
   const booking =
     typeof bookingRef === 'object' && bookingRef !== null
@@ -930,12 +1037,12 @@ async function createCancellationInvoiceForRefundRequest(
         })) as unknown as Record<string, unknown>)
 
   const orderId = booking.orderId as string | undefined
-  if (!orderId) return
+  if (!orderId) return null
 
   const order = await payload
     .findByID({ collection: 'orders', id: orderId, depth: 0, overrideAccess: true })
     .catch(() => null)
-  if (!order) return
+  if (!order) return null
 
   const orderRecord = order as unknown as {
     invoiceNumber?: string | null
@@ -945,12 +1052,13 @@ async function createCancellationInvoiceForRefundRequest(
   }
 
   const originalSeries: 'MAN' | 'WEB' = orderRecord.paymentMethod === 'manual' ? 'MAN' : 'WEB'
-  const requestedAmount = (refundRequest.requestedAmount as number) ?? 0
+  // What really went back (a partial refund is less than requested); falls back to the requested amount.
+  const requestedAmount = (refundRequest.refundedAmount as number | null | undefined) ?? (refundRequest.requestedAmount as number) ?? 0
   const workshopTitle = (booking.workshopTitle as string) ?? 'Workshop'
   const clientName =
     [booking.firstName, booking.lastName].filter(Boolean).join(' ') || (booking.email as string) || ''
 
-  await payload.create({
+  const created = await payload.create({
     collection: 'cancellation-invoices',
     data: {
       order: orderId,
@@ -968,47 +1076,83 @@ async function createCancellationInvoiceForRefundRequest(
     } as any,
     overrideAccess: true,
   })
+  return { id: String(created.id), number: (created as { cancellationNumber?: string | null }).cancellationNumber ?? '' }
 }
 
-/**
- * Cosmetic-only acknowledgment (plan §8 step 5) — lets a founder mark "I've
- * submitted this in Stripe" so the Refunds queue reflects what they've
- * actioned vs. not yet looked at. NOT authoritative: the charge.refunded
- * webhook is what actually moves a row to 'completed', regardless of
- * whether anyone clicked this first.
- *
- * On the FIRST acknowledgment (status was 'requested') this also generates
- * a seat-scoped Stornorechnung, so workshop refunds get the same invoicing
- * paperwork as shop-product cancellations. Guarded to first-time only so a
- * repeat click can't create duplicate Stornorechnungen.
- */
-export async function acknowledgeRefundRequest(refundRequestId: string): Promise<void> {
-  const payload = await getPayload({ config: configPromise })
-  await requireAdmin(payload)
+export type RefundResolution = 'refunded' | 'partial' | 'voucher' | 'rebooked' | 'declined' | 'other'
 
-  const existing = await payload.findByID({
-    collection: 'refund-requests',
-    id: refundRequestId,
-    depth: 1,
-    overrideAccess: true,
-  })
-  const wasFirstAcknowledgment = existing.status === 'requested'
+/**
+ * A founder records how a refund request is being handled. Nothing is sent to Stripe from here.
+ * - refunded / partial: the money goes back through Stripe by hand → status "acknowledged"; the
+ *   charge.refunded webhook closes it when Stripe confirms (and a reminder appears if it never does).
+ *   No Stornorechnung is made here — that is a separate, deliberate founder decision (createRefundCancellationInvoice).
+ * - voucher / rebooked / declined / other: solved without a refund → status "resolved" (closed).
+ */
+export async function handleRefundRequest(
+  refundRequestId: string,
+  resolution: RefundResolution,
+  note: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const payload = await getPayload({ config: configPromise })
+  const user = await requireAdmin(payload)
+  const allowed: RefundResolution[] = ['refunded', 'partial', 'voucher', 'rebooked', 'declined', 'other']
+  if (!allowed.includes(resolution)) return { ok: false, error: 'Unbekannte Lösung.' }
+  const text = note.trim().slice(0, 1000)
+  if ((resolution === 'other' || resolution === 'declined') && !text) return { ok: false, error: 'Bitte kurz notieren, was entschieden wurde.' }
+
+  const existing = await payload.findByID({ collection: 'refund-requests', id: refundRequestId, depth: 1, overrideAccess: true })
+  if (existing.status === 'completed' || existing.status === 'failed') return { ok: false, error: 'Diese Rückerstattung ist schon abgeschlossen.' }
+  const byName = adminDisplayName(user as Parameters<typeof adminDisplayName>[0])
+  const moneyBack = resolution === 'refunded' || resolution === 'partial'
 
   await payload.update({
     collection: 'refund-requests',
     id: refundRequestId,
-    data: { status: 'acknowledged', acknowledgedAt: new Date().toISOString() },
+    data: {
+      status: moneyBack ? 'acknowledged' : 'resolved',
+      resolution,
+      resolutionNote: text,
+      handledByName: byName,
+      acknowledgedAt: new Date().toISOString(),
+    },
     overrideAccess: true,
   })
 
-  if (wasFirstAcknowledgment) {
-    try {
-      await createCancellationInvoiceForRefundRequest(payload, existing as unknown as Record<string, unknown>)
-    } catch (err) {
-      payload.logger.error(
-        `[acknowledgeRefundRequest] Failed to create Stornorechnung: ${err instanceof Error ? err.message : String(err)}`,
-      )
-    }
+  return { ok: true }
+}
+
+/**
+ * Closes a refund the founders paid back themselves, when Stripe's confirmation doesn't close it:
+ * money sent by bank transfer / outside Stripe, or a partial refund the webhook couldn't match.
+ * Same effect as Stripe's confirmation (seat refunded, place back on sale). No Stornorechnung.
+ */
+export async function markRefundCompleted(
+  refundRequestId: string,
+  refundedCents: number,
+  note: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const user = await requireAdmin(payload)
+    const rr = await payload.findByID({ collection: 'refund-requests', id: refundRequestId, depth: 0, overrideAccess: true })
+    if (rr.status === 'completed') return { ok: false, error: 'Diese Rückerstattung ist schon abgeschlossen.' }
+    if (rr.status !== 'acknowledged' && rr.status !== 'processing')
+      return { ok: false, error: 'Bitte die Anfrage zuerst bearbeiten (Rückerstattung oder Teilerstattung wählen).' }
+    const cents = Math.round(Number(refundedCents))
+    const max = rr.requestedAmount ?? 0
+    if (!Number.isFinite(cents) || cents <= 0) return { ok: false, error: 'Bitte den erstatteten Betrag eingeben.' }
+    if (max > 0 && cents > max) return { ok: false, error: `Der Betrag ist höher als die Anfrage (€${(max / 100).toFixed(2)}).` }
+
+    await completeRefundRequest(payload, rr, {
+      refundedCents: cents,
+      by: adminDisplayName(user),
+      via: 'manual',
+      note: note.trim().slice(0, 300),
+    })
+    refreshPublicAvailability()
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, error: e instanceof Error && e.message === 'Unauthorized' ? 'Keine Berechtigung.' : e instanceof Error ? e.message : 'Unbekannter Fehler.' }
   }
 }
 
@@ -1287,5 +1431,59 @@ export async function getOrderDetail(orderId: string): Promise<OrderDetail> {
         }
       : null,
     bookings: bookings.docs.map((b) => toBookingRow(b)),
+  }
+}
+
+/**
+ * Makes the Stornorechnung for one refund request — only when a founder presses the button for it
+ * (never automatic). One per request: the link is stored on the request. A Stornorechnung the old
+ * "acknowledge" button made earlier (same order, same text, same amount) is linked instead of made twice.
+ */
+export async function createRefundCancellationInvoice(
+  refundRequestId: string,
+): Promise<{ ok: true; number: string; existed: boolean } | { ok: false; error: string }> {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    await requireAdmin(payload)
+    const rr = await payload.findByID({ collection: 'refund-requests', id: refundRequestId, depth: 1, overrideAccess: true })
+    const linked = rr.cancellationInvoice
+    if (linked) {
+      const nr = typeof linked === 'object' ? linked.cancellationNumber : ''
+      return { ok: false, error: `Für diese Anfrage gibt es schon eine Stornorechnung${nr ? ` (${nr})` : ''}.` }
+    }
+    if (rr.status === 'requested') return { ok: false, error: 'Bitte die Anfrage zuerst bearbeiten.' }
+    if (rr.resolution === 'partial' && rr.refundedAmount == null)
+      return { ok: false, error: 'Teilerstattung: bitte zuerst die Erstattung abschließen („Als erstattet markieren“ oder Stripe), damit der Betrag auf der Stornorechnung stimmt.' }
+    const stornoCents = rr.refundedAmount ?? rr.requestedAmount ?? 0
+
+    const booking = typeof rr.booking === 'object' && rr.booking ? rr.booking : null
+    const orderId = booking?.orderId
+    if (orderId) {
+      const earlier = await payload.find({
+        collection: 'cancellation-invoices',
+        where: {
+          and: [
+            { order: { equals: orderId } },
+            { reason: { equals: `Workshop-Rückerstattung: ${booking?.workshopTitle ?? 'Workshop'}` } },
+            { totalCents: { equals: stornoCents } },
+          ],
+        },
+        limit: 1,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const prev = earlier.docs[0]
+      if (prev) {
+        await payload.update({ collection: 'refund-requests', id: refundRequestId, data: { cancellationInvoice: prev.id }, overrideAccess: true })
+        return { ok: true, number: prev.cancellationNumber ?? '', existed: true }
+      }
+    }
+
+    const created = await createCancellationInvoiceForRefundRequest(payload, rr as unknown as Record<string, unknown>)
+    if (!created) return { ok: false, error: 'Zu dieser Buchung gibt es keine Rechnung im System. Die Stornorechnung bitte im CMS von Hand anlegen.' }
+    await payload.update({ collection: 'refund-requests', id: refundRequestId, data: { cancellationInvoice: created.id }, overrideAccess: true })
+    return { ok: true, number: created.number, existed: false }
+  } catch (e) {
+    return { ok: false, error: e instanceof Error && e.message === 'Unauthorized' ? 'Keine Berechtigung.' : e instanceof Error ? e.message : 'Unbekannter Fehler.' }
   }
 }

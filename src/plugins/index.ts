@@ -11,6 +11,7 @@ import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 
+import { checkRole } from '@/access/utilities'
 import { isAdmin } from '@/access/isAdmin'
 import { isDocumentOwner } from '@/access/isDocumentOwner'
 import { autoCompleteDigitalOrders } from '@/collections/Orders/autoCompleteDigitalOrders'
@@ -35,6 +36,7 @@ import { exactlyOnceConfirmOrder } from '@/lib/cartFulfilment'
 import { requireWorkshopSeatsHeld } from '@/collections/Transactions/requireWorkshopSeatsHeld'
 import { assignInvoiceNumber } from '@/hooks/assignInvoiceNumber'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
+import { freezeInvoiceOnIssue } from '@/hooks/freezeInvoice'
 import { Page, Product } from '@/payload-types'
 import { mediaFixR2UrlAfterReadPlugin } from '@/plugins/mediaFixR2UrlAfterRead'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -247,6 +249,17 @@ export const plugins: Plugin[] = [
     orders: {
       ordersCollectionOverride: ({ defaultCollection }) => ({
         ...defaultCollection,
+        access: {
+          ...defaultCollection?.access,
+          // An order that has an invoice number is an issued invoice: it must not be deleted
+          // (that would leave a gap in the numbering and destroy the record). A correction goes
+          // through a cancellation invoice (Storno). Only orders WITHOUT an invoice number can be
+          // deleted in the CMS. Scripts that clean up test data use overrideAccess and are not affected.
+          delete: (args) => {
+            if (!args.req.user || !checkRole(['admin'], args.req.user)) return false
+            return { invoiceNumber: { exists: false } }
+          },
+        },
         admin: {
           ...defaultCollection?.admin,
           group: 'Shop',
@@ -412,6 +425,16 @@ export const plugins: Plugin[] = [
             },
           },
           {
+            name: 'invoiceItemsSnapshot',
+            type: 'json',
+            admin: {
+              hidden: true,
+              readOnly: true,
+              description:
+                'Frozen invoice lines. Saved once when the invoice is issued, so moving a booking or changing a price later can never change an invoice that was already issued.',
+            },
+          },
+          {
             name: 'downloadInvoice',
             type: 'ui',
             label: 'Invoice PDF',
@@ -451,6 +474,7 @@ export const plugins: Plugin[] = [
             autoEnrollOnPurchase,
             confirmWorkshopBookings,
             redeemVoucherOnOrderComplete,
+            freezeInvoiceOnIssue,
             sendOrderConfirmationEmail,
             autoCompleteDigitalOrders,
           ],

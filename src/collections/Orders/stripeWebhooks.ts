@@ -1,10 +1,11 @@
 import { releaseSpotsAtomic } from '@/lib/atomicSpots'
 import { completeCartPayment } from '@/lib/cartFulfilment'
 import { addBookingHistory } from '@/lib/bookingHistory'
-import { logActivityEvent } from '@/lib/manageBooking'
 import { fulfilVoucherPurchase } from '@/lib/voucherFulfilment'
 import type { PayloadRequest } from 'payload'
 import type Stripe from 'stripe'
+import { capacityOf } from '@/lib/appointmentCapacity'
+import { completeRefundRequest } from '@/lib/completeRefundRequest'
 
 /**
  * Custom Stripe webhook handlers for the ecommerce plugin.
@@ -123,82 +124,37 @@ export async function handleChargeRefunded({
       )
     }
 
-    for (const rr of pendingRequests) {
-      if (latestRefund && rr.requestedAmount !== latestRefund.amount) continue
+    // Same Stripe refund delivered twice → already handled.
+    if (latestRefund && allRequestsForPI.docs.some((rr) => rr.stripeRefundId === latestRefund.id)) {
+      payload.logger.info(`[stripe:charge_refunded] Refund ${latestRefund.id} already reconciled — duplicate delivery, no-op`)
+      return
+    }
 
-      await payload.update({
-        collection: 'refund-requests',
-        id: rr.id,
-        data: {
-          status: 'completed',
-          completedAt: new Date().toISOString(),
-          stripeRefundId: latestRefund?.id ?? '',
-        },
-        overrideAccess: true,
-      })
-
-      const bookingId = typeof rr.booking === 'object' ? rr.booking.id : rr.booking
-      let booking
-      try {
-        booking = await payload.findByID({
-          collection: 'workshop-bookings',
-          id: bookingId,
-          overrideAccess: true,
-        })
-      } catch {
-        payload.logger.error(
-          `[stripe:charge_refunded] refund-request ${rr.id} points at a missing booking ${bookingId} — skipping seat update`,
-        )
-        continue
-      }
-
-      const seats = [...(booking.seats ?? [])]
-      if (seats[rr.seatIndex]) {
-        seats[rr.seatIndex] = { ...seats[rr.seatIndex], seatStatus: 'refunded' }
-        await payload.update({
-          collection: 'workshop-bookings',
-          id: booking.id,
-          data: { seats },
-          overrideAccess: true,
-        })
-      }
-
-      if (booking.appointmentId) {
-        try {
-          const appointment = await payload.findByID({
-            collection: 'workshop-appointments',
-            id: booking.appointmentId,
-            depth: 1,
-            overrideAccess: true,
-          })
-          const maxCapacity =
-            typeof appointment.workshop === 'object'
-              ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
-              : 12
-          await releaseSpotsAtomic(payload, booking.appointmentId, 1, maxCapacity)
-        } catch (err) {
-          payload.logger.error(
-            `[stripe:charge_refunded] Failed to restore capacity for refund-request ${rr.id}: ${err}`,
-          )
-        }
-      }
-
-      const requestedAmountCents = rr.requestedAmount ?? 0
-      await logActivityEvent(
-        payload,
-        'refund_completed',
-        String(rr.id),
-        `${booking.firstName ?? 'Gast'} ${booking.lastName ?? ''} — ${booking.workshopTitle}, €${(requestedAmountCents / 100).toFixed(2)} Rückerstattung abgeschlossen (Platz ${rr.seatIndex + 1})`,
+    // Which request this refund belongs to:
+    // - no refund list (Stripe API failed) → every pending row, as before;
+    // - one row whose requested amount matches exactly (one seat per Stripe refund);
+    // - otherwise the one row a founder marked "partial" whose amount is above this refund
+    //   (a partial refund is less than requested — used to never close and kept the reminder going).
+    // Nothing fits → left open; a founder closes it with "Als erstattet markieren" in Management → Requests.
+    let matched: { rr: (typeof pendingRequests)[number]; cents: number }[] = []
+    if (!latestRefund) {
+      matched = pendingRequests.map((rr) => ({ rr, cents: rr.requestedAmount ?? 0 }))
+    } else {
+      const amount = latestRefund.amount
+      const exact = pendingRequests.find((rr) => rr.requestedAmount === amount)
+      const partial = pendingRequests.filter((rr) => rr.resolution === 'partial' && (rr.requestedAmount ?? 0) > amount)
+      if (exact) matched = [{ rr: exact, cents: amount }]
+      else if (partial.length === 1) matched = [{ rr: partial[0], cents: amount }]
+    }
+    if (matched.length === 0) {
+      payload.logger.warn(
+        `[stripe:charge_refunded] Refund ${latestRefund?.id} (${latestRefund?.amount} cents) on PI ${paymentIntentId} matches no open refund request — left for the founders to close by hand`,
       )
-      await addBookingHistory(payload, String(booking.id), {
-        type: 'refund_completed',
-        summary: `Platz ${rr.seatIndex + 1}: Erstattung über Stripe abgeschlossen (€${(requestedAmountCents / 100).toFixed(2)})`,
-        by: 'Stripe',
-      })
+    }
 
-      payload.logger.info(
-        `[stripe:charge_refunded] Seat-scoped: reconciled refund-request ${rr.id} (seat ${rr.seatIndex} of booking ${booking.id})`,
-      )
+    for (const { rr, cents } of matched) {
+      await completeRefundRequest(payload, rr, { refundedCents: cents, stripeRefundId: latestRefund?.id, by: 'Stripe', via: 'stripe' })
+      payload.logger.info(`[stripe:charge_refunded] Seat-scoped: reconciled refund-request ${rr.id} (seat ${rr.seatIndex})`)
     }
 
     return
@@ -294,10 +250,7 @@ export async function handleChargeRefunded({
           overrideAccess: true,
         })
 
-        const maxCapacity =
-          typeof appointment.workshop === 'object'
-            ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
-            : 12
+        const maxCapacity = capacityOf(appointment)
 
         await releaseSpotsAtomic(payload, booking.appointmentId, booking.guestCount ?? 1, maxCapacity)
 

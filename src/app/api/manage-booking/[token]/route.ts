@@ -21,7 +21,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   }
 
   const { booking, appointment, magicLink } = resolved
-  const seats = getAllSeatBundles(booking, appointment, new Date())
+  const seats = getAllSeatBundles(booking, appointment, new Date(), magicLink.scope)
 
   return NextResponse.json({
     success: true,

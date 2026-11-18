@@ -17,7 +17,10 @@
 
 /* Nav brand spacing */
 .nav__brand {
-  padding: 1rem 0;
+  padding: 1.25rem 0 1rem;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 /* Utility */
@@ -30,4 +33,115 @@
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+/* ── CMS sidebar = same look as the Management dashboard rail ───────────── */
+:root {
+  --ff-rail: #3a3e3a;
+  --ff-rail-fg: #f4efe2;
+  --ff-gold: #e6be68;
+  --ff-mk-outer: #faf2e0;
+  --ff-mk-inner: #4b4f4a;
+  --ff-mk-f: #faf2e0;
+  --ff-av-outer: #e6be68;
+  --ff-av-inner: #4b4f4a;
+  --ff-av-f: #faf2e0;
+}
+html[data-theme='dark'] {
+  --ff-av-outer: #e6be68;
+  --ff-av-inner: #10110f;
+  --ff-av-f: #faf2e0;
+  --ff-rail: #10110f;
+  --ff-rail-fg: #efeadc;
+  --ff-mk-outer: #e6be68;
+  --ff-mk-inner: #10110f;
+  --ff-mk-f: #faf2e0;
+}
+
+.nav {
+  background: var(--ff-rail);
+  color: var(--ff-rail-fg);
+  /* everything inside the sidebar reads these, so links, group titles and icons follow the rail */
+  --theme-text: var(--ff-rail-fg);
+  --theme-elevation-0: var(--ff-rail);
+  --theme-elevation-50: rgba(255, 255, 255, 0.07);
+  --theme-elevation-100: rgba(255, 255, 255, 0.1);
+  --theme-elevation-150: rgba(255, 255, 255, 0.16);
+  --theme-elevation-400: rgba(244, 239, 226, 0.55);
+  --theme-elevation-500: rgba(244, 239, 226, 0.6);
+  --theme-elevation-800: var(--ff-rail-fg);
+  border-right: 0;
+}
+.nav a,
+.nav button {
+  color: inherit;
+}
+.nav .nav__link:hover,
+.nav a:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+.nav .nav__link-indicator {
+  background: var(--ff-rail-fg);
+}
+
+/* Brand at the top of the sidebar: logo mark, long wordmark underneath */
+.ff-navlogo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  justify-content: center;
+  padding: 8px 12px 24px;
+}
+.ff-navlogo a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  color: var(--ff-rail-fg);
+  text-decoration: none;
+  background: none;
+  box-shadow: none;
+}
+.ff-navlogo-mark {
+  display: block;
+  width: clamp(88px, 15vh, 132px);
+  max-width: 100%;
+  height: auto;
+}
+.ff-mk-outer { fill: var(--ff-mk-outer); }
+.ff-mk-inner { fill: var(--ff-mk-inner); }
+.ff-mk-f { fill: var(--ff-mk-f); }
+.ff-navlogo-word {
+  display: block;
+  width: clamp(150px, 70%, 196px);
+  max-width: 100%;
+  height: auto;
+  fill: var(--ff-rail-fg);
+}
+
+/* Default avatar = the logo mark (light and dark dashboard) */
+.ff-av-mark { display: block; width: 100%; height: 100%; }
+.ff-avm-outer { fill: var(--ff-av-outer); }
+.ff-avm-inner { fill: var(--ff-av-inner); }
+.ff-avm-f { fill: var(--ff-av-f); }
+
+/* Phones / tablets and short screens: smaller logo so the menu items stay in reach */
+@media (max-width: 1024px), (max-height: 720px) {
+  .ff-navlogo { gap: 12px; padding: 4px 12px 14px; }
+  .ff-navlogo a { gap: 12px; }
+  .ff-navlogo-mark { width: 76px; }
+  .ff-navlogo-word { width: 160px; }
+}
+
+/* CMS dashboard shortcut cards: neutral, sidebar grey on hover */
+.ff-sc {
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.ff-sc:hover,
+.ff-sc:focus-visible {
+  background: var(--ff-rail) !important;
+  color: var(--ff-rail-fg) !important;
+  border-color: var(--ff-rail) !important;
 }

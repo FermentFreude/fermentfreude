@@ -1,4 +1,5 @@
 import { adminOnly } from '@/access/adminOnly'
+import { followStandardCapacity, validateStandardCapacity } from '@/hooks/appointmentCapacity'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import type { CollectionConfig } from 'payload'
 
@@ -11,13 +12,14 @@ export const Workshops: CollectionConfig = {
     delete: adminOnly,
   },
   hooks: {
-    afterChange: [autoTranslateCollection],
+    beforeChange: [validateStandardCapacity],
+    afterChange: [autoTranslateCollection, followStandardCapacity],
   },
   admin: {
     useAsTitle: 'title',
     group: 'Workshops',
     defaultColumns: ['title', 'basePrice', 'maxCapacityPerSlot', 'isActive'],
-    description: 'Define workshop metadata. Price and capacity apply to all dates and locations.',
+    description: 'Define workshop metadata. Price and standard capacity apply to all dates and locations. A single date can have its own capacity.',
   },
   fields: [
     {
@@ -63,10 +65,9 @@ export const Workshops: CollectionConfig = {
       required: true,
       defaultValue: 8,
       min: 1,
-      max: 12,
       admin: {
         description:
-          'Maximum number of people per workshop session. Keep this matched to your real room/class size — it controls how many spots show as available on the booking page.',
+          'Standard-Kapazität: wie viele Personen pro Termin dabei sein können. Sie gilt für alle Termine dieses Workshops, die keine eigene Kapazität haben (bei einem einzelnen Termin kann sie unter „Workshop-Termine“ überschrieben werden). Eine Änderung passt die freien Plätze aller kommenden Termine ohne eigene Kapazität automatisch an.',
       },
     },
     {
