@@ -13,7 +13,7 @@ import { OrdersView } from './OrdersView'
 import { ParticipantsView } from './ParticipantsView'
 import { PickupsView } from './PickupsView'
 import { QuotesView } from './QuotesView'
-import { RefundsView } from './RefundsView'
+import { RequestsView } from './RequestsView'
 import { readLang, saveLang, type Lang } from './rosterI18n'
 import { ROSTER_CSS } from './rosterStyles'
 import { ToastProvider, useToast } from './RosterToast'
@@ -38,6 +38,8 @@ type Section =
   | 'quotes'
   | 'refunds'
   | 'emails'
+
+const LINKABLE_SECTIONS = ['dashboard', 'workshops', 'calendar', 'archive', 'participants', 'pickups', 'vouchers', 'orders', 'quotes', 'refunds', 'emails'] as const satisfies readonly Exclude<Section, 'detail'>[]
 
 type GroupId = 'today' | 'workshops' | 'vouchers' | 'shop' | 'requests' | 'emails'
 type WsTab = 'calendar' | 'workshops' | 'participants' | 'archive'
@@ -75,10 +77,10 @@ const NAV_T: Record<
     cms: 'CMS-Dashboard',
     cmsHint: 'Webseiten-Texte, Bilder, Produkte und Workshop-Termine bearbeiten.',
     live: 'Live',
-    groups: { today: 'Dashboard', workshops: 'Workshops', vouchers: 'Gutscheine', shop: 'Shop', requests: 'Rückerstattungen', emails: 'E-Mails' },
+    groups: { today: 'Dashboard', workshops: 'Workshops', vouchers: 'Gutscheine', shop: 'Shop', requests: 'Anfragen', emails: 'E-Mails' },
     tabs: {
       dashboard: 'Übersicht', calendar: 'Kalender', workshops: 'Liste', participants: 'Teilnehmer', archive: 'Archiv',
-      vouchers: 'Gutscheine', orders: 'Bestellungen', pickups: 'Abholung', quotes: 'Angebote', refunds: 'Rückerstattungen',
+      vouchers: 'Gutscheine', orders: 'Bestellungen', pickups: 'Abholung', quotes: 'Angebote', refunds: 'Anfragen',
       emails: 'E-Mail-Texte',
     },
     arr: 'Seiten anordnen',
@@ -100,10 +102,10 @@ const NAV_T: Record<
     cms: 'CMS dashboard',
     cmsHint: 'Edit website texts, images, products and workshop dates.',
     live: 'Live',
-    groups: { today: 'Dashboard', workshops: 'Workshops', vouchers: 'Vouchers', shop: 'Shop', requests: 'Refunds', emails: 'Emails' },
+    groups: { today: 'Dashboard', workshops: 'Workshops', vouchers: 'Vouchers', shop: 'Shop', requests: 'Requests', emails: 'Emails' },
     tabs: {
       dashboard: 'Overview', calendar: 'Calendar', workshops: 'List', participants: 'Participants', archive: 'Archive',
-      vouchers: 'Vouchers', orders: 'Orders', pickups: 'Pickup', quotes: 'Quotes', refunds: 'Refunds',
+      vouchers: 'Vouchers', orders: 'Orders', pickups: 'Pickup', quotes: 'Quotes', refunds: 'Requests',
       emails: 'Email texts',
     },
     arr: 'Arrange pages',
@@ -184,11 +186,11 @@ function RosterShell({ initialData }: { initialData: RosterData }) {
   const t = NAV_T[lang]
 
   useEffect(() => setLang(readLang()), [])
-  // Deep links from the CMS (sidebar, shortcut cards): ?section=dashboard|workshops|participants|vouchers|orders.
+  // Deep links from the CMS (sidebar, shortcut cards): ?section=<any section except the workshop detail page>.
   // Reacts to every change of the address, also when Management is already open.
   const sectionParam = useSearchParams()?.get('section') ?? null
   useEffect(() => {
-    if (sectionParam && ['dashboard', 'workshops', 'calendar', 'participants', 'archive', 'vouchers', 'orders', 'refunds'].includes(sectionParam)) {
+    if (sectionParam && (LINKABLE_SECTIONS as readonly string[]).includes(sectionParam)) {
       setSection(sectionParam as Section)
       setProfileEmail(null)
       setSelectedApptId(null)
@@ -473,7 +475,7 @@ function RosterShell({ initialData }: { initialData: RosterData }) {
           {section === 'vouchers' && <VouchersView vouchers={data.vouchers} onRefresh={refresh} />}
           {section === 'orders' && <OrdersView orders={data.orders} onRefresh={refresh} />}
           {section === 'quotes' && <QuotesView quotes={data.quotes} onRefresh={refresh} />}
-          {section === 'refunds' && <RefundsView refundRequests={data.refundRequests} activityEvents={data.activityEvents} lang={lang} onRefresh={refresh} />}
+          {section === 'refunds' && <RequestsView refundRequests={data.refundRequests} activityEvents={data.activityEvents} lang={lang} onRefresh={refresh} />}
           {section === 'emails' && <EmailTemplatesView lang={lang} />}
         </main>
         <NoteAlerts

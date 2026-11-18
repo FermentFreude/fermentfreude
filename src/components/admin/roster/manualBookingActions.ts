@@ -51,26 +51,3 @@ export async function updateManualPayment(params: {
     return { ok: false, error: e instanceof Error && e.message === 'Unauthorized' ? 'Keine Berechtigung.' : e instanceof Error ? e.message : 'Unbekannter Fehler.' }
   }
 }
-
-export async function createInvoiceForBooking(bookingId: string): Promise<Result> {
-  try {
-    const payload = await getPayload({ config: configPromise })
-    const user = await requireAdminUser(payload)
-    const r = await createInvoice(payload, bookingId, adminDisplayName(user))
-    return { ok: true, message: `Rechnung ${r.invoiceNumber || 'erstellt'}`, warnings: [] }
-  } catch (e) {
-    return { ok: false, error: e instanceof Error && e.message === 'Unauthorized' ? 'Keine Berechtigung.' : e instanceof Error ? e.message : 'Unbekannter Fehler.' }
-  }
-}
-
-export async function sendConfirmationForBooking(bookingId: string): Promise<Result> {
-  try {
-    const payload = await getPayload({ config: configPromise })
-    const user = await requireAdminUser(payload)
-    const r = await sendConfirmation(payload, bookingId, adminDisplayName(user))
-    if (r.sent) return { ok: true, message: 'Bestätigung gesendet', warnings: [] }
-    return { ok: false, error: r.blocked ? 'Nicht gesendet: Testumgebung, diese Adresse ist nicht freigegeben.' : (r.reason ?? 'Konnte nicht gesendet werden.') }
-  } catch (e) {
-    return { ok: false, error: e instanceof Error && e.message === 'Unauthorized' ? 'Keine Berechtigung.' : e instanceof Error ? e.message : 'Unbekannter Fehler.' }
-  }
-}

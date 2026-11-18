@@ -3,7 +3,6 @@
 import React, { useState, useTransition } from 'react'
 
 import { createManualOrder, searchProducts } from './actions'
-import { BRAND } from './rosterTheme'
 
 interface ProductResult {
   id: string

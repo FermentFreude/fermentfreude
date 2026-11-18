@@ -8,14 +8,14 @@ import type { RefundRequestRow } from './types'
 const T = {
   de: {
     none: 'Keine offenen Rückerstattungen.',
-    open: 'Rückerstattungen öffnen →',
+    open: 'Anfragen öffnen →',
     status: { requested: 'Angefragt', acknowledged: 'Gestartet', processing: 'Gestartet' } as Record<string, string>,
     days: (n: number) => (n <= 0 ? 'Heute angefragt' : `Seit ${n} ${n === 1 ? 'Tag' : 'Tagen'} offen`),
     by: (n: string) => `Von ${n}`,
   },
   en: {
     none: 'No open refunds.',
-    open: 'Open refunds →',
+    open: 'Open requests →',
     status: { requested: 'Requested', acknowledged: 'Started', processing: 'Started' } as Record<string, string>,
     days: (n: number) => (n <= 0 ? 'Requested today' : `Open for ${n} day${n === 1 ? '' : 's'}`),
     by: (n: string) => `By ${n}`,

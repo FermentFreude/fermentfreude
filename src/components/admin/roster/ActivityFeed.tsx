@@ -16,6 +16,7 @@ export const TYPE_LABELS: Record<Lang, Record<string, string>> = {
     refund_requested: 'Rückerstattung angefragt',
     refund_completed: 'Rückerstattung abgeschlossen',
     appointment_cancelled_by_organiser: 'Termin abgesagt',
+    founder_exception: 'Ausnahme',
   },
   en: {
     order_placed: 'Order',
@@ -26,6 +27,7 @@ export const TYPE_LABELS: Record<Lang, Record<string, string>> = {
     refund_requested: 'Refund requested',
     refund_completed: 'Refund completed',
     appointment_cancelled_by_organiser: 'Date cancelled',
+    founder_exception: 'Exception',
   },
 }
 
@@ -75,7 +77,11 @@ export function ActivityFeed({ activityEvents, lang, onRefresh }: { activityEven
           >
             <span className="ff-nmain">
               <b>{e.summary}</b>
-              <small>{TYPE_LABELS[lang][e.type] ?? e.type} · {e.createdAt}</small>
+              <small>
+                {TYPE_LABELS[lang][e.type] ?? e.type}
+                {e.actorName ? ` · ${lang === 'de' ? 'von' : 'by'} ${e.actorName}` : ''}
+                {e.reason ? ` · ${lang === 'de' ? 'Grund' : 'Reason'}: ${e.reason}` : ''} · {e.createdAt}
+              </small>
             </span>
           </button>
         ))

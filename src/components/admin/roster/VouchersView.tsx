@@ -4,7 +4,7 @@ import React, { useState, useTransition } from 'react'
 
 import { createVoucher, deleteVoucher } from './actions'
 import type { VoucherRow } from './types'
-import { BRAND, PageHeader, StatCard } from './rosterTheme'
+import { PageHeader, StatCard } from './rosterTheme'
 
 interface Props {
   vouchers: VoucherRow[]

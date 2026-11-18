@@ -6224,6 +6224,10 @@ export interface RefundRequest {
    * Filled once the charge.refunded webhook reconciles this row.
    */
   stripeRefundId?: string | null;
+  /**
+   * What actually went back to the customer — can be less than the requested amount (partial refund). Filled when the refund is closed (Stripe webhook or "Mark as refunded" in Management → Requests). The Stornorechnung uses this amount.
+   */
+  refundedAmount?: number | null;
   requestedAt?: string | null;
   acknowledgedAt?: string | null;
   /**
@@ -6235,8 +6239,51 @@ export interface RefundRequest {
    */
   resolutionNote?: string | null;
   handledByName?: string | null;
+  /**
+   * Never automatic: only made when a founder presses "Create Stornorechnung" in Management → Refunds.
+   */
+  cancellationInvoice?: (string | null) | CancellationInvoice;
   completedAt?: string | null;
   notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Stornorechnungen — stornieren die referenzierte Bestellung vollständig.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cancellation-invoices".
+ */
+export interface CancellationInvoice {
+  id: string;
+  /**
+   * Auto-generated, erbt die Serie der Originalrechnung (MAN/WEB).
+   */
+  cancellationNumber?: string | null;
+  issueDate?: string | null;
+  order: string | Order;
+  originalInvoiceNumber: string;
+  originalSeries: 'MAN' | 'WEB';
+  originalIssueDate: string;
+  reason?: string | null;
+  clientName: string;
+  clientAddress?: string | null;
+  items: {
+    title: string;
+    quantity: number;
+    unitPriceCents: number;
+    id?: string | null;
+  }[];
+  /**
+   * Positive Cent-Summe — wird auf der PDF negativ dargestellt.
+   */
+  totalCents: number;
+  /**
+   * Rein informativ — die tatsächliche Rückerstattung erfolgt manuell im Stripe-Dashboard bzw. per Überweisung.
+   */
+  refundStatus: 'offen' | 'erstattet' | 'verrechnet';
+  refundDate?: string | null;
+  refundMethodOrReference?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -6289,45 +6336,6 @@ export interface Quote {
    * Standardmäßig "individuelle Vereinbarung" wenn leer.
    */
   cancellationTermsText?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Stornorechnungen — stornieren die referenzierte Bestellung vollständig.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "cancellation-invoices".
- */
-export interface CancellationInvoice {
-  id: string;
-  /**
-   * Auto-generated, erbt die Serie der Originalrechnung (MAN/WEB).
-   */
-  cancellationNumber?: string | null;
-  issueDate?: string | null;
-  order: string | Order;
-  originalInvoiceNumber: string;
-  originalSeries: 'MAN' | 'WEB';
-  originalIssueDate: string;
-  reason?: string | null;
-  clientName: string;
-  clientAddress?: string | null;
-  items: {
-    title: string;
-    quantity: number;
-    unitPriceCents: number;
-    id?: string | null;
-  }[];
-  /**
-   * Positive Cent-Summe — wird auf der PDF negativ dargestellt.
-   */
-  totalCents: number;
-  /**
-   * Rein informativ — die tatsächliche Rückerstattung erfolgt manuell im Stripe-Dashboard bzw. per Überweisung.
-   */
-  refundStatus: 'offen' | 'erstattet' | 'verrechnet';
-  refundDate?: string | null;
-  refundMethodOrReference?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -6471,7 +6479,8 @@ export interface ActivityEvent {
     | 'booking_cancelled_no_refund'
     | 'refund_requested'
     | 'refund_completed'
-    | 'appointment_cancelled_by_organiser';
+    | 'appointment_cancelled_by_organiser'
+    | 'founder_exception';
   /**
    * The order / booking / voucher / refund-request id this event is about.
    */
@@ -6480,6 +6489,14 @@ export interface ActivityEvent {
    * Human-readable one-liner, e.g. "Thomas Huber — Kombucha 12.9., €99 refund requested".
    */
   summary: string;
+  /**
+   * The reason the customer chose in their booking link (cancellations, refunds, rebookings).
+   */
+  reason?: string | null;
+  /**
+   * Empty = the customer did it through their link. Otherwise the founder who made the exception.
+   */
+  actorName?: string | null;
   /**
    * Admin users who have seen this event — drives the unread-count badge on the Roster nav item.
    */
@@ -9406,11 +9423,13 @@ export interface RefundRequestsSelect<T extends boolean = true> {
   initiatedBy?: T;
   stripePaymentIntentId?: T;
   stripeRefundId?: T;
+  refundedAmount?: T;
   requestedAt?: T;
   acknowledgedAt?: T;
   resolution?: T;
   resolutionNote?: T;
   handledByName?: T;
+  cancellationInvoice?: T;
   completedAt?: T;
   notes?: T;
   updatedAt?: T;
@@ -9424,6 +9443,8 @@ export interface ActivityEventsSelect<T extends boolean = true> {
   type?: T;
   refId?: T;
   summary?: T;
+  reason?: T;
+  actorName?: T;
   readBy?: T;
   updatedAt?: T;
   createdAt?: T;

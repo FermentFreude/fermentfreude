@@ -4,11 +4,6 @@ import React from 'react'
 
 import { AvatarMark } from '../BrandLockup'
 
-/** The first letter of the name (an email address works too). */
-export function initialsOf(name: string) {
-  return (name.trim().match(/[\p{L}\p{N}]/u)?.[0] ?? '?').toUpperCase()
-}
-
 type AvatarUser = { name?: string | null; email?: string | null; avatar?: unknown } | null | undefined
 
 export function avatarUrl(avatar: unknown): string | null {
@@ -22,16 +17,16 @@ export function avatarUrl(avatar: unknown): string | null {
 /** Profile photo, or the Fermentfreude logo mark as the default avatar. */
 export function UserAvatar({
   user,
-  name,
   url,
   size = 32,
 }: {
   user?: AvatarUser
+  /** Kept for callers; the avatar shows a photo or the logo mark, never initials. */
   name?: string
   url?: string | null
   size?: number
 }) {
-    const src = url ?? avatarUrl(user?.avatar)
+  const src = url ?? avatarUrl(user?.avatar)
   return (
     <span
       className="ff-av"

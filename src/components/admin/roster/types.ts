@@ -147,6 +147,8 @@ export type RefundRequestRow = {
   workshopDate: string
   seatIndex: number
   amount: number // cents
+  /** What really went back (cents) once closed — can be less than `amount` (partial refund). */
+  refundedAmount: number | null
   status: 'requested' | 'acknowledged' | 'processing' | 'completed' | 'failed' | 'resolved'
   stripePaymentIntentId: string
   requestedAt: string
@@ -159,6 +161,11 @@ export type RefundRequestRow = {
   /** Date it was handled (de-DE) and the days since — drives the "Stripe has not confirmed" reminder. */
   handledAt: string
   daysSinceHandled: number
+  /** The Stornorechnung a founder made for this request ('' = none yet). Never made automatically. */
+  stornoId: string
+  stornoNumber: string
+  /** The customer's reason from their booking link ('' if none). */
+  reason: string
 }
 
 export type OrderRow = {
@@ -192,6 +199,10 @@ export type ActivityEventRow = {
   summary: string
   createdAt: string
   isUnread: boolean
+  /** The customer's reason from their booking link ('' if none). */
+  reason: string
+  /** Founder who made an exception; '' = the customer did it. */
+  actorName: string
 }
 
 import type { AttentionNoteRow, TeamMember } from './attentionTypes'

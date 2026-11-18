@@ -141,7 +141,7 @@ export const WELCOME: Record<Lang, Dict> = {
       }),
       refundStale: (p) => ({
         title: `Refund for ${p.name} not confirmed yet`,
-        detail: `Started ${p.days} days ago, but Stripe has not confirmed the money going back. Check it in Stripe.`,
+        detail: `Started ${p.days} days ago, but Stripe has not confirmed the money going back. Check it in Stripe — if it went back another way or only in part, close it with “Mark as refunded” in Requests.`,
       }),
     },
     lang: 'Language',
@@ -204,7 +204,7 @@ export const WELCOME: Record<Lang, Dict> = {
       }),
       refundStale: (p) => ({
         title: `Rückerstattung für ${p.name} noch nicht bestätigt`,
-        detail: `Vor ${p.days} Tagen gestartet, aber Stripe hat die Rückzahlung noch nicht bestätigt. Bitte in Stripe prüfen.`,
+        detail: `Vor ${p.days} Tagen gestartet, aber Stripe hat die Rückzahlung noch nicht bestätigt. Bitte in Stripe prüfen — ging sie anders oder nur teilweise zurück, in Anfragen mit „Als erstattet markieren“ abschließen.`,
       }),
     },
     lang: 'Sprache',

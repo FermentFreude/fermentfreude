@@ -12,12 +12,12 @@ import { WorkshopCard } from './WorkshopCard'
 
 const X = {
   de: {
-    refT: 'Rückerstattungen', refS: 'Kundinnen und Kunden, die ihr Geld zurückwollen. Öffnen, vermerken, dass ihr die Rückzahlung gestartet habt, und eine Notiz dazu schreiben.',
+    refT: 'Anfragen', refS: 'Was Kundinnen und Kunden über ihren Buchungslink gemacht haben. Offene Rückerstattungen warten auf euch: öffnen, entscheiden, eine Notiz dazu schreiben.',
     latT: 'Letzte Käufe', latS: 'Die 10 neuesten Buchungen über die Webseite. Anklicken, um Zahlung, Platz und Kontakt zu prüfen oder zu ändern.', latNone: 'Noch keine Käufe über die Webseite.',
     seats: (n: number) => `${n} ${n === 1 ? 'Platz' : 'Plätze'}`, open: 'Workshop öffnen', next: 'Nächste Workshops', nextS: 'Die kommenden Termine mit freien Plätzen. Einen Termin öffnen, um Teilnehmende zu sehen, Buchungen zu ändern oder umzubuchen.', all: 'Alle Termine',
   },
   en: {
-    refT: 'Refunds', refS: 'Customers asking for their money back. Open a request, record that you started the refund and add a note.',
+    refT: 'Requests', refS: 'What customers did through their booking link. Open refunds wait for you: open one, decide, add a note.',
     latT: 'Latest purchases', latS: 'The 10 newest bookings from the website. Click one to check or change payment, seat and contact details.', latNone: 'No website purchases yet.',
     seats: (n: number) => `${n} ${n === 1 ? 'seat' : 'seats'}`, open: 'Open workshop', next: 'Next workshops', nextS: 'Upcoming dates with free seats. Open one to see participants, edit bookings or move people to another date.', all: 'All dates',
   },

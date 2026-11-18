@@ -131,6 +131,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         'booking_rebooked',
         String(booking.id),
         `${booking.firstName ?? 'Gast'} ${booking.lastName ?? ''} — von ${booking.workshopTitle} (${booking.date}) auf ${resumeBooking.date} umgebucht (nach unterbrochener Anfrage fortgesetzt)`.trim(),
+        { reason: cancelReasonLabel(reason) },
       )
       if (booking.email) {
         await sendTemplateEmail({
@@ -323,6 +324,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     'booking_rebooked',
     String(booking.id),
     `${booking.firstName ?? 'Gast'} ${booking.lastName ?? ''} — von ${booking.workshopTitle} (${booking.date}) auf ${dateDisplay} umgebucht`.trim(),
+    { reason: cancelReasonLabel(reason) },
   )
 
   const manageUrl = `${getServerSideURL().replace(/\/$/, '')}/manage-booking/${newToken}`

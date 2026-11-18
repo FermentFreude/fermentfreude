@@ -19,7 +19,7 @@ import {
 } from './attentionActions'
 import type { AttentionNoteRow, AttentionSeverity, NoteMessage, TeamMember } from './attentionTypes'
 import { Accordion } from './Accordion'
-import { ActivityFeed } from './ActivityView'
+import { ActivityFeed } from './ActivityFeed'
 import { RefundSummary, isOpenRefund } from './RefundSummary'
 import { detectAttentionItems } from './autoAttention'
 import { LOCALE, WELCOME, type Lang } from './rosterI18n'
@@ -34,7 +34,7 @@ const NT = {
     title: 'Benachrichtigungen',
     sub: 'Hier landet, was eure Aufmerksamkeit braucht: Notizen, die ihr euch gegenseitig schreibt, und Hinweise des Systems. Notiz hinzufügen, jemanden fragen, als erledigt markieren.',
     add: 'Benachrichtigung hinzufügen',
-    fMe: 'Für mich', fAll: 'Alle offenen', fBy: 'Von mir gefragt', fSys: 'System', fRefunds: 'Rückerstattungen', fActivity: 'Aktivität', openRefunds: 'Rückerstattungen öffnen', fDone: 'Erledigt', fTrash: 'Gelöscht', restore: 'Wiederherstellen', purge: 'Endgültig löschen', purgeSure: 'Endgültig löschen? Das geht nicht rückgängig.', restored: 'Wiederhergestellt.', trashEmpty: 'Hier ist nichts gelöscht.', trashHint: 'Gelöschte Einträge liegen hier und können wiederhergestellt werden.', deletedBy: (n: string) => `Gelöscht von ${n}`, closedSys: 'System-Hinweis geschlossen', showAgain: 'Wieder anzeigen',
+    fMe: 'Für mich', fAll: 'Alle offenen', fBy: 'Von mir gefragt', fSys: 'System', fRefunds: 'Anfragen', fActivity: 'Aktivität', openRefunds: 'Anfragen öffnen', fDone: 'Erledigt', fTrash: 'Gelöscht', restore: 'Wiederherstellen', purge: 'Endgültig löschen', purgeSure: 'Endgültig löschen? Das geht nicht rückgängig.', restored: 'Wiederhergestellt.', trashEmpty: 'Hier ist nichts gelöscht.', trashHint: 'Gelöschte Einträge liegen hier und können wiederhergestellt werden.', deletedBy: (n: string) => `Gelöscht von ${n}`, closedSys: 'System-Hinweis geschlossen', showAgain: 'Wieder anzeigen',
     isNew: 'Neu', waitFor: (n: string) => `Wartet auf ${n}`, waitAll: 'Wartet auf alle', everyone: 'Alle', system: 'System',
     ask: 'Fragen …', known: 'Bekannt', openWs: 'Workshop öffnen',
     replyPh: 'Antwort schreiben. Einen Screenshot kannst du mit Strg+V oder Cmd+V einfügen.',
@@ -65,7 +65,7 @@ const NT = {
     title: 'Notifications',
     sub: 'Everything that needs your attention: notes you write to each other and hints from the system. Add a note, ask someone, mark it as done.',
     add: 'Add notification',
-    fMe: 'For me', fAll: 'All open', fBy: 'Asked by me', fSys: 'System', fRefunds: 'Refunds', fActivity: 'Activity', openRefunds: 'Open refunds', fDone: 'Done', fTrash: 'Deleted', restore: 'Restore', purge: 'Delete forever', purgeSure: 'Delete forever? This cannot be undone.', restored: 'Restored.', trashEmpty: 'Nothing deleted.', trashHint: 'Deleted entries are kept here and can be restored.', deletedBy: (n: string) => `Deleted by ${n}`, closedSys: 'System item closed', showAgain: 'Show again',
+    fMe: 'For me', fAll: 'All open', fBy: 'Asked by me', fSys: 'System', fRefunds: 'Requests', fActivity: 'Activity', openRefunds: 'Open requests', fDone: 'Done', fTrash: 'Deleted', restore: 'Restore', purge: 'Delete forever', purgeSure: 'Delete forever? This cannot be undone.', restored: 'Restored.', trashEmpty: 'Nothing deleted.', trashHint: 'Deleted entries are kept here and can be restored.', deletedBy: (n: string) => `Deleted by ${n}`, closedSys: 'System item closed', showAgain: 'Show again',
     isNew: 'New', waitFor: (n: string) => `Waiting for ${n}`, waitAll: 'Waiting for everyone', everyone: 'Everyone', system: 'System',
     ask: 'Ask…', known: 'Known', openWs: 'Open workshop',
     replyPh: 'Write a reply. Paste a screenshot with Ctrl+V or Cmd+V.',

@@ -5,7 +5,6 @@ import React, { useState, useTransition } from 'react'
 import { createManualWorkshopBooking } from './actions'
 import { CHANNELS, EMPTY_PAYMENT, MP, PaymentFields, toPaymentInput, validatePayment, type PaymentForm } from './ManualPayment'
 import type { Lang } from './rosterI18n'
-import { BRAND } from './rosterTheme'
 
 const inputStyle: React.CSSProperties = {
   width: '100%',

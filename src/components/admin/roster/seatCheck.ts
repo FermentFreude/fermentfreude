@@ -10,7 +10,3 @@ export function seatMismatch(a: AppointmentRow): { shown: number; expected: numb
   const expected = a.capacity - a.totalBooked - (a.pendingSeats ?? 0)
   return a.counterFree === expected ? null : { shown: a.counterFree, expected }
 }
-
-export function seatMismatchText(m: { shown: number; expected: number }): string {
-  return `Die Buchungsseite zeigt ${m.shown} freie Plätze, laut Buchungen sollten es ${m.expected} sein.`
-}

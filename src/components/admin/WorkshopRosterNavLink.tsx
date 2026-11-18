@@ -101,5 +101,5 @@ const SUB_LINKS = [
   { view: 'participants', label: 'Participants' },
   { view: 'vouchers', label: 'Vouchers' },
   { view: 'orders', label: 'Shop' },
-  { view: 'refunds', label: 'Refunds' },
+  { view: 'refunds', label: 'Requests' },
 ]
