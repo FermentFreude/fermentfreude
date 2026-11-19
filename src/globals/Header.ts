@@ -144,7 +144,7 @@ export const Header: GlobalConfig = {
           ],
         },
       ],
-      maxRows: 6,
+      maxRows: 7,
     },
   ],
 }

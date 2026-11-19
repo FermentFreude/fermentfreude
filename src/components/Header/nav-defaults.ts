@@ -50,6 +50,7 @@ export const defaultNavItemsEn: DefaultNavItem[] = [
   },
   { label: 'Voucher', url: '/workshops/voucher' },
   { label: 'Shop', url: '/shop' },
+  { label: 'Recipes', url: '/rezepte' },
   { label: 'For Chefs', url: '/gastronomy' },
   {
     label: 'About Us',
@@ -94,6 +95,7 @@ export const defaultNavItemsDe: DefaultNavItem[] = [
   },
   { label: 'Gutschein', url: '/workshops/voucher' },
   { label: 'Shop', url: '/shop' },
+  { label: 'Rezepte', url: '/rezepte' },
   { label: 'Für Gastronomen', url: '/gastronomy' },
   {
     label: 'Über uns',

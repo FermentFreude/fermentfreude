@@ -33,6 +33,7 @@ import { OnlineCourses } from '@/collections/OnlineCourses'
 import { Pages } from '@/collections/Pages'
 import { Posts } from '@/collections/Posts'
 import { Quotes } from '@/collections/Quotes'
+import { Recipes } from '@/collections/Recipes'
 import { RefundRequests } from '@/collections/RefundRequests'
 import { ReturnRequests } from '@/collections/ReturnRequests'
 import { Reviews } from '@/collections/Reviews'
@@ -42,6 +43,7 @@ import { WorkshopAppointments } from '@/collections/WorkshopAppointments'
 import { WorkshopBookings } from '@/collections/WorkshopBookings'
 import { WorkshopLocations } from '@/collections/WorkshopLocations'
 import { Workshops } from '@/collections/Workshops'
+import { RecipesPageGlobal } from '@/globals/RecipesPage'
 import { BusinessInfoGlobal } from '@/globals/BusinessInfo'
 import { InvoiceCounterGlobal } from '@/globals/InvoiceCounter'
 import { Footer } from '@/globals/Footer'
@@ -129,6 +131,10 @@ export default buildConfig({
           Component: '/components/admin/AnalyticsView#AnalyticsView',
           path: '/analytics',
         },
+        recipeImport: {
+          Component: '/components/admin/RecipeImportView#RecipeImportView',
+          path: '/rezepte-import',
+        },
       },
     },
     livePreview: {
@@ -178,6 +184,7 @@ export default buildConfig({
     Pages,
     Media,
     Posts,
+    Recipes,
     Categories,
     Vouchers,
     Quotes,
@@ -261,6 +268,7 @@ export default buildConfig({
     WorkshopCardsGlobal,
     ProductDetailLabelsGlobal,
     ProductPickupSettingsGlobal,
+    RecipesPageGlobal,
   ],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',

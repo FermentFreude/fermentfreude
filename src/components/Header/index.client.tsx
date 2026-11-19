@@ -218,7 +218,7 @@ export function HeaderClient({ header, locale, navWorkshops = [] }: Props) {
             {/* Desktop Nav — centered */}
             <ul
               ref={navLinksRef}
-              className="hidden lg:flex items-center justify-center gap-8 xl:gap-10"
+              className="hidden lg:flex items-center justify-center gap-5 whitespace-nowrap xl:gap-8 2xl:gap-10"
               onMouseLeave={() => setHoveredIndex(null)}
             >
               {navItems.map((item, index) => {

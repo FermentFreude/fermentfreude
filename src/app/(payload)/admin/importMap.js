@@ -22,6 +22,7 @@ import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c08
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
+import { RecipeImportLink as RecipeImportLink_e2c2fa27a6a985ffad988115c0fbfd1a } from '../../../components/admin/RecipeImportLink'
 import { VoucherDownloadButton as VoucherDownloadButton_6076d14b00ea639b658811a95ae4eac3 } from '@/components/admin/VoucherDownloadButton'
 import { VariantOptionsSelector as VariantOptionsSelector_b91672ccd6e8b071c11142ab941fedfb } from '@payloadcms/plugin-ecommerce/rsc'
 import { PriceCell as PriceCell_e27bf7b8cc50640dcdd584767b8eac3c } from '@payloadcms/plugin-ecommerce/client'
@@ -38,6 +39,7 @@ import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc056
 import { WorkshopRosterView as WorkshopRosterView_b3728385e2666ef74641233e5f8bae70 } from '../../../components/admin/WorkshopRosterView'
 import { BacklogView as BacklogView_dd5410193a81ec05f402c2c0de35a116 } from '../../../components/admin/BacklogView'
 import { AnalyticsView as AnalyticsView_e3b35b44f6b14d102431def2313ebb66 } from '../../../components/admin/AnalyticsView'
+import { RecipeImportView as RecipeImportView_4d5241ca1bc6eed708f25f610e497e70 } from '../../../components/admin/RecipeImportView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -66,6 +68,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaDescriptionComponent": MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
+  "/components/admin/RecipeImportLink#RecipeImportLink": RecipeImportLink_e2c2fa27a6a985ffad988115c0fbfd1a,
   "@/components/admin/VoucherDownloadButton#VoucherDownloadButton": VoucherDownloadButton_6076d14b00ea639b658811a95ae4eac3,
   "@payloadcms/plugin-ecommerce/rsc#VariantOptionsSelector": VariantOptionsSelector_b91672ccd6e8b071c11142ab941fedfb,
   "@payloadcms/plugin-ecommerce/client#PriceCell": PriceCell_e27bf7b8cc50640dcdd584767b8eac3c,
@@ -82,5 +85,6 @@ export const importMap = {
   "/components/admin/WorkshopRosterView#WorkshopRosterView": WorkshopRosterView_b3728385e2666ef74641233e5f8bae70,
   "/components/admin/BacklogView#BacklogView": BacklogView_dd5410193a81ec05f402c2c0de35a116,
   "/components/admin/AnalyticsView#AnalyticsView": AnalyticsView_e3b35b44f6b14d102431def2313ebb66,
+  "/components/admin/RecipeImportView#RecipeImportView": RecipeImportView_4d5241ca1bc6eed708f25f610e497e70,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

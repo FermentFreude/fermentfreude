@@ -67,6 +67,10 @@ const scripts: Record<string, { name: string; file: string }> = {
     name: 'Kombucha phases block (WorkshopPhases)',
     file: 'seed-kombucha-phases.ts',
   },
+  recipes: {
+    name: 'Sample recipes for /rezepte (staging only, not in seed-all)',
+    file: 'seed-recipes.ts',
+  },
   'feld-ins-glas-posts': {
     name: 'Vom Feld ins Glas Tipps articles (Posts)',
     file: 'seed-feld-ins-glas-posts.ts',

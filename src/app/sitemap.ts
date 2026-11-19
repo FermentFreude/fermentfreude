@@ -2,6 +2,7 @@ import { getServerSideURL } from '@/utilities/getURL'
 import configPromise from '@payload-config'
 import type { MetadataRoute } from 'next'
 import { getPayload } from 'payload'
+import { RECIPE_CATEGORIES } from '@/collections/Recipes/categories'
 
 /* ═══════════════════════════════════════════════════════════════
  *  /sitemap.xml — dynamically generated from Payload CMS data
@@ -76,6 +77,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
+    {
+      url: `${baseUrl}/rezepte`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    // recipe category pages: /rezepte/fermentieren · /einlegen · /tempeh · /kombucha
+    ...RECIPE_CATEGORIES.map((c) => ({
+      url: `${baseUrl}/rezepte/${c.value}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    })),
     {
       url: `${baseUrl}/impressum`,
       lastModified: new Date(),
@@ -159,5 +173,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Payload not available during static build — skip
   }
 
-  return [...staticPages, ...cmsPages, ...productPages]
+  // ─── Recipe pages ──────────────────────────────────────────
+  let recipePages: MetadataRoute.Sitemap = []
+  try {
+    const recipesResult = await payload.find({
+      collection: 'recipes',
+      where: { _status: { equals: 'published' } },
+      depth: 0,
+      limit: 1000,
+      overrideAccess: true,
+      select: { slug: true, updatedAt: true },
+    })
+
+    recipePages = recipesResult.docs
+      .filter((r) => r.slug)
+      .map((r) => ({
+        url: `${baseUrl}/rezepte/${r.slug}`,
+        lastModified: r.updatedAt ? new Date(r.updatedAt as string) : new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+      }))
+  } catch {
+    // Payload not available during static build — skip
+  }
+
+  return [...staticPages, ...cmsPages, ...productPages, ...recipePages]
 }
