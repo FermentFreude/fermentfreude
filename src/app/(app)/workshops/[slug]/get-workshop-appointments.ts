@@ -100,7 +100,16 @@ export async function getWorkshopAppointments(workshopSlug: string): Promise<Wor
       const endTime = endDate.toLocaleTimeString('de-DE', timeOpts)
       const timeDisplay = `${startTime} – ${endTime}`
 
+      // Location is populated at depth 1; display only (not used by booking logic)
+      const loc =
+        typeof appointment.location === 'object' && appointment.location !== null
+          ? appointment.location
+          : null
+
       return {
+        dateTime: String(appointment.dateTime),
+        locationName: loc?.name ?? null,
+        locationAddress: loc?.address ?? null,
         id: appointment.id,
         date: dateDisplay,
         time: timeDisplay,

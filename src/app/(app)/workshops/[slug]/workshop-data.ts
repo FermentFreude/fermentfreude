@@ -13,6 +13,9 @@ export interface WorkshopDate {
   spotsLeft: number
   appointmentId?: string // NEW: From WorkshopAppointments._id
   availableSpots?: number // NEW: From WorkshopAppointments.availableSpots
+  dateTime?: string // ISO start — for formatting the date in the site language
+  locationName?: string | null // Display only — from WorkshopAppointments.location
+  locationAddress?: string | null
 }
 
 export interface ScheduleStep {

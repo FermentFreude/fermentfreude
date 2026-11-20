@@ -7,11 +7,12 @@ import { Price } from '@/components/Price'
 import { ProductItem } from '@/components/ProductItem'
 import { AddressItem } from '@/components/addresses/AddressItem'
 import { Button } from '@/components/ui/button'
+import { googleCalendarUrl } from '@/lib/googleCalendarUrl'
 import { formatDateTime } from '@/utilities/formatDateTime'
 import { getLocale } from '@/utilities/getLocale'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import configPromise from '@payload-config'
-import { ChevronLeftIcon } from 'lucide-react'
+import { CalendarPlusIcon, ChevronLeftIcon } from 'lucide-react'
 import { headers as getHeaders } from 'next/headers.js'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -124,6 +125,70 @@ export default async function Order({ params, searchParams }: PageProps) {
     return !isDigital && !isWorkshop
   })
 
+  // Workshop bookings for this order, with the location of each booked date
+  // (display only — same lookup as the ticket page). Access to the order was
+  // already checked above, so reading its bookings server-side is safe.
+  type BookingSummary = {
+    id: string
+    title: string
+    date: string
+    time: string
+    guests: number
+    locationName: string
+    locationAddress: string
+    start: string
+  }
+  const bookingSummaries: BookingSummary[] = []
+  if (!requiresShipping) {
+    try {
+      const { docs: bookings } = await payload.find({
+        collection: 'workshop-bookings',
+        where: { orderId: { equals: order.id } },
+        limit: 20,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const locationByAppointment = new Map<string, { name: string; address: string }>()
+      const startByAppointment = new Map<string, string>()
+      for (const booking of bookings) {
+        const appointmentId = (booking as { appointmentId?: string | null }).appointmentId
+        if (appointmentId && !locationByAppointment.has(appointmentId)) {
+          try {
+            const appointment = await payload.findByID({
+              collection: 'workshop-appointments',
+              id: appointmentId,
+              locale,
+              depth: 1,
+              overrideAccess: true,
+            })
+            const loc = (appointment as { location?: unknown }).location
+            if (typeof loc === 'object' && loc !== null) {
+              const l = loc as { name?: string; address?: string }
+              if (l.name) locationByAppointment.set(appointmentId, { name: l.name, address: l.address ?? '' })
+            }
+            const dt = (appointment as { dateTime?: unknown }).dateTime
+            if (typeof dt === 'string') startByAppointment.set(appointmentId, dt)
+          } catch {
+            // appointment gone — show the booking without a location
+          }
+        }
+        const loc = locationByAppointment.get(appointmentId ?? '')
+        bookingSummaries.push({
+          id: booking.id,
+          title: booking.workshopTitle ?? 'Workshop',
+          date: booking.date ?? '',
+          time: booking.time ?? '',
+          guests: typeof booking.guestCount === 'number' ? booking.guestCount : 1,
+          locationName: loc?.name ?? '',
+          locationAddress: loc?.address ?? '',
+          start: startByAppointment.get(appointmentId ?? '') ?? '',
+        })
+      }
+    } catch (error) {
+      console.error('Failed to load workshop bookings for order', error)
+    }
+  }
+
   // Map raw status → user-facing label.
   // For digital/workshop orders, "completed" reads better as "Confirmed".
   let statusLabel: string | undefined
@@ -215,6 +280,74 @@ export default async function Order({ params, searchParams }: PageProps) {
                       quantity={item.quantity}
                       variant={variant}
                     />
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        )}
+
+        {bookingSummaries.length > 0 && (
+          <div>
+            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">
+              {t.bookingSummaryTitle}
+            </h2>
+            <ul className="flex flex-col gap-4">
+              {bookingSummaries.map((b) => {
+                const fullLocation = [b.locationName, b.locationAddress].filter(Boolean).join(', ')
+                const googleHref = b.start
+                  ? googleCalendarUrl({
+                      title: `${b.title} – Fermentfreude`,
+                      start: b.start,
+                      location: fullLocation || undefined,
+                    })
+                  : null
+                return (
+                  <li key={b.id} className="rounded-lg border p-4">
+                    <p className="font-display font-bold text-base mb-3!">{b.title}</p>
+                    <dl className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+                      <dt className="font-mono uppercase text-primary/50 text-xs pt-0.5">{t.labelDate}</dt>
+                      <dd>{b.date}</dd>
+                      <dt className="font-mono uppercase text-primary/50 text-xs pt-0.5">{t.labelTime}</dt>
+                      <dd>{b.time}</dd>
+                      <dt className="font-mono uppercase text-primary/50 text-xs pt-0.5">{t.labelGuests}</dt>
+                      <dd>{b.guests}</dd>
+                      {fullLocation && (
+                        <>
+                          <dt className="font-mono uppercase text-primary/50 text-xs pt-0.5">{t.labelLocation}</dt>
+                          <dd>
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullLocation)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline underline-offset-4 decoration-primary/30 hover:decoration-primary"
+                            >
+                              <span className="font-semibold">{b.locationName}</span>
+                              {b.locationAddress && <span className="block text-primary/70">{b.locationAddress}</span>}
+                            </a>
+                          </dd>
+                        </>
+                      )}
+                    </dl>
+                    {order.downloadToken && (
+                      <a
+                        href={`/api/orders/${order.id}/calendar?token=${encodeURIComponent(order.downloadToken)}&booking=${encodeURIComponent(b.id)}`}
+                        className="mt-4 inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold hover:bg-primary/5"
+                      >
+                        <CalendarPlusIcon className="size-4" aria-hidden="true" />
+                        {t.addToCalendar}
+                      </a>
+                    )}
+                    {googleHref && (
+                      <a
+                        href={googleHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 ml-2 inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold hover:bg-primary/5"
+                      >
+                        Google Calendar
+                      </a>
+                    )}
                   </li>
                 )
               })}

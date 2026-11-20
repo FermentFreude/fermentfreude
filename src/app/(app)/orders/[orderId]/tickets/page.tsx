@@ -1,9 +1,10 @@
 import { accountI18n } from '@/app/(app)/account/i18n'
 import { PrintTicketsButton } from '@/components/PrintTicketsButton'
 import type { Order, WorkshopBooking } from '@/payload-types'
+import { googleCalendarUrl } from '@/lib/googleCalendarUrl'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
-import { Calendar, Clock, MapPin, Ticket } from 'lucide-react'
+import { Calendar, CalendarPlus, Clock, MapPin, Ticket } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
@@ -122,6 +123,7 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
   // Marktgarten while the other workshops are at the Ginery.
   const FALLBACK_LOCATION = { name: 'Ginery', address: 'Grabenstraße 15, 8010 Graz, Österreich' }
   const locationByAppointment = new Map<string, { name: string; address: string }>()
+  const startByAppointment = new Map<string, string>()
   for (const booking of bookings) {
     const appointmentId = (booking as { appointmentId?: string | null }).appointmentId
     if (!appointmentId || locationByAppointment.has(appointmentId)) continue
@@ -133,6 +135,8 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
         depth: 1,
         overrideAccess: true,
       })
+      const dt = (appointment as { dateTime?: unknown }).dateTime
+      if (typeof dt === 'string') startByAppointment.set(appointmentId, dt)
       const loc = (appointment as { location?: unknown }).location
       if (typeof loc === 'object' && loc !== null) {
         const l = loc as { name?: string; address?: string }
@@ -191,6 +195,28 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
   // ── 5. Render ─────────────────────────────────────────────────────────────
   const noTickets = seatTickets.length === 0
 
+  // "Add to calendar" — one link per booking of THIS order (the calendar route
+  // only serves bookings whose orderId matches, so legacy fallback bookings are skipped).
+  const calendarLinks = bookings
+    .filter((b) => String((b as { orderId?: string | null }).orderId ?? '') === String(orderId))
+    .map((b) => {
+      const appointmentId = (b as { appointmentId?: string | null }).appointmentId ?? ''
+      const loc = locationByAppointment.get(appointmentId) ?? FALLBACK_LOCATION
+      const start = startByAppointment.get(appointmentId)
+      return {
+        id: b.id,
+        title: b.workshopTitle ?? 'Workshop',
+        href: `/api/orders/${orderId}/calendar?token=${encodeURIComponent(token)}&booking=${encodeURIComponent(b.id)}`,
+        googleHref: start
+          ? googleCalendarUrl({
+              title: `${b.workshopTitle ?? 'Workshop'} – Fermentfreude`,
+              start,
+              location: [loc.name, loc.address].filter(Boolean).join(', '),
+            })
+          : null,
+      }
+    })
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
       {/* Page header — hidden when printing */}
@@ -212,6 +238,33 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
           </div>
           {!noTickets && <PrintTicketsButton label={t.printTickets} />}
         </div>
+        {calendarLinks.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {calendarLinks.map((c) => (
+              <a
+                key={c.id}
+                href={c.href}
+                className="inline-flex items-center gap-2 rounded-full border-2 border-ff-near-black px-4 py-2 font-display text-sm font-semibold text-ff-near-black transition-colors hover:bg-ff-near-black hover:text-white"
+              >
+                <CalendarPlus className="w-4 h-4" aria-hidden="true" />
+                {calendarLinks.length > 1 ? `${c.title}: ${t.addToCalendar}` : t.addToCalendar}
+              </a>
+            ))}
+            {calendarLinks
+              .filter((c) => c.googleHref)
+              .map((c) => (
+                <a
+                  key={`g-${c.id}`}
+                  href={c.googleHref!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border-2 border-ff-near-black px-4 py-2 font-display text-sm font-semibold text-ff-near-black transition-colors hover:bg-ff-near-black hover:text-white"
+                >
+                  {calendarLinks.length > 1 ? `${c.title}: Google Calendar` : 'Google Calendar'}
+                </a>
+              ))}
+          </div>
+        )}
       </div>
 
       {noTickets ? (

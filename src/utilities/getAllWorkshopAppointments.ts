@@ -19,6 +19,10 @@ export type WorkshopCalendarDate = {
   availableSpots: number
   price: number
   appointmentId: string
+  /** ISO start time — lets the UI format the date in the site language */
+  dateTime?: string
+  locationName?: string | null // Display only
+  locationAddress?: string | null
 }
 
 /**
@@ -99,7 +103,15 @@ export async function getAllWorkshopAppointments(): Promise<WorkshopCalendarDate
     const endTime = endDate.toLocaleTimeString('de-DE', timeOpts)
     const timeDisplay = `${startTime} – ${endTime}`
 
+    const loc =
+      typeof appointment.location === 'object' && appointment.location !== null
+        ? appointment.location
+        : null
+
     return {
+      dateTime: String(appointment.dateTime),
+      locationName: loc?.name ?? null,
+      locationAddress: loc?.address ?? null,
       id: appointment.id,
       workshopType,
       workshopTitle: workshop.title || 'Workshop',
