@@ -55,6 +55,7 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
+import { RecipeTeaser } from '@/blocks/RecipeTeaser/config'
 
 function gastronomyShowSection(name: string): CheckboxField {
   return {
@@ -259,6 +260,7 @@ export const Pages: CollectionConfig = {
                 CourseWaitlistCta,
                 WorkshopSlider,
                 WorkshopPhases,
+                RecipeTeaser,
               ],
               required: false,
               // Home: only offer the sections Home is built from (plus any already on it)

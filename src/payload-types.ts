@@ -79,6 +79,7 @@ export interface Config {
     pages: Page;
     media: Media;
     posts: Post;
+    recipes: Recipe;
     categories: Category;
     vouchers: Voucher;
     quotes: Quote;
@@ -135,6 +136,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    recipes: RecipesSelect<false> | RecipesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     vouchers: VouchersSelect<false> | VouchersSelect<true>;
     quotes: QuotesSelect<false> | QuotesSelect<true>;
@@ -187,6 +189,7 @@ export interface Config {
     'workshop-cards-global': WorkshopCardsGlobal;
     'product-detail-labels-global': ProductDetailLabelsGlobal;
     'product-pickup-settings': ProductPickupSetting;
+    'recipes-page': RecipesPage;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -201,6 +204,7 @@ export interface Config {
     'workshop-cards-global': WorkshopCardsGlobalSelect<false> | WorkshopCardsGlobalSelect<true>;
     'product-detail-labels-global': ProductDetailLabelsGlobalSelect<false> | ProductDetailLabelsGlobalSelect<true>;
     'product-pickup-settings': ProductPickupSettingsSelect<false> | ProductPickupSettingsSelect<true>;
+    'recipes-page': RecipesPageSelect<false> | RecipesPageSelect<true>;
   };
   locale: 'de' | 'en';
   widgets: {
@@ -1521,6 +1525,7 @@ export interface Page {
         | CourseWaitlistCtaBlock
         | WorkshopSliderBlock
         | WorkshopPhasesBlock
+        | RecipeTeaserBlock
       )[]
     | null;
   /**
@@ -5709,6 +5714,200 @@ export interface WorkshopPhasesBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RecipeTeaserBlock".
+ */
+export interface RecipeTeaserBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * Leave empty to show the "Rezept der Woche" chosen on Rezepte-Seite → Hero (so you only pick it in one place). If that is empty too, the first highlighted recipe is shown.
+   */
+  recipe?: (string | null) | Recipe;
+  /**
+   * Default: "Rezept der Woche" / "Recipe of the week".
+   */
+  eyebrow?: string | null;
+  /**
+   * Default: "Zum Rezept" / "View recipe".
+   */
+  recipeButton?: string | null;
+  /**
+   * Default: "Alle Rezepte" / "All recipes".
+   */
+  allButton?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'recipeTeaser';
+}
+/**
+ * Rezepte für /rezepte. Jedes Rezept bekommt eine eigene Seite (/rezepte/[slug]) im gleichen Layout. Google- und Pinterest-Rezeptdaten werden automatisch aus den Feldern erzeugt.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recipes".
+ */
+export interface Recipe {
+  id: string;
+  /**
+   * z. B. „Klassisches Sauerkraut". Erscheint als Überschrift und in Google.
+   */
+  title: string;
+  /**
+   * Wird automatisch aus dem Namen erzeugt (z. B. „klassisches-sauerkraut"). Nach dem Veröffentlichen nicht mehr ändern. fermentieren, einlegen, tempeh und kombucha sind die Kategorie-Seiten – daraus wird automatisch z. B. „kombucha-rezept".
+   */
+  slug?: string | null;
+  /**
+   * Eine der vier Kategorien auf /rezepte.
+   */
+  category: 'fermentieren' | 'einlegen' | 'tempeh' | 'kombucha';
+  /**
+   * Erscheint ganz oben auf /rezepte.
+   */
+  featured?: boolean | null;
+  publishedAt?: string | null;
+  /**
+   * 1–2 Sätze. Erscheint auf der Karte, unter dem Titel und als Google-Beschreibung (max. ~155 Zeichen).
+   */
+  summary?: string | null;
+  /**
+   * Querformat 3:2, mind. 1600 px breit. Für Seite, Karte und Google.
+   */
+  heroImage?: (string | null) | Media;
+  /**
+   * Optional. Hochformat 2:3 (z. B. 1000×1500 px) — wird beim Pinnen bevorzugt.
+   */
+  pinterestImage?: (string | null) | Media;
+  /**
+   * Aktive Arbeitszeit.
+   */
+  prepMinutes?: number | null;
+  /**
+   * Leer lassen, wenn nicht fermentiert wird.
+   */
+  fermentationDays?: number | null;
+  /**
+   * z. B. „1 Glas (1 l)" oder „4 Portionen".
+   */
+  yield?: string | null;
+  difficulty?: ('leicht' | 'mittel' | 'fortgeschritten') | null;
+  /**
+   * Optional, z. B. „500-ml-Rex-, Weck- oder Bügelglas, mit Gewicht".
+   */
+  vessel?: string | null;
+  /**
+   * Optional: kurze Erklärung, was im Glas passiert. Erscheint als hervorgehobener Kasten über der Zubereitung.
+   */
+  whyItWorks?: string | null;
+  /**
+   * Meist reicht eine Gruppe ohne Titel. Mehrere Gruppen z. B. für „Lake" und „Gemüse".
+   */
+  ingredientGroups?:
+    | {
+        /**
+         * z. B. „Für die Lake". Leer lassen, wenn es nur eine Gruppe gibt.
+         */
+        title?: string | null;
+        items?:
+          | {
+              /**
+               * z. B. „1 kg", „20 g", „2 EL". Englisch z. B. „2 tbsp" – leer = wie Deutsch.
+               */
+              amount?: string | null;
+              name: string;
+              /**
+               * z. B. „fein gehobelt".
+               */
+              note?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Ein Schritt = ein klarer Arbeitsschritt. Foto optional.
+   */
+  steps?:
+    | {
+        /**
+         * z. B. „Gemüse vorbereiten", „Ansetzen", „Fermentieren".
+         */
+        title?: string | null;
+        text: string;
+        /**
+         * Ein Foto genau von diesem Schritt (z. B. Kraut ins Glas drücken). Querformat 3:2, z. B. 1200×800 px. Erscheint neben dem Schritt – macht das Rezept viel appetitlicher.
+         */
+        image?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional, hilft Anfängern: was man an welchem Tag sieht, riecht oder schmeckt, z. B. Tag 1 „Erste kleine Bläschen", Tag 3 „Riecht angenehm säuerlich". Erscheint unter der Zeitleiste. Nur sichtbar, wenn Fermentationstage eingetragen sind.
+   */
+  fermentLog?:
+    | {
+        /**
+         * 0 = am Tag des Ansetzens.
+         */
+        day: number;
+        /**
+         * Kurz, z. B. „Erste kleine Bläschen steigen auf".
+         */
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional: Profi-Tipps, häufige Fehler, Varianten.
+   */
+  tips?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional, mit Komma getrennt (z. B. „Sauerkraut, Weißkraut, probiotisch"). Hilft Google & Pinterest.
+   */
+  keywords?: string | null;
+  partner?: {
+    enabled?: boolean | null;
+    /**
+     * Erscheint unter dem Titel, z. B. „In Kooperation mit Musterglas". Bei bezahlten Kooperationen (Geld oder Gratis-Produkte) rechtlich „Anzeige" oder „Werbung" wählen.
+     */
+    disclosure?: ('kooperation' | 'anzeige' | 'werbung') | null;
+    /**
+     * Erscheint als „In Kooperation mit <Marke>" unter dem Titel.
+     */
+    name?: string | null;
+    logo?: (string | null) | Media;
+    /**
+     * Kurz: welches Produkt wurde verwendet und warum.
+     */
+    text?: string | null;
+    linkUrl?: string | null;
+    /**
+     * z. B. „Zum Produkt".
+     */
+    linkLabel?: string | null;
+  };
+  relatedWorkshop?: (string | null) | Workshop;
+  relatedProducts?: (string | Product)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+    description?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "GastronomyHeroBlock".
  */
 export interface GastronomyHeroBlock {
@@ -6915,6 +7114,10 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'recipes';
+        value: string | Recipe;
+      } | null)
+    | ({
         relationTo: 'categories';
         value: string | Category;
       } | null)
@@ -7315,6 +7518,7 @@ export interface PagesSelect<T extends boolean = true> {
         courseWaitlistCta?: T | CourseWaitlistCtaBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
         workshopPhases?: T | WorkshopPhasesBlockSelect<T>;
+        recipeTeaser?: T | RecipeTeaserBlockSelect<T>;
       };
   gastronomy?:
     | T
@@ -9012,6 +9216,19 @@ export interface WorkshopPhasesBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RecipeTeaserBlock_select".
+ */
+export interface RecipeTeaserBlockSelect<T extends boolean = true> {
+  visible?: T;
+  recipe?: T;
+  eyebrow?: T;
+  recipeButton?: T;
+  allButton?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "GastronomyHeroBlock_select".
  */
 export interface GastronomyHeroBlockSelect<T extends boolean = true> {
@@ -9232,6 +9449,85 @@ export interface PostsSelect<T extends boolean = true> {
   content?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recipes_select".
+ */
+export interface RecipesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  category?: T;
+  featured?: T;
+  publishedAt?: T;
+  summary?: T;
+  heroImage?: T;
+  pinterestImage?: T;
+  prepMinutes?: T;
+  fermentationDays?: T;
+  yield?: T;
+  difficulty?: T;
+  vessel?: T;
+  whyItWorks?: T;
+  ingredientGroups?:
+    | T
+    | {
+        title?: T;
+        items?:
+          | T
+          | {
+              amount?: T;
+              name?: T;
+              note?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  steps?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        image?: T;
+        id?: T;
+      };
+  fermentLog?:
+    | T
+    | {
+        day?: T;
+        text?: T;
+        id?: T;
+      };
+  tips?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  keywords?: T;
+  partner?:
+    | T
+    | {
+        enabled?: T;
+        disclosure?: T;
+        name?: T;
+        logo?: T;
+        text?: T;
+        linkUrl?: T;
+        linkLabel?: T;
+      };
+  relatedWorkshop?: T;
+  relatedProducts?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -10833,6 +11129,161 @@ export interface ProductPickupSetting {
   createdAt?: string | null;
 }
 /**
+ * Texte und Fotos der Seite /rezepte: großes Foto oben, Kategorien (Name, Kurztext, Foto), Workshop-Karte am Ende und die festen Wörter der Rezept-Vorlage. Die Rezepte selbst pflegst du unter „Rezepte". Leere Felder zeigen den Standardtext.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recipes-page".
+ */
+export interface RecipesPage {
+  id: string;
+  hero?: {
+    /**
+     * z. B. „Rezepte".
+     */
+    eyebrow?: string | null;
+    /**
+     * Weiß, z. B. „Aus dem Glas."
+     */
+    title?: string | null;
+    /**
+     * Gold, z. B. „Auf den Teller."
+     */
+    highlight?: string | null;
+    /**
+     * Wird nicht auf der Seite angezeigt, nur als Google-Beschreibung verwendet.
+     */
+    lead?: string | null;
+    /**
+     * Sein Foto ist das große Bild oben auf /rezepte (mit Link „Rezept der Woche"), und es erscheint als „Rezept der Woche" auf der Startseite. Leer = erstes hervorgehobenes Rezept mit Foto.
+     */
+    heroRecipe?: (string | null) | Recipe;
+  };
+  categories?: {
+    /**
+     * z. B. „Was setzt du heute an?".
+     */
+    title?: string | null;
+    /**
+     * Pro Kategorie: Name, ein kurzer Text und ein Foto. Der Name steht auf der Karte, im Filter und auf der Kategorie-Seite; der Text erscheint oben auf der Kategorie-Seite (/rezepte/kombucha usw.).
+     */
+    items?:
+      | {
+          category: 'fermentieren' | 'einlegen' | 'tempeh' | 'kombucha';
+          /**
+           * Leer = Standard (z. B. „Gemüse fermentieren" / „Fermenting Vegetables").
+           */
+          name?: string | null;
+          /**
+           * Ein bis zwei Sätze, erscheinen oben auf der Kategorie-Seite.
+           */
+          intro?: string | null;
+          /**
+           * Querformat 4:3, z. B. 1200×900 px. Erscheint auf der Kategorie-Karte.
+           */
+          image?: (string | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  featured?: {
+    /**
+     * z. B. „Frisch aus der Küche". Zeigt hervorgehobene Rezepte zuerst, dann die neuesten.
+     */
+    title?: string | null;
+    /**
+     * Gelbes Schild, z. B. „Workshops".
+     */
+    bandEyebrow?: string | null;
+    /**
+     * z. B. „Lieber gemeinsam fermentieren?".
+     */
+    bandTitle?: string | null;
+    bandText?: string | null;
+    /**
+     * z. B. „Termine ansehen".
+     */
+    bandButton?: string | null;
+    /**
+     * Querformat oder Hochformat, z. B. ein Foto vom Workshop-Tisch.
+     */
+    bandImage?: (string | null) | Media;
+    /**
+     * Auf Kategorie-Seiten führt der Button automatisch zum passenden Workshop.
+     */
+    bandLink?: string | null;
+  };
+  note?: {
+    /**
+     * Quadratisches Porträt, z. B. 600×600 px. Wird rund angezeigt.
+     */
+    photo?: (string | null) | Media;
+    /**
+     * z. B. „David".
+     */
+    name?: string | null;
+    /**
+     * z. B. „Mitgründer von Fermentfreude".
+     */
+    role?: string | null;
+  };
+  labels?: {
+    overviewTitle?: string | null;
+    all?: string | null;
+    empty?: string | null;
+    prep?: string | null;
+    fermentation?: string | null;
+    total?: string | null;
+    yield?: string | null;
+    difficulty?: string | null;
+    minutes?: string | null;
+    day?: string | null;
+    days?: string | null;
+    ingredients?: string | null;
+    steps?: string | null;
+    stepFallback?: string | null;
+    whyItWorks?: string | null;
+    tips?: string | null;
+    products?: string | null;
+    toProduct?: string | null;
+    workshopEyebrow?: string | null;
+    workshopTitle?: string | null;
+    workshopText?: string | null;
+    toWorkshop?: string | null;
+    moreLink?: string | null;
+    related?: string | null;
+    partnerDefaultCta?: string | null;
+    timelineStart?: string | null;
+    timelineMiddle?: string | null;
+    timelineEnd?: string | null;
+    today?: string | null;
+    dayShort?: string | null;
+    readyIn?: string | null;
+    searchLabel?: string | null;
+    searchPlaceholder?: string | null;
+    searchButton?: string | null;
+    popular?: string | null;
+    resultsFor?: string | null;
+    noResults?: string | null;
+    clearSearch?: string | null;
+    more?: string | null;
+    showMore?: string | null;
+    filterLabel?: string | null;
+    recipeOfWeek?: string | null;
+    diffEasy?: string | null;
+    diffMedium?: string | null;
+    diffAdvanced?: string | null;
+    partnerKooperation?: string | null;
+    partnerAnzeige?: string | null;
+    partnerWerbung?: string | null;
+    printRecipe?: string | null;
+    checkHint?: string | null;
+    readyOnText?: string | null;
+    noticeTitle?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -11163,6 +11614,112 @@ export interface ProductPickupSettingsSelect<T extends boolean = true> {
   locationName?: T;
   locationAddress?: T;
   googleScheduleUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recipes-page_select".
+ */
+export interface RecipesPageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        highlight?: T;
+        lead?: T;
+        heroRecipe?: T;
+      };
+  categories?:
+    | T
+    | {
+        title?: T;
+        items?:
+          | T
+          | {
+              category?: T;
+              name?: T;
+              intro?: T;
+              image?: T;
+              id?: T;
+            };
+      };
+  featured?:
+    | T
+    | {
+        title?: T;
+        bandEyebrow?: T;
+        bandTitle?: T;
+        bandText?: T;
+        bandButton?: T;
+        bandImage?: T;
+        bandLink?: T;
+      };
+  note?:
+    | T
+    | {
+        photo?: T;
+        name?: T;
+        role?: T;
+      };
+  labels?:
+    | T
+    | {
+        overviewTitle?: T;
+        all?: T;
+        empty?: T;
+        prep?: T;
+        fermentation?: T;
+        total?: T;
+        yield?: T;
+        difficulty?: T;
+        minutes?: T;
+        day?: T;
+        days?: T;
+        ingredients?: T;
+        steps?: T;
+        stepFallback?: T;
+        whyItWorks?: T;
+        tips?: T;
+        products?: T;
+        toProduct?: T;
+        workshopEyebrow?: T;
+        workshopTitle?: T;
+        workshopText?: T;
+        toWorkshop?: T;
+        moreLink?: T;
+        related?: T;
+        partnerDefaultCta?: T;
+        timelineStart?: T;
+        timelineMiddle?: T;
+        timelineEnd?: T;
+        today?: T;
+        dayShort?: T;
+        readyIn?: T;
+        searchLabel?: T;
+        searchPlaceholder?: T;
+        searchButton?: T;
+        popular?: T;
+        resultsFor?: T;
+        noResults?: T;
+        clearSearch?: T;
+        more?: T;
+        showMore?: T;
+        filterLabel?: T;
+        recipeOfWeek?: T;
+        diffEasy?: T;
+        diffMedium?: T;
+        diffAdvanced?: T;
+        partnerKooperation?: T;
+        partnerAnzeige?: T;
+        partnerWerbung?: T;
+        printRecipe?: T;
+        checkHint?: T;
+        readyOnText?: T;
+        noticeTitle?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

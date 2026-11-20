@@ -37,7 +37,7 @@ import { requireWorkshopSeatsHeld } from '@/collections/Transactions/requireWork
 import { assignInvoiceNumber } from '@/hooks/assignInvoiceNumber'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { freezeInvoiceOnIssue } from '@/hooks/freezeInvoice'
-import { Page, Product } from '@/payload-types'
+import { Page, Product, Recipe } from '@/payload-types'
 import { mediaFixR2UrlAfterReadPlugin } from '@/plugins/mediaFixR2UrlAfterRead'
 import { getServerSideURL } from '@/utilities/getURL'
 
@@ -48,12 +48,16 @@ const withExactlyOnceConfirmOrder = (adapter: ReturnType<typeof stripeAdapter>) 
   confirmOrder: exactlyOnceConfirmOrder(adapter.confirmOrder),
 })
 
-const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
+const generateTitle: GenerateTitle<Product | Page | Recipe> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Fermentfreude` : 'Fermentfreude'
 }
 
-const generateURL: GenerateURL<Product | Page> = ({ doc }) => {
+const generateURL: GenerateURL<Product | Page | Recipe> = ({ doc, collectionConfig }) => {
   const url = getServerSideURL()
+
+  if (collectionConfig?.slug === 'recipes') {
+    return doc?.slug ? `${url}/rezepte/${doc.slug}` : `${url}/rezepte`
+  }
 
   return doc?.slug ? `${url}/${doc.slug}` : url
 }

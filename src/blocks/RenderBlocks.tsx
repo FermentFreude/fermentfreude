@@ -33,6 +33,7 @@ import { TeamCardsBlock } from '@/blocks/TeamCards/Component'
 import { TeamPreviewBlock } from '@/blocks/TeamPreview/Component'
 import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 import { ThreeItemGridBlock } from '@/blocks/ThreeItemGrid/Component'
+import { RecipeTeaserBlock } from '@/blocks/RecipeTeaser/Component'
 import { VoucherCtaBlock } from '@/blocks/VoucherCta/Component'
 import { WorkshopPhasesComponent } from '@/blocks/WorkshopPhases/Component'
 import { WorkshopSliderBlock } from '@/blocks/WorkshopSlider/Component'
@@ -85,6 +86,7 @@ const blockComponents = {
   courseWaitlistCta: CourseWaitlistCtaBlock,
   workshopSlider: WorkshopSliderBlock,
   workshopPhases: WorkshopPhasesComponent,
+  recipeTeaser: RecipeTeaserBlock,
 }
 
 // Maps block types to their GlobalWrapper component (used when useGlobalData is true)
