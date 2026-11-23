@@ -76,6 +76,9 @@ const CHECKOUT_DE = {
   voucherEmptyError: 'Bitte gib einen Gutschein-Code ein.',
   voucherInvalidError: 'Ungültiger Gutschein-Code.',
   voucherNetworkError: 'Verbindungsfehler. Bitte versuche es erneut.',
+  voucherDiscountCodeHint:
+    'Das ist ein Geschenkcode: Er gilt nur beim Kauf eines Gutscheins, nicht für eine direkte Workshop-Buchung.',
+  voucherDiscountCodeLink: 'Zur Gutschein-Seite',
   voucherApplied: (value: number) => `Gutschein €${value} angewendet!`,
   payment: 'Zahlung',
   poweredByStripe: 'Sichere Zahlung über Stripe',
@@ -145,8 +148,7 @@ const CHECKOUT_EN = {
   address: 'Address',
   noShipping: 'Workshop / digital product — no shipping address required.',
   storePickup: 'Store Pickup',
-  pickupNote:
-    'After payment you receive a link to choose a day and time to pick up your order.',
+  pickupNote: 'After payment you receive a link to choose a day and time to pick up your order.',
   emailPickupHint: 'We send the link for your pickup slot to this address.',
   pickupWorkshopNote:
     'Your cart also includes a workshop. The pickup details apply to the physical products only. Your workshop date stays exactly as you booked it.',
@@ -167,6 +169,9 @@ const CHECKOUT_EN = {
   voucherEmptyError: 'Please enter a voucher code.',
   voucherInvalidError: 'Invalid voucher code.',
   voucherNetworkError: 'Connection error. Please try again.',
+  voucherDiscountCodeHint:
+    'This is a gift code: it only works when buying a voucher, not for booking a workshop directly.',
+  voucherDiscountCodeLink: 'Go to the voucher page',
   voucherApplied: (value: number) => `Voucher €${value} applied!`,
   payment: 'Payment',
   poweredByStripe: 'Secure payment via Stripe',
@@ -301,6 +306,8 @@ export const CheckoutPage: React.FC = () => {
     value: number
   } | null>(null)
   const [voucherError, setVoucherError] = useState<string | null>(null)
+  // A Rabattcode (FREUDE26 …) typed into the voucher field — show where it works
+  const [voucherIsDiscountCode, setVoucherIsDiscountCode] = useState(false)
   const [voucherLoading, setVoucherLoading] = useState(false)
   // Workshop booking metadata (date/time/pricePerPerson) — stored in localStorage by add-to-cart-utils
   // because the Payload ecommerce plugin has no per-item metadata field.
@@ -491,10 +498,9 @@ export const CheckoutPage: React.FC = () => {
             })
           }
         } else {
-          const res = await fetch(
-            `/api/globals/product-pickup-settings?depth=0&locale=${locale}`,
-            { cache: 'no-store' },
-          )
+          const res = await fetch(`/api/globals/product-pickup-settings?depth=0&locale=${locale}`, {
+            cache: 'no-store',
+          })
           if (!res.ok) return
           const json = (await res.json()) as {
             locationName?: string
@@ -649,7 +655,6 @@ export const CheckoutPage: React.FC = () => {
   }, [hasWorkshop, cart?.items, removeItem, refreshCart, t])
 
   const runWorkshopSeatCheck = async (): Promise<boolean> => {
-
     let before: Record<string, { workshopTitle?: string; date?: string }> = {}
     try {
       before = JSON.parse(localStorage.getItem('workshopBookings') || '{}')
@@ -968,6 +973,7 @@ export const CheckoutPage: React.FC = () => {
   /* ── Voucher Handlers ── */
   const handleApplyVoucher = useCallback(async () => {
     setVoucherError(null)
+    setVoucherIsDiscountCode(false)
     const trimmed = voucherCode.trim()
     if (!trimmed) {
       setVoucherError(t.voucherEmptyError)
@@ -981,6 +987,11 @@ export const CheckoutPage: React.FC = () => {
         body: JSON.stringify({ code: trimmed }),
       })
       const data = await res.json()
+      if (data.discountCodeOnly) {
+        setVoucherIsDiscountCode(true)
+        setVoucherError(t.voucherDiscountCodeHint)
+        return
+      }
       if (!res.ok || !data.success) {
         setVoucherError(data.error || t.voucherInvalidError)
         return
@@ -1012,6 +1023,7 @@ export const CheckoutPage: React.FC = () => {
     setVoucherApplied(null)
     setVoucherCode('')
     setVoucherError(null)
+    setVoucherIsDiscountCode(false)
 
     // Same reasoning as handleApplyVoucher: removing a voucher after the
     // payment step is already showing must regenerate it at full price,
@@ -1038,7 +1050,9 @@ export const CheckoutPage: React.FC = () => {
         const data = await res.json().catch(() => ({}))
         const errMsg: string = data?.errors?.[0]?.message ?? ''
         setCreateAccountError(
-          /duplicate|already exist/i.test(errMsg) ? t.createAccountEmailExists : t.createAccountError,
+          /duplicate|already exist/i.test(errMsg)
+            ? t.createAccountEmailExists
+            : t.createAccountError,
         )
         setIsCreatingAccount(false)
         return false
@@ -1090,7 +1104,10 @@ export const CheckoutPage: React.FC = () => {
     return (
       <div className="prose dark:prose-invert py-12 w-full items-center">
         {workshopNotice && (
-          <p role="alert" className="rounded-(--radius-card) border border-red-200 bg-red-50 p-6 text-ff-near-black">
+          <p
+            role="alert"
+            className="rounded-(--radius-card) border border-red-200 bg-red-50 p-6 text-ff-near-black"
+          >
             {workshopNotice} <Link href="/workshops">{t.chooseAnotherDate}</Link>
           </p>
         )}
@@ -1110,7 +1127,10 @@ export const CheckoutPage: React.FC = () => {
           because that is the part worth highlighting. */}
       <div className="min-w-0 flex-1 overflow-hidden rounded-(--radius-card) bg-white divide-y divide-ff-border-light">
         {workshopNotice && (
-          <div role="alert" className="m-6 sm:m-8 rounded-(--radius-card) border border-red-200 bg-red-50 p-6">
+          <div
+            role="alert"
+            className="m-6 sm:m-8 rounded-(--radius-card) border border-red-200 bg-red-50 p-6"
+          >
             <p className="text-body text-ff-near-black">{workshopNotice}</p>
             <Link
               href="/workshops"
@@ -1402,7 +1422,10 @@ export const CheckoutPage: React.FC = () => {
             )}
             {/* Pickup Location */}
             <div className="mb-6 flex items-start gap-3">
-              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-ff-gray-text-light" strokeWidth={1.5} />
+              <MapPin
+                className="mt-0.5 h-5 w-5 shrink-0 text-ff-gray-text-light"
+                strokeWidth={1.5}
+              />
               <address className="not-italic">
                 <span className="block font-display font-semibold text-ff-near-black">
                   {pickupLocation.name}
@@ -1932,7 +1955,20 @@ export const CheckoutPage: React.FC = () => {
                 </div>
               )}
               {voucherError && (
-                <p className="text-caption font-medium text-red-600">{voucherError}</p>
+                <p className="text-caption font-medium text-red-600">
+                  {voucherError}
+                  {voucherIsDiscountCode && (
+                    <>
+                      {' '}
+                      <Link
+                        href="/workshops/voucher"
+                        className="underline underline-offset-2 hover:text-ff-near-black"
+                      >
+                        {t.voucherDiscountCodeLink}
+                      </Link>
+                    </>
+                  )}
+                </p>
               )}
             </div>
 
