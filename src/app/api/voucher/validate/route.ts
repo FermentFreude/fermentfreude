@@ -1,4 +1,5 @@
 import configPromise from '@payload-config'
+import { normaliseDiscountCode } from '@/lib/discountCodes'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
@@ -24,6 +25,30 @@ export async function POST(request: NextRequest) {
 
     // Sanitize: uppercase, trim whitespace
     const sanitizedCode = code.trim().toUpperCase()
+
+    // A Rabattcode (e.g. FREUDE26 from the newspaper) typed in here by
+    // mistake: it only works when buying a voucher — tell the customer.
+    {
+      const config = await configPromise
+      const payload = await getPayload({ config })
+      const discount = await payload.find({
+        collection: 'discount-codes',
+        where: { code: { equals: normaliseDiscountCode(code) } },
+        limit: 1,
+        depth: 0,
+        overrideAccess: true,
+      })
+      if (discount.docs.length > 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            discountCodeOnly: true,
+            error: 'This code only works when buying a gift voucher.',
+          },
+          { status: 400 },
+        )
+      }
+    }
 
     if (sanitizedCode.length < 5 || sanitizedCode.length > 30) {
       return NextResponse.json(
