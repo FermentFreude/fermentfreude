@@ -10,6 +10,7 @@ import { Media } from '@/components/Media'
 import { OnlineCoursePopupCta } from '@/components/OnlineCoursePopupCta'
 import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
 import {
+  FERMENTATION_RETOUCH_DE,
   FERMENTATION_RETOUCH_EN,
   resolveFermentationRows,
   resolveFermentationText,
@@ -250,151 +251,6 @@ const DEFAULT_FAQ_ITEMS: Array<{ id?: string; question: string; answer: string }
   },
 ]
 
-const RETOUCH_DE = {
-  heroTitle: 'Innovation trifft Tradition',
-  heroDescription:
-    'Fermentation ist weit mehr als Sauerkraut oder Joghurt.\nSie steckt in vielen Lebensmitteln, die wir täglich essen: Brot, Käse, Salami, Oliven, Vanille, Miso, Essig und vieles mehr.',
-  heroBenefitsTitle: 'Warum Fermentieren?',
-  heroBlocks: [
-    {
-      title: 'PROBIOTIKA',
-      description:
-        'Lebende Mikroorganismen unterstützen ein gesundes Gleichgewicht im Darm und können sich positiv auf Immunsystem und Wohlbefinden auswirken.',
-    },
-    {
-      title: 'ENZYME',
-      description:
-        'Während des Prozesses entstehen Enzyme, die Lebensmittel leichter verdaulich machen und komplexe Strukturen aufbrechen.',
-    },
-    {
-      title: 'GESCHMACK',
-      description:
-        'Fermentation schafft völlig neue Aromen, von mild und rund bis intensiv und komplex, und macht aus einfachen Zutaten einzigartige Lebensmittel.',
-    },
-    {
-      title: 'HALTBARKEIT',
-      description:
-        'Fermentation ist eine natürliche Methode, Lebensmittel haltbar zu machen, ganz ohne künstliche Zusatzstoffe.',
-    },
-  ] as HeroBlock[],
-  guideTitle: 'Ein kompletter Leitfaden zur Fermentation',
-  guideBody:
-    'Fermentation ist kein Rezept, sondern ein Prozess.\nEin Prozess, den man versteht und bewusst erlebt.',
-  whatTitle: 'Was ist Fermentation?',
-  whatBody:
-    'Fermentation ist die kontrollierte Umwandlung von Lebensmitteln mithilfe von Mikroorganismen wie Bakterien, Hefen und Schimmelpilzen.\nEin natürlicher Prozess, der aus einfachen Zutaten neue Aromen, mehr Tiefe und längere Haltbarkeit entstehen lässt.',
-  whatMotto: 'Gute Zutaten, Zeit und Verständnis für den Prozess, mehr braucht es nicht.',
-  whatListItems: [] as string[],
-  whyEyebrow: 'GRUNDLAGEN',
-  whyTitle: 'Fermentation verstehen',
-  whyItems: [
-    {
-      title: 'Es gibt nicht die eine Technik',
-      description:
-        'Fermentation umfasst verschiedene Techniken, von Milchsäuregärung über Hefegärung und Essigsäuregärung bis hin zu Symbiosen wie Kombucha und Kefir sowie Edelschimmel, je nach Mikroorganismen und Ausgangsprodukt.',
-    },
-    {
-      title: 'Woher kommen die Mikroorganismen?',
-      description:
-        'Fermentation kann spontan durch natürlich vorkommende Mikroorganismen entstehen oder gezielt durch Starterkulturen gesteuert werden, um mehr Kontrolle und gleichbleibende Ergebnisse zu erreichen.',
-    },
-    {
-      title: 'Die richtigen Bedingungen sind entscheidend',
-      description:
-        'Damit Fermentation funktioniert, müssen die Rahmenbedingungen stimmen, je nach Technik z. B. Salzgehalt, Temperatur, Sauerstoff, pH-Wert und Hygiene.',
-    },
-    {
-      title: 'Zeit ist ein zentraler Faktor',
-      description:
-        'Fermentation braucht Zeit, von wenigen Tagen bis zu mehreren Monaten. Der Geschmack entwickelt sich dabei kontinuierlich weiter.',
-    },
-    {
-      title: 'Haltbarkeit und Ressourcennutzung',
-      description:
-        'Fermentation verlängert die Haltbarkeit von Lebensmitteln und ermöglicht es, saisonale Überschüsse sinnvoll zu nutzen.',
-    },
-    {
-      title: 'Erfahrung macht den Unterschied',
-      description:
-        'Mit Erfahrung lernt man, Prozesse zu verstehen, gezielt zu steuern und sicher anzuwenden, und so verlässlich gute Ergebnisse zu erzielen.',
-    },
-  ],
-  dangerTitle: 'Ist Fermentation gefährlich?',
-  dangerIntro:
-    'Fermentation ist eine der sichersten Methoden, Lebensmittel haltbar zu machen, vorausgesetzt, sie wird richtig durchgeführt.',
-  dangerConcernsHeading: 'Worauf es ankommt:',
-  dangerConcerns: [
-    {
-      title: 'Sauberes Arbeiten',
-      description:
-        'Hygiene, frische Zutaten und passende Bedingungen sind die Grundlage für eine sichere Fermentation.',
-    },
-    {
-      title: 'Schimmel',
-      description: 'Wenn ein Ferment schimmelt, sollte es grundsätzlich entsorgt werden.',
-    },
-    {
-      title: 'Geruch und Aussehen',
-      description:
-        'Je nach Fermentation unterscheiden sich Geruch und Erscheinungsbild, entscheidend ist, Veränderungen richtig einordnen zu können.',
-    },
-    {
-      title: 'Erfahrung und Verständnis',
-      description:
-        'Mit zunehmender Erfahrung lernt man, Prozesse besser zu beurteilen und sicher anzuwenden.',
-    },
-  ],
-  dangerClosing:
-    'Fazit: Wer die Grundlagen versteht und sauber arbeitet, kann Fermentation zuverlässig und sicher im Alltag einsetzen.',
-  practiceTitle: 'Eine Praxis, kein Trend',
-  practiceParagraphs: [
-    'Fermentation wird seit Jahrtausenden in vielen Kulturen genutzt, von koreanischem Kimchi über europäisches Sauerkraut bis zu japanischem Miso und indonesischem Tempeh.',
-    'Sie ist kein schneller Prozess, sondern entwickelt sich über Zeit, Erfahrung und Verständnis.',
-    'Jede Fermentation verläuft etwas anders. Entscheidend ist, die Grundlagen zu kennen und den Prozess beobachten und steuern zu können.',
-    'Fermentation bedeutet, mit Lebensmitteln zu arbeiten statt sie nur zu verarbeiten, und so Geschmack, Haltbarkeit und Qualität bewusst zu gestalten.',
-  ],
-  ctaTitle: 'Bereit zu lernen?',
-  ctaDescription:
-    'In unseren Workshops lernst du, wie Fermentation wirklich funktioniert.\nVerständlich erklärt und direkt anwendbar.',
-  faqTitle: 'Häufig gestellte Fragen',
-  faqSubtitle: 'Häufige Fragen zur Fermentation wie sie in unseren Workshops gestellt werden',
-  faqItems: [
-    {
-      question: 'Tötet Fermentation Bakterien ab?',
-      answer:
-        'Nein. Fermentation nutzt gezielt Mikroorganismen, die gewünschte Prozesse auslösen und gleichzeitig das Wachstum unerwünschter Keime hemmen.',
-    },
-    {
-      question: 'Ist Fermentation dasselbe wie Einlegen?',
-      answer:
-        'Nein. Fermentation ist ein mikrobieller Prozess, bei dem Mikroorganismen Lebensmittel umwandeln. Einlegen hingegen nutzt meist Essig oder andere Säuren zur Konservierung und ist kein Fermentationsprozess.',
-    },
-    {
-      question: 'Sind fermentierte Produkte aus dem Supermarkt auch gesund?',
-      answer:
-        'Teilweise.\nViele industriell hergestellte Produkte sind pasteurisiert und enthalten keine lebenden Mikroorganismen mehr.\nDadurch geht ein Teil der probiotischen Eigenschaften verloren.',
-    },
-    {
-      question: 'Kann ich täglich fermentierte Lebensmittel essen?',
-      answer:
-        'Ja.\nFermentierte Lebensmittel können täglich konsumiert werden und sind ein sinnvoller Bestandteil der Ernährung.\nWenn du sie noch nicht gewohnt bist, starte mit kleinen Mengen.',
-    },
-    {
-      question: 'Wie lagere ich fertige fermentierte Lebensmittel?',
-      answer:
-        'Fertige Fermente sollten gekühlt gelagert werden, da die Mikroorganismen weiterhin aktiv sind und sich Geschmack und Reife sonst weiter verändern.',
-    },
-    {
-      question: 'Können fermentierte Lebensmittel verderben?',
-      answer:
-        'Ja.\nFermente können kippen oder überreif werden, wenn Bedingungen nicht stimmen.\nIm Zweifel sollte das Produkt nicht mehr verwendet werden.',
-    },
-  ],
-  faqCtaTitle: 'Bereit zum Fermentieren?',
-  faqCtaBody:
-    'Starte mit einfachen Anwendungen und achte auf sauberes Arbeiten sowie die richtigen Bedingungen.\nMit der Zeit entwickelst du ein sicheres Gefühl für den Prozess.',
-}
-
 function isResolvedMedia(img: unknown): img is MediaType {
   return typeof img === 'object' && img !== null && 'url' in img
 }
@@ -414,7 +270,7 @@ type FermentationPageProps = {
 export default async function FermentationPage({ searchParams }: FermentationPageProps) {
   const locale = await getLocale()
   const localeKey = locale as 'de' | 'en'
-  const retouchDe = RETOUCH_DE
+  const retouchDe = FERMENTATION_RETOUCH_DE
   const retouchEn = FERMENTATION_RETOUCH_EN
   const params = await searchParams
   // Use code defaults when ?defaults=1 or FERMENTATION_USE_DEFAULTS=1. Set in .env to always see design.
