@@ -38,6 +38,7 @@ import { RefundRequests } from '@/collections/RefundRequests'
 import { ReturnRequests } from '@/collections/ReturnRequests'
 import { Reviews } from '@/collections/Reviews'
 import { Users } from '@/collections/Users'
+import { DiscountCodes } from '@/collections/DiscountCodes'
 import { Vouchers } from '@/collections/Vouchers'
 import { WorkshopAppointments } from '@/collections/WorkshopAppointments'
 import { WorkshopBookings } from '@/collections/WorkshopBookings'
@@ -187,6 +188,7 @@ export default buildConfig({
     Recipes,
     Categories,
     Vouchers,
+    DiscountCodes,
     Quotes,
     CancellationInvoices,
     Downloads,

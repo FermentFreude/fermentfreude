@@ -187,6 +187,9 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
       const recipientLine = doc.recipientEmail
         ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Empfänger:in</td><td style="padding:4px 0">${recipientNameValue || ''} ${doc.recipientEmail ? `&lt;${doc.recipientEmail}&gt;` : ''}</td></tr>`
         : ''
+      const discountLine = doc.discountCode
+        ? `<tr><td style="padding:4px 12px 4px 0;color:#555;white-space:nowrap">Rabattcode</td><td style="padding:4px 0">${String(doc.discountCode)} · −€${String(doc.discountAmount ?? '')} · bezahlt €${String(Number(doc.value ?? 99) - Number(doc.discountAmount ?? 0))}</td></tr>`
+        : ''
       const warningBlock = customerSendFailed
         ? `<p style="font-family:sans-serif;background:#FEF3C7;color:#92400E;padding:12px 16px;border-radius:8px;margin:0 0 16px">
              ⚠️ Die Bestätigungs-E-Mail an den/die Käufer:in konnte NICHT gesendet werden (Brevo-Fehler). Bitte manuell nachfassen.
@@ -197,6 +200,7 @@ ${warningBlock}
 <h2 style="font-family:sans-serif;margin-bottom:16px">Neuer Gutschein-Kauf: ${String(doc.code ?? '')}</h2>
 <table style="font-family:sans-serif;border-collapse:collapse;font-size:14px">
   <tr><td style="padding:4px 12px 4px 0;color:#555;white-space:nowrap">Betrag</td><td style="padding:4px 0"><strong>€${String(doc.value ?? 99)}</strong></td></tr>
+  ${discountLine}
   <tr><td style="padding:4px 12px 4px 0;color:#555">Käufer:in</td><td style="padding:4px 0">${purchaserNameValue || ''} <a href="mailto:${purchaserEmail}">${purchaserEmail}</a></td></tr>
   <tr><td style="padding:4px 12px 4px 0;color:#555">Zustellart</td><td style="padding:4px 0">${deliveryLabel}</td></tr>
   ${recipientLine}

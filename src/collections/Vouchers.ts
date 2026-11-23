@@ -150,6 +150,29 @@ export const Vouchers: CollectionConfig = {
         description: 'Stripe Checkout Session ID for payment verification',
       },
     },
+    {
+      name: 'discountCode',
+      type: 'text',
+      label: 'Gekauft mit Rabattcode',
+      index: true,
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        condition: (data) => Boolean(data?.discountCode),
+        description: 'Rabattcode beim Kauf (siehe Shop → Rabattcodes). Der Gutschein hat trotzdem den vollen Wert.',
+      },
+    },
+    {
+      name: 'discountAmount',
+      type: 'number',
+      label: 'Rabatt (€)',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        condition: (data) => Boolean(data?.discountCode),
+        description: 'So viel weniger wurde bezahlt.',
+      },
+    },
 
     /* ── Redemption Tracking ── */
     {
