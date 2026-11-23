@@ -144,6 +144,7 @@ export function resolveVoucherContent(
     },
     buy: {
       ...d.buy,
+      voucherImage: asMedia(buy?.voucherImage) ?? d.buy.voucherImage,
       title: str(buy?.title, d.buy.title),
       amountLabel: str(buy?.amountLabel, d.buy.amountLabel),
       workshopChip: str(buy?.workshopChip, d.buy.workshopChip),
@@ -153,6 +154,12 @@ export function resolveVoucherContent(
       yourEmail: str(buy?.yourEmail, d.buy.yourEmail),
       submit: str(buy?.submit, d.buy.submit),
       secure: str(buy?.secure, d.buy.secure),
+      codeLabel: str(buy?.codeLabel, d.buy.codeLabel),
+      codePlaceholder: str(buy?.codePlaceholder, d.buy.codePlaceholder),
+      codeApply: str(buy?.codeApply, d.buy.codeApply),
+      codeRemove: str(buy?.codeRemove, d.buy.codeRemove),
+      codeDiscount: str(buy?.codeDiscount, d.buy.codeDiscount),
+      codeToPay: str(buy?.codeToPay, d.buy.codeToPay),
     },
   }
 }

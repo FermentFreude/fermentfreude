@@ -461,6 +461,18 @@ export const plugins: Plugin[] = [
               description: 'Set automatically when this order is a voucher purchase — the voucher that was bought.',
             },
           },
+          {
+            name: 'discountCode',
+            type: 'text',
+            label: 'Rabattcode',
+            admin: {
+              position: 'sidebar',
+              readOnly: true,
+              condition: (data) => Boolean(data?.discountCode),
+              description:
+                'Rabattcode beim Gutscheinkauf (z. B. FREUDE26). Die Rechnung zeigt den Rabatt als eigene Zeile.',
+            },
+          },
         ],
         hooks: {
           ...defaultCollection?.hooks,

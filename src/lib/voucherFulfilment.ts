@@ -70,6 +70,11 @@ async function createVoucherAndOrder(
     amountCents,
   }: { paymentKey: string; meta: Record<string, string>; amountCents: number | null },
 ): Promise<VoucherPurchaseResult> {
+  // Rabattcode (e.g. FREUDE26): the voucher keeps its full value (meta.amount),
+  // the order holds what was actually paid, so the invoice shows the discount.
+  const discountCode = meta.discountCode || undefined
+  const discountAmount = discountCode ? Number(meta.discountAmount) || undefined : undefined
+
   // ─── Order record first: it holds the invoice (Rechnung WEB) ──
   // Created before the voucher so the voucher email can link the invoice,
   // like the workshop confirmation does. Non-fatal: without it the voucher
@@ -85,8 +90,10 @@ async function createVoucherAndOrder(
         customerEmail: meta.purchaserEmail,
         customerName: meta.purchaserName || undefined,
         status: 'completed',
-        amount: amountCents ?? Math.round(Number(meta.amount) * 100),
+        amount:
+          amountCents ?? Math.round((Number(meta.amount) - (discountAmount ?? 0)) * 100),
         currency: 'EUR',
+        discountCode,
       },
       context: {
         skipOrderConfirmationEmail: true,
@@ -124,6 +131,8 @@ async function createVoucherAndOrder(
         (meta.deliveryMethod as 'email-recipient' | 'email-self' | 'pdf' | 'email' | 'pickup') ||
         'email-self',
       stripeSessionId: paymentKey,
+      discountCode,
+      discountAmount,
       redeemed: false,
     },
     // The purchase email (afterChange hook) adds the invoice link

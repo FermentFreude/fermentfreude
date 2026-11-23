@@ -1,5 +1,8 @@
+import { checkDiscountCode } from '@/lib/discountCodes'
 import { getStripe } from '@/lib/stripe'
+import config from '@/payload.config'
 import { NextRequest, NextResponse } from 'next/server'
+import { getPayload } from 'payload'
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/voucher/checkout — Create Stripe Payment Intent
@@ -20,6 +23,8 @@ interface CheckoutBody {
   recipientName?: string
   recipientEmail?: string
   personalNote?: string
+  /** Optional Rabattcode (e.g. FREUDE26) — checked again here, never trusted */
+  discountCode?: string
 }
 
 const VALID_DELIVERY_METHODS = ['email-recipient', 'email-self', 'pdf', 'email', 'pickup'] as const
@@ -94,10 +99,32 @@ export async function POST(request: NextRequest) {
     const personalNote =
       typeof body.personalNote === 'string' ? body.personalNote.trim().slice(0, 500) : ''
 
+    // ─── Discount code (Rabattcode) ───────────────────────────────
+    // The voucher keeps its full value (metadata.amount); only the price
+    // charged goes down. A code that stopped working since the buyer
+    // pressed "Einlösen" is refused, so the panel can tell them.
+
+    let chargeAmount = body.amount
+    let discountCode = ''
+    let discountAmount = 0
+    if (typeof body.discountCode === 'string' && body.discountCode.trim()) {
+      const payload = await getPayload({ config })
+      const discount = await checkDiscountCode(payload, body.discountCode, body.amount)
+      if (!discount.ok) {
+        return NextResponse.json(
+          { success: false, discountProblem: discount.problem },
+          { status: 400 },
+        )
+      }
+      chargeAmount = discount.finalAmount
+      discountCode = discount.code
+      discountAmount = discount.amountOff
+    }
+
     // ─── Create Stripe Payment Intent ─────────────────────────────
 
     const paymentIntent = await getStripe().paymentIntents.create({
-      amount: body.amount * 100,
+      amount: Math.round(chargeAmount * 100),
       currency: 'eur',
       receipt_email: body.purchaserEmail,
       metadata: {
@@ -109,6 +136,9 @@ export async function POST(request: NextRequest) {
         recipientName,
         recipientEmail: body.recipientEmail || '',
         personalNote,
+        ...(discountCode
+          ? { discountCode, discountAmount: String(discountAmount) }
+          : {}),
       },
     })
 
@@ -122,6 +152,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       clientSecret: paymentIntent.client_secret,
+      chargeAmount,
+      discountCode: discountCode || undefined,
+      discountAmount: discountAmount || undefined,
     })
   } catch (error) {
     console.error('[voucher/checkout] Error:', error)

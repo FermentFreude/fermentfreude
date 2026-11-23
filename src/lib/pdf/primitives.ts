@@ -205,6 +205,8 @@ export interface OrderDocumentData {
   totalCents: number
   /** Voucher/gift-card discount in cents. When > 0 a "Gutschein − €X" line is shown. */
   voucherDiscountCents?: number
+  /** Label for that line. Default "Gutschein"; a Rabattcode purchase shows "Rabatt FREUDE26". */
+  discountLabel?: string
   shippingAddress?: string // formatted multi-line string
   customerFirstName: string
   customerLastName: string

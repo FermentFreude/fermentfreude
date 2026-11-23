@@ -377,6 +377,16 @@ export const voucherTab: Tab = {
       type: 'group',
       label: 'Kauf-Fenster (öffnet sich beim Klick auf „Verschenken“) / Buy panel',
       fields: [
+        {
+          name: 'voucherImage',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Gutschein-Bild / Voucher image',
+          admin: {
+            description:
+              'Das Bild des €99-Gutscheins oben im Kauf-Fenster (Querformat, mind. 1200 px breit). Ohne Bild wird das gezeichnete Ticket gezeigt.',
+          },
+        },
         text('title', 'Titel / Title', 'z. B. „Gutschein kaufen“'),
         text('amountLabel', 'Überschrift der Beträge / Amounts heading'),
         text('workshopChip', 'Zeile unter €99 / Line under €99', 'z. B. „Workshop“'),
@@ -390,6 +400,12 @@ export const voucherTab: Tab = {
           'Der Betrag wird automatisch angehängt, z. B. „Weiter zur Zahlung · €99“.',
         ),
         text('secure', 'Zeile unter dem Button / Line under the button'),
+        text('codeLabel', 'Feld „Geschenkcode“ / Discount code field', 'z. B. „Geschenkcode (optional)“'),
+        text('codePlaceholder', 'Platzhalter im Code-Feld / Code placeholder'),
+        text('codeApply', 'Button „Einlösen“ / Apply button'),
+        text('codeRemove', 'Link „Entfernen“ / Remove link'),
+        text('codeDiscount', 'Zeile mit dem Rabatt / Discount line', 'z. B. „Rabatt“ — Code und Betrag werden angehängt.'),
+        text('codeToPay', 'Zeile „Zu zahlen“ / “To pay” line'),
       ],
     },
   ],

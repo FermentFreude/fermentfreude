@@ -82,6 +82,7 @@ export interface Config {
     recipes: Recipe;
     categories: Category;
     vouchers: Voucher;
+    'discount-codes': DiscountCode;
     quotes: Quote;
     'cancellation-invoices': CancellationInvoice;
     downloads: Download;
@@ -139,6 +140,7 @@ export interface Config {
     recipes: RecipesSelect<false> | RecipesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     vouchers: VouchersSelect<false> | VouchersSelect<true>;
+    'discount-codes': DiscountCodesSelect<false> | DiscountCodesSelect<true>;
     quotes: QuotesSelect<false> | QuotesSelect<true>;
     'cancellation-invoices': CancellationInvoicesSelect<false> | CancellationInvoicesSelect<true>;
     downloads: DownloadsSelect<false> | DownloadsSelect<true>;
@@ -708,6 +710,14 @@ export interface Voucher {
    */
   stripeSessionId?: string | null;
   /**
+   * Rabattcode beim Kauf (siehe Shop → Rabattcodes). Der Gutschein hat trotzdem den vollen Wert.
+   */
+  discountCode?: string | null;
+  /**
+   * So viel weniger wurde bezahlt.
+   */
+  discountAmount?: number | null;
+  /**
    * Automatically set to true when voucher is used
    */
   redeemed?: boolean | null;
@@ -902,6 +912,10 @@ export interface Order {
    * Set automatically when this order is a voucher purchase — the voucher that was bought.
    */
   purchasedVoucher?: (string | null) | Voucher;
+  /**
+   * Rabattcode beim Gutscheinkauf (z. B. FREUDE26). Die Rechnung zeigt den Rabatt als eigene Zeile.
+   */
+  discountCode?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2302,6 +2316,10 @@ export interface Page {
     };
     buy?: {
       /**
+       * Das Bild des €99-Gutscheins oben im Kauf-Fenster (Querformat, mind. 1200 px breit). Ohne Bild wird das gezeichnete Ticket gezeigt.
+       */
+      voucherImage?: (string | null) | Media;
+      /**
        * z. B. „Gutschein kaufen“
        */
       title?: string | null;
@@ -2319,6 +2337,18 @@ export interface Page {
        */
       submit?: string | null;
       secure?: string | null;
+      /**
+       * z. B. „Geschenkcode (optional)“
+       */
+      codeLabel?: string | null;
+      codePlaceholder?: string | null;
+      codeApply?: string | null;
+      codeRemove?: string | null;
+      /**
+       * z. B. „Rabatt“ — Code und Betrag werden angehängt.
+       */
+      codeDiscount?: string | null;
+      codeToPay?: string | null;
     };
   };
   /**
@@ -6487,6 +6517,49 @@ export interface CancellationInvoice {
   createdAt: string;
 }
 /**
+ * Codes, die Kund:innen beim Kauf eines Gutscheins auf der Gutschein-Seite eingeben (z. B. aus einer Zeitungsaktion). Der Rabatt wird vom Preis abgezogen, der Gutschein behält seinen vollen Wert.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discount-codes".
+ */
+export interface DiscountCode {
+  id: string;
+  /**
+   * Was Kund:innen eintippen, z. B. FREUDE26. Groß-/Kleinschreibung und Leerzeichen sind egal.
+   */
+  code: string;
+  /**
+   * Wird vom Gutscheinpreis abgezogen, z. B. 5 → €99 Gutschein kostet €94.
+   */
+  amountOff: number;
+  /**
+   * Bei welchen Gutscheinen der Code funktioniert.
+   */
+  voucherAmounts: ('99' | '50' | '30' | '20')[];
+  /**
+   * Ab diesem Tag (österreichische Zeit). Leer = sofort.
+   */
+  validFrom?: string | null;
+  /**
+   * Bis einschließlich diesem Tag. Leer = unbegrenzt.
+   */
+  validUntil?: string | null;
+  /**
+   * Ausschalten, um den Code sofort zu stoppen (auch innerhalb der Gültigkeit).
+   */
+  active?: boolean | null;
+  /**
+   * So viele bezahlte Gutscheine wurden mit diesem Code gekauft.
+   */
+  timesUsed?: number | null;
+  /**
+   * Nur für euch, z. B. „Kleine Zeitung Tip-On-Card, 4.12.2026“.
+   */
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Angebote (Kostenvoranschläge) für Sonder-, Partner- oder Firmenveranstaltungen.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -7124,6 +7197,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'vouchers';
         value: string | Voucher;
+      } | null)
+    | ({
+        relationTo: 'discount-codes';
+        value: string | DiscountCode;
       } | null)
     | ({
         relationTo: 'quotes';
@@ -7947,6 +8024,7 @@ export interface PagesSelect<T extends boolean = true> {
         buy?:
           | T
           | {
+              voucherImage?: T;
               title?: T;
               amountLabel?: T;
               workshopChip?: T;
@@ -7956,6 +8034,12 @@ export interface PagesSelect<T extends boolean = true> {
               yourEmail?: T;
               submit?: T;
               secure?: T;
+              codeLabel?: T;
+              codePlaceholder?: T;
+              codeApply?: T;
+              codeRemove?: T;
+              codeDiscount?: T;
+              codeToPay?: T;
             };
       };
   workshops?:
@@ -9556,6 +9640,8 @@ export interface VouchersSelect<T extends boolean = true> {
   personalNote?: T;
   deliveryMethod?: T;
   stripeSessionId?: T;
+  discountCode?: T;
+  discountAmount?: T;
   redeemed?: T;
   redeemedOn?: T;
   redeemedForWorkshop?: T;
@@ -9563,6 +9649,22 @@ export interface VouchersSelect<T extends boolean = true> {
   invoiceNumber?: T;
   notes?: T;
   emailDeliveryFailed?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discount-codes_select".
+ */
+export interface DiscountCodesSelect<T extends boolean = true> {
+  code?: T;
+  amountOff?: T;
+  voucherAmounts?: T;
+  validFrom?: T;
+  validUntil?: T;
+  active?: T;
+  timesUsed?: T;
+  note?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -10385,6 +10487,7 @@ export interface OrdersSelect<T extends boolean = true> {
   invoiceIssuedAt?: T;
   invoiceItemsSnapshot?: T;
   purchasedVoucher?: T;
+  discountCode?: T;
   updatedAt?: T;
   createdAt?: T;
 }

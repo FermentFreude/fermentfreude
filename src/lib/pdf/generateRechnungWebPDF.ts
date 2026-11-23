@@ -161,7 +161,7 @@ export async function generateRechnungWebPDF(data: OrderDocumentData): Promise<B
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.setTextColor(...COLORS.darkText)
-    doc.text('Gutschein', MARGIN_L + 3, y)
+    doc.text(data.discountLabel || 'Gutschein', MARGIN_L + 3, y)
     doc.text(`-${formatCurrency(data.voucherDiscountCents)}`, rightX - 3, y, { align: 'right' })
     y += 6
     doc.setDrawColor(...COLORS.divider)

@@ -23,6 +23,7 @@ const CHECKOUT_DE = {
   to: 'An',
   recipientLabel: 'Empfänger:in',
   personalNoteLabel: 'Persönliche Notiz',
+  discount: 'Rabatt',
   payNow: 'Jetzt bezahlen',
   processing: 'Wird verarbeitet…',
   backToVoucher: 'Zurück zum Gutschein',
@@ -46,6 +47,7 @@ const CHECKOUT_EN = {
   to: 'To',
   recipientLabel: 'Recipient',
   personalNoteLabel: 'Personal note',
+  discount: 'Discount',
   payNow: 'Pay now',
   processing: 'Processing…',
   backToVoucher: 'Back to voucher',
@@ -63,6 +65,10 @@ interface VoucherSession {
   recipientName?: string
   recipientEmail?: string
   personalNote?: string
+  /** What Stripe charges — lower than amount when a Rabattcode was used */
+  chargeAmount?: number
+  discountCode?: string
+  discountAmount?: number
 }
 
 function deliveryLabel(method: VoucherSession['deliveryMethod'], t: typeof CHECKOUT_DE) {
@@ -125,6 +131,8 @@ function CheckoutForm({ session, t }: { session: VoucherSession; t: typeof CHECK
   const recipientDisplay =
     showsRecipient && session.recipientEmail ? session.recipientEmail : session.purchaserEmail
   const recipientNameDisplay = session.recipientName?.trim() || ''
+  const payAmount = session.chargeAmount ?? session.amount
+  const euro = (n: number) => `€${n.toFixed(2).replace('.', ',')}`
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -136,9 +144,19 @@ function CheckoutForm({ session, t }: { session: VoucherSession; t: typeof CHECK
         <div className="flex justify-between items-baseline">
           <span className="font-sans text-body text-ff-near-black">{t.voucherLabel}</span>
           <span className="font-display text-body-lg font-bold text-ff-near-black">
-            €{session.amount},00
+            {euro(session.amount)}
           </span>
         </div>
+        {session.discountCode && session.discountAmount ? (
+          <div className="mt-1 flex justify-between items-baseline">
+            <span className="font-sans text-body text-ff-near-black">
+              {t.discount} {session.discountCode}
+            </span>
+            <span className="font-display text-body font-bold text-ff-near-black">
+              −{euro(session.discountAmount)}
+            </span>
+          </div>
+        ) : null}
         <div className="mt-2 flex flex-col gap-0.5">
           <span className="font-sans text-body-sm text-ff-gray-text">
             {t.delivery}: {deliveryLabel(session.deliveryMethod, t)}
@@ -179,7 +197,7 @@ function CheckoutForm({ session, t }: { session: VoucherSession; t: typeof CHECK
         disabled={!stripe || isSubmitting}
         className="w-full rounded-full bg-ff-gold-accent px-6 py-3 md:py-4 font-display text-base md:text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isSubmitting ? t.processing : `${t.payNow} €${session.amount},00`}
+        {isSubmitting ? t.processing : `${t.payNow} ${euro(payAmount)}`}
       </button>
 
       <div className="flex items-center justify-center gap-1.5 mt-3">

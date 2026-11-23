@@ -394,6 +394,9 @@ export async function buildOrderReceiptData(
     shippingCents: Math.max(shippingCents, 0),
     totalCents,
     voucherDiscountCents: voucherDiscountCents > 0 ? voucherDiscountCents : undefined,
+    discountLabel: (order as { discountCode?: string | null }).discountCode
+      ? `Rabatt ${(order as { discountCode?: string | null }).discountCode}`
+      : undefined,
     shippingAddress,
     customerFirstName,
     customerLastName,
