@@ -23,7 +23,7 @@ export async function categoryMetadata(category: CategoryDef, locale: AppLocale)
   const { labels, categoryCards } = await loadRecipeLibrary(locale)
   const card = categoryCards.find((c) => c.value === category.value)
   return {
-    title: `${card?.name ?? category.label[locale]} — ${labels.overviewTitle} | Fermentfreude`,
+    title: `${card?.name ?? category.label[locale]} | ${labels.overviewTitle} | Fermentfreude`,
     description: card?.intro,
     alternates: { canonical: categoryPath(category.value) },
   }

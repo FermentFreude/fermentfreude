@@ -3,12 +3,13 @@ import type { AppLocale } from '@/utilities/payloadLocaleQuery'
 import Link from 'next/link'
 
 import type { Labels } from './shared'
+import { SaveButton } from './saved'
 import { Photo } from './ui'
 
 /* ═══════════════════════════════════════════════════════════════
  *  Gallery style (reference: Cooking Catrin)
- *  Photography first: 4:5 photos with rounded corners, the name
- *  centred underneath, lots of white space.
+ *  Photography first (ref. Cooking Catrin): small landscape 3:2
+ *  photos, the name centred underneath, many recipes at a glance.
  * ═══════════════════════════════════════════════════════════════ */
 
 export const SMALL_CAPS = 'font-display text-[0.72rem] font-bold uppercase tracking-[0.2em]'
@@ -16,21 +17,34 @@ export const SMALL_CAPS = 'font-display text-[0.72rem] font-bold uppercase track
 /** Recipe in the gallery: photo + name only, both clickable (David: keep it simple). */
 export function GalleryCard({
   recipe,
+  labels,
   priority,
 }: {
   recipe: Recipe
   locale?: AppLocale
-  /** Unused since David's note: the time shows only inside the recipe. */
+  /** Template words (used for the save heart). */
   labels?: Labels
   priority?: boolean
 }) {
   return (
-    <Link href={`/rezepte/${recipe.slug}`} className="group block">
-      <Photo image={recipe.heroImage} ratio="aspect-[4/5]" className="rounded-[1.25rem] md:rounded-[1.5rem]" tint="#ECE5DE" priority={priority} />
-      <h3 className="mt-3 text-center font-display text-[clamp(0.98rem,1.5vw,1.2rem)] font-bold leading-[1.25] tracking-[-0.01em] text-[#2D2F2C] decoration-[#E6BE68] decoration-2 underline-offset-[5px] group-hover:underline md:mt-4">
-        {recipe.title}
-      </h3>
-    </Link>
+    <div className="relative">
+      <Link href={`/rezepte/${recipe.slug}`} className="group block">
+        <Photo image={recipe.heroImage} ratio="aspect-[3/2]" className="rounded-[1rem] md:rounded-[1.25rem]" tint="#ECE5DE" priority={priority} />
+        <h3 className="mt-2.5 text-center font-display text-[clamp(0.92rem,1.15vw,1.05rem)] font-bold leading-[1.25] tracking-[-0.01em] text-[#2D2F2C] decoration-[#E6BE68] decoration-2 underline-offset-[5px] text-balance group-hover:underline md:mt-3">
+          {recipe.title}
+        </h3>
+      </Link>
+      {/* heart on the photo: save for later (this device) */}
+      {labels && recipe.slug && (
+        <SaveButton
+          variant="card"
+          slug={recipe.slug}
+          title={recipe.title}
+          labels={{ save: labels.save, saved: labels.saved, saveAria: labels.saveAria, unsaveAria: labels.unsaveAria }}
+          className="absolute right-2 top-2 md:right-2.5 md:top-2.5"
+        />
+      )}
+    </div>
   )
 }
 

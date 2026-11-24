@@ -8,8 +8,8 @@ import { autoTranslateGlobal } from '@/hooks/autoTranslateGlobal'
 /* ═══════════════════════════════════════════════════════════════
  *  Rezepte-Seite (global) — texts and photos of the /rezepte landing
  *
- *  Tabs: Hero (headline, photo recipe) · Kategorien (name, intro,
- *  photo) · Rezepte & Workshop (gallery title, workshop card) ·
+ *  Tabs: Oben (recipe of the week, heading) · Kategorien (name, intro,
+ *  photo) · Workshop-Karte · Notiz-Karte ·
  *  Vorlagen-Texte (fixed template words).
  *  Every field falls back to an English/German default in code.
  * ═══════════════════════════════════════════════════════════════ */
@@ -40,7 +40,7 @@ export const RecipesPageGlobal: GlobalConfig = {
   admin: {
     group: 'Inhalt',
     description:
-      'Texte und Fotos der Seite /rezepte: großes Foto oben, Kategorien (Name, Kurztext, Foto), Workshop-Karte am Ende und die festen Wörter der Rezept-Vorlage. Die Rezepte selbst pflegst du unter „Rezepte". Leere Felder zeigen den Standardtext.',
+      'Texte und Fotos der Seite /rezepte: Rezept der Woche oben, Überschrift, Kategorien (Name, Kurztext, Foto), Workshop-Karte, Notiz-Karte und die festen Wörter der Rezept-Vorlage. Die Rezepte selbst pflegst du unter „Rezepte". Leere Felder zeigen den Standardtext.',
   },
   access: {
     read: () => true,
@@ -54,31 +54,33 @@ export const RecipesPageGlobal: GlobalConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Hero',
+          label: 'Oben',
           name: 'hero',
+          description:
+            'Ganz oben ein großes Rezept-Bild (Rezept der Woche), direkt darunter die Überschrift mit Suche und danach alle Rezepte.',
           fields: [
-            text('eyebrow', 'Kleiner Text oben', 'z. B. „Rezepte".'),
-            {
-              type: 'row',
-              fields: [
-                text('title', 'Überschrift Zeile 1', { width: '60%', description: 'Weiß, z. B. „Aus dem Glas."' }),
-                text('highlight', 'Überschrift Zeile 2', {
-                  width: '40%',
-                  description: 'Gold, z. B. „Auf den Teller."',
-                }),
-              ],
-            },
-            area('lead', 'Einleitung', 'Wird nicht auf der Seite angezeigt, nur als Google-Beschreibung verwendet.'),
             {
               name: 'heroRecipe',
               type: 'relationship',
               relationTo: 'recipes',
-              label: 'Rezept der Woche',
+              label: 'Rezept der Woche (großes Bild ganz oben)',
               admin: {
                 description:
-                  'Sein Foto ist das große Bild oben auf /rezepte (mit Link „Rezept der Woche"), und es erscheint als „Rezept der Woche" auf der Startseite. Leer = erstes hervorgehobenes Rezept mit Foto.',
+                  'Foto, Name und Kurzbeschreibung dieses Rezepts erscheinen ganz oben auf /rezepte mit Button „Zum Rezept" – und als „Rezept der Woche" auf der Startseite. Leer = erstes hervorgehobenes Rezept mit Foto.',
               },
             },
+            text('eyebrow', 'Kleiner Text über der Überschrift', 'z. B. „Rezepte".'),
+            {
+              type: 'row',
+              fields: [
+                text('title', 'Überschrift über den Rezepten', { width: '60%', description: 'z. B. „Aus dem Glas."' }),
+                text('highlight', 'Überschrift: markierter Teil', {
+                  width: '40%',
+                  description: 'Gelb unterlegt, z. B. „Auf den Teller."',
+                }),
+              ],
+            },
+            area('lead', 'Einleitung', 'Wird nicht auf der Seite angezeigt, nur als Google-Beschreibung verwendet.'),
           ],
         },
         {
@@ -111,10 +113,10 @@ export const RecipesPageGlobal: GlobalConfig = {
           ],
         },
         {
-          label: 'Rezepte & Workshop',
+          label: 'Workshop-Karte',
           name: 'featured',
+          description: 'Die Karte am Ende von /rezepte, den Kategorie-Seiten und jedem Rezept.',
           fields: [
-            text('title', 'Überschrift über den Rezepten', 'z. B. „Frisch aus der Küche". Zeigt hervorgehobene Rezepte zuerst, dann die neuesten.'),
             text('bandEyebrow', 'Workshop-Karte: kleiner Text', 'Gelbes Schild, z. B. „Workshops".'),
             text('bandTitle', 'Workshop-Karte: Überschrift', 'z. B. „Lieber gemeinsam fermentieren?".'),
             area('bandText', 'Workshop-Karte: Text'),
@@ -135,12 +137,12 @@ export const RecipesPageGlobal: GlobalConfig = {
           description:
             'Die Karte „Warum es funktioniert" in jedem Rezept: Foto, Name und Rolle der Person, die den Tipp gibt. Den Text selbst schreibst du im Rezept (Feld „Warum es funktioniert").',
           fields: [
-            image('photo', 'Foto', 'Quadratisches Porträt, z. B. 600×600 px. Wird rund angezeigt.'),
+            image('photo', 'Foto', 'Eine Person: quadratisches Porträt (z. B. 600×600 px), wird rund angezeigt. Zwei Personen: breites Foto (ca. 2:1, z. B. 1200×600 px), wird als breite Pille angezeigt.'),
             {
               type: 'row',
               fields: [
-                text('name', 'Name', { width: '40%', description: 'z. B. „David".' }),
-                text('role', 'Rolle', { width: '60%', description: 'z. B. „Mitgründer von Fermentfreude".' }),
+                text('name', 'Name', { width: '40%', description: 'z. B. „David & Marcel".' }),
+                text('role', 'Rolle', { width: '60%', description: 'z. B. „Gründer von Fermentfreude".' }),
               ],
             },
           ],

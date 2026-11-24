@@ -231,6 +231,12 @@ export const accountI18n = {
     noDownloads: 'Noch keine Downloads verfügbar.',
     loginRequiredDownloads: 'Bitte melde dich an, um deine Downloads zu sehen.',
 
+    // Saved recipes (♥ on /rezepte)
+    savedRecipes: 'Gespeicherte Rezepte',
+    savedRecipesSubtitle: 'Rezepte, die du mit dem Herz gespeichert hast. Auf allen deinen Geräten da.',
+    noSavedRecipes: 'Noch keine Rezepte gespeichert. Tippe bei einem Rezept auf das Herz.',
+    browseRecipes: 'Rezepte entdecken',
+
     // Purchases / Reviews
     purchases: 'Einkäufe',
     reviews: 'Bewertungen',
@@ -479,6 +485,12 @@ export const accountI18n = {
     downloadsSubtitle: 'Your downloadable files and digital products.',
     noDownloads: 'No downloads available yet.',
     loginRequiredDownloads: 'Please sign in to view your downloads.',
+
+    // Saved recipes (♥ on /rezepte)
+    savedRecipes: 'Saved recipes',
+    savedRecipesSubtitle: 'Recipes you saved with the heart. Available on all your devices.',
+    noSavedRecipes: 'No saved recipes yet. Tap the heart on any recipe.',
+    browseRecipes: 'Discover recipes',
 
     // Purchases / Reviews
     purchases: 'Purchases',

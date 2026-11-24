@@ -80,6 +80,7 @@ export interface Config {
     media: Media;
     posts: Post;
     recipes: Recipe;
+    'recipe-ratings': RecipeRating;
     categories: Category;
     vouchers: Voucher;
     'discount-codes': DiscountCode;
@@ -138,6 +139,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     recipes: RecipesSelect<false> | RecipesSelect<true>;
+    'recipe-ratings': RecipeRatingsSelect<false> | RecipeRatingsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     vouchers: VouchersSelect<false> | VouchersSelect<true>;
     'discount-codes': DiscountCodesSelect<false> | DiscountCodesSelect<true>;
@@ -783,6 +785,10 @@ export interface User {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  /**
+   * Rezepte, die diese Person auf der Website mit dem Herz gespeichert hat (neueste zuerst). Wird automatisch gesetzt.
+   */
+  savedRecipes?: (string | Recipe)[] | null;
   stripeCustomerId?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -5795,6 +5801,9 @@ export interface Recipe {
    * Erscheint ganz oben auf /rezepte.
    */
   featured?: boolean | null;
+  /**
+   * Nur das Datum. Wird beim ersten Veröffentlichen automatisch gesetzt (leer lassen). Online geht das Rezept erst mit dem Button „Veröffentlichen" oben rechts.
+   */
   publishedAt?: string | null;
   /**
    * 1–2 Sätze. Erscheint auf der Karte, unter dem Titel und als Google-Beschreibung (max. ~155 Zeichen).
@@ -6517,6 +6526,21 @@ export interface CancellationInvoice {
   createdAt: string;
 }
 /**
+ * Sterne von Besuchern („Hat's geschmeckt?") auf den Rezeptseiten. Eine Stimme pro Person und Rezept. Unpassende Einträge kannst du löschen; neue kommen nur über die Website.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recipe-ratings".
+ */
+export interface RecipeRating {
+  id: string;
+  recipe: string | Recipe;
+  stars: number;
+  voter: string;
+  ipHash: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Codes, die Kund:innen beim Kauf eines Gutscheins auf der Gutschein-Seite eingeben (z. B. aus einer Zeitungsaktion). Der Rabatt wird vom Preis abgezogen, der Gutschein behält seinen vollen Wert.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -7189,6 +7213,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'recipes';
         value: string | Recipe;
+      } | null)
+    | ({
+        relationTo: 'recipe-ratings';
+        value: string | RecipeRating;
       } | null)
     | ({
         relationTo: 'categories';
@@ -9615,6 +9643,18 @@ export interface RecipesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recipe-ratings_select".
+ */
+export interface RecipeRatingsSelect<T extends boolean = true> {
+  recipe?: T;
+  stars?: T;
+  voter?: T;
+  ipHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
@@ -10084,6 +10124,7 @@ export interface UsersSelect<T extends boolean = true> {
   orders?: T;
   cart?: T;
   addresses?: T;
+  savedRecipes?: T;
   stripeCustomerId?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -10757,6 +10798,10 @@ export interface Footer {
     facebook?: string | null;
     instagram?: string | null;
     linkedin?: string | null;
+    /**
+     * Profil-Link, z. B. https://www.pinterest.at/fermentfreude/ (leer = dieser Standard-Link).
+     */
+    pinterest?: string | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -11232,7 +11277,7 @@ export interface ProductPickupSetting {
   createdAt?: string | null;
 }
 /**
- * Texte und Fotos der Seite /rezepte: großes Foto oben, Kategorien (Name, Kurztext, Foto), Workshop-Karte am Ende und die festen Wörter der Rezept-Vorlage. Die Rezepte selbst pflegst du unter „Rezepte". Leere Felder zeigen den Standardtext.
+ * Texte und Fotos der Seite /rezepte: Rezept der Woche oben, Überschrift, Kategorien (Name, Kurztext, Foto), Workshop-Karte, Notiz-Karte und die festen Wörter der Rezept-Vorlage. Die Rezepte selbst pflegst du unter „Rezepte". Leere Felder zeigen den Standardtext.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "recipes-page".
@@ -11241,25 +11286,25 @@ export interface RecipesPage {
   id: string;
   hero?: {
     /**
+     * Foto, Name und Kurzbeschreibung dieses Rezepts erscheinen ganz oben auf /rezepte mit Button „Zum Rezept" – und als „Rezept der Woche" auf der Startseite. Leer = erstes hervorgehobenes Rezept mit Foto.
+     */
+    heroRecipe?: (string | null) | Recipe;
+    /**
      * z. B. „Rezepte".
      */
     eyebrow?: string | null;
     /**
-     * Weiß, z. B. „Aus dem Glas."
+     * z. B. „Aus dem Glas."
      */
     title?: string | null;
     /**
-     * Gold, z. B. „Auf den Teller."
+     * Gelb unterlegt, z. B. „Auf den Teller."
      */
     highlight?: string | null;
     /**
      * Wird nicht auf der Seite angezeigt, nur als Google-Beschreibung verwendet.
      */
     lead?: string | null;
-    /**
-     * Sein Foto ist das große Bild oben auf /rezepte (mit Link „Rezept der Woche"), und es erscheint als „Rezept der Woche" auf der Startseite. Leer = erstes hervorgehobenes Rezept mit Foto.
-     */
-    heroRecipe?: (string | null) | Recipe;
   };
   categories?: {
     /**
@@ -11290,10 +11335,6 @@ export interface RecipesPage {
   };
   featured?: {
     /**
-     * z. B. „Frisch aus der Küche". Zeigt hervorgehobene Rezepte zuerst, dann die neuesten.
-     */
-    title?: string | null;
-    /**
      * Gelbes Schild, z. B. „Workshops".
      */
     bandEyebrow?: string | null;
@@ -11317,15 +11358,15 @@ export interface RecipesPage {
   };
   note?: {
     /**
-     * Quadratisches Porträt, z. B. 600×600 px. Wird rund angezeigt.
+     * Eine Person: quadratisches Porträt (z. B. 600×600 px), wird rund angezeigt. Zwei Personen: breites Foto (ca. 2:1, z. B. 1200×600 px), wird als breite Pille angezeigt.
      */
     photo?: (string | null) | Media;
     /**
-     * z. B. „David".
+     * z. B. „David & Marcel".
      */
     name?: string | null;
     /**
-     * z. B. „Mitgründer von Fermentfreude".
+     * z. B. „Gründer von Fermentfreude".
      */
     role?: string | null;
   };
@@ -11337,6 +11378,7 @@ export interface RecipesPage {
     fermentation?: string | null;
     total?: string | null;
     yield?: string | null;
+    vessel?: string | null;
     difficulty?: string | null;
     minutes?: string | null;
     day?: string | null;
@@ -11372,14 +11414,46 @@ export interface RecipesPage {
     showMore?: string | null;
     filterLabel?: string | null;
     recipeOfWeek?: string | null;
+    heroButton?: string | null;
     diffEasy?: string | null;
     diffMedium?: string | null;
     diffAdvanced?: string | null;
     partnerKooperation?: string | null;
     partnerAnzeige?: string | null;
     partnerWerbung?: string | null;
-    printRecipe?: string | null;
+    aboutRecipe?: string | null;
+    backToRecipes?: string | null;
+    share?: string | null;
+    copyLink?: string | null;
+    linkCopied?: string | null;
+    printShort?: string | null;
+    pinShort?: string | null;
+    save?: string | null;
+    saved?: string | null;
+    saveAria?: string | null;
+    unsaveAria?: string | null;
+    savedTab?: string | null;
+    savedEmpty?: string | null;
+    savedHint?: string | null;
+    savedLoginLink?: string | null;
+    savedAccountHint?: string | null;
+    rateTitle?: string | null;
+    rateThanks?: string | null;
+    rateError?: string | null;
+    rateOne?: string | null;
+    rateMany?: string | null;
+    rateStarsAria?: string | null;
+    allRecipes?: string | null;
+    printSlogan?: string | null;
     checkHint?: string | null;
+    jumpToRecipe?: string | null;
+    scaleLabel?: string | null;
+    scaleMakes?: string | null;
+    scale1?: string | null;
+    scale2?: string | null;
+    scale3?: string | null;
+    cookMode?: string | null;
+    cookModeHint?: string | null;
     readyOnText?: string | null;
     noticeTitle?: string | null;
   };
@@ -11482,6 +11556,7 @@ export interface FooterSelect<T extends boolean = true> {
         facebook?: T;
         instagram?: T;
         linkedin?: T;
+        pinterest?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -11729,11 +11804,11 @@ export interface RecipesPageSelect<T extends boolean = true> {
   hero?:
     | T
     | {
+        heroRecipe?: T;
         eyebrow?: T;
         title?: T;
         highlight?: T;
         lead?: T;
-        heroRecipe?: T;
       };
   categories?:
     | T
@@ -11752,7 +11827,6 @@ export interface RecipesPageSelect<T extends boolean = true> {
   featured?:
     | T
     | {
-        title?: T;
         bandEyebrow?: T;
         bandTitle?: T;
         bandText?: T;
@@ -11777,6 +11851,7 @@ export interface RecipesPageSelect<T extends boolean = true> {
         fermentation?: T;
         total?: T;
         yield?: T;
+        vessel?: T;
         difficulty?: T;
         minutes?: T;
         day?: T;
@@ -11812,14 +11887,46 @@ export interface RecipesPageSelect<T extends boolean = true> {
         showMore?: T;
         filterLabel?: T;
         recipeOfWeek?: T;
+        heroButton?: T;
         diffEasy?: T;
         diffMedium?: T;
         diffAdvanced?: T;
         partnerKooperation?: T;
         partnerAnzeige?: T;
         partnerWerbung?: T;
-        printRecipe?: T;
+        aboutRecipe?: T;
+        backToRecipes?: T;
+        share?: T;
+        copyLink?: T;
+        linkCopied?: T;
+        printShort?: T;
+        pinShort?: T;
+        save?: T;
+        saved?: T;
+        saveAria?: T;
+        unsaveAria?: T;
+        savedTab?: T;
+        savedEmpty?: T;
+        savedHint?: T;
+        savedLoginLink?: T;
+        savedAccountHint?: T;
+        rateTitle?: T;
+        rateThanks?: T;
+        rateError?: T;
+        rateOne?: T;
+        rateMany?: T;
+        rateStarsAria?: T;
+        allRecipes?: T;
+        printSlogan?: T;
         checkHint?: T;
+        jumpToRecipe?: T;
+        scaleLabel?: T;
+        scaleMakes?: T;
+        scale1?: T;
+        scale2?: T;
+        scale3?: T;
+        cookMode?: T;
+        cookModeHint?: T;
         readyOnText?: T;
         noticeTitle?: T;
       };

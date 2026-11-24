@@ -65,16 +65,16 @@ const NOTICES: Record<string, Array<{ day: number } & Lang>> = {
   'trauben-kombucha': [
     { day: 1, de: 'Erste kleine Bläschen am Flaschenhals', en: 'First small bubbles at the neck of the bottle' },
     { day: 2, de: 'Die Trauben steigen nach oben', en: 'The grapes rise to the top' },
-    { day: 3, de: 'Prickelt und riecht fruchtig – ab in den Kühlschrank', en: 'Fizzy and fruity – into the fridge' },
+    { day: 3, de: 'Prickelt und riecht fruchtig. Ab in den Kühlschrank', en: 'Fizzy and fruity. Into the fridge' },
   ],
   'klassisches-sauerkraut': [
     { day: 1, de: 'Lake steht über dem Kraut, erste Bläschen', en: 'Brine covers the cabbage, first bubbles' },
     { day: 3, de: 'Es blubbert kräftig und riecht säuerlich', en: 'Lively bubbling, smells pleasantly sour' },
     { day: 10, de: 'Kraut wird heller und weicher', en: 'The cabbage turns paler and softer' },
-    { day: 21, de: 'Knackig, mild-sauer – fertig zum Genießen', en: 'Crunchy and mildly sour – ready to enjoy' },
+    { day: 21, de: 'Knackig, mild-sauer, fertig zum Genießen', en: 'Crunchy and mildly sour, ready to enjoy' },
   ],
   'fermentierte-zucchini-pickles': [
-    { day: 2, de: 'Lake wird leicht trüb – das ist gut so', en: 'The brine turns slightly cloudy – that is a good sign' },
+    { day: 2, de: 'Lake wird leicht trüb, das ist gut so', en: 'The brine turns slightly cloudy, that is a good sign' },
     { day: 5, de: 'Riecht frisch-säuerlich nach Dill', en: 'Smells fresh, sour and of dill' },
   ],
   'paprika-kimchi': [
@@ -241,8 +241,8 @@ const OWN_SAMPLES: Sample[] = [
     category: 'fermentieren',
     title: { de: 'Klassisches Sauerkraut', en: 'Classic Sauerkraut' },
     summary: {
-      de: 'Nur Kraut und Salz — und nach ein paar Wochen ein knackiges, probiotisches Sauerkraut aus dem eigenen Glas.',
-      en: 'Just cabbage and salt — and a few weeks later, crunchy probiotic sauerkraut from your own jar.',
+      de: 'Nur Kraut und Salz. Nach ein paar Wochen hast du ein knackiges, probiotisches Sauerkraut aus dem eigenen Glas.',
+      en: 'Just cabbage and salt. A few weeks later you have crunchy probiotic sauerkraut from your own jar.',
     },
     prepMinutes: 30,
     fermentationDays: 21,
@@ -261,7 +261,7 @@ const OWN_SAMPLES: Sample[] = [
       { de: 'Locker verschließen und 3–5 Tage bei Zimmertemperatur, danach 2–3 Wochen kühler fermentieren lassen.', en: 'Close loosely and ferment for 3–5 days at room temperature, then 2–3 weeks somewhere cooler.' },
     ],
     tips: [
-      { de: 'Alles muss unter der Lake bleiben — das ist der wichtigste Schutz vor Schimmel.', en: 'Everything must stay below the brine — that is the most important protection against mould.' },
+      { de: 'Alles muss unter der Lake bleiben. Das ist der wichtigste Schutz vor Schimmel.', en: 'Everything must stay below the brine. That is the most important protection against mould.' },
     ],
   },
   {
@@ -295,8 +295,8 @@ const OWN_SAMPLES: Sample[] = [
     category: 'tempeh',
     title: { de: 'Knuspriges Tempeh mit Sojamarinade', en: 'Crispy Tempeh with Soy Marinade' },
     summary: {
-      de: 'Mariniert, in der Pfanne knusprig gebraten — so wird Tempeh zum Lieblingsprotein in jeder Bowl.',
-      en: 'Marinated and pan-fried until crispy — this is how tempeh becomes the favourite protein in any bowl.',
+      de: 'Mariniert, in der Pfanne knusprig gebraten. So wird Tempeh zum Lieblingsprotein in jeder Bowl.',
+      en: 'Marinated and pan-fried until crispy. This is how tempeh becomes the favourite protein in any bowl.',
     },
     prepMinutes: 25,
     yield: { de: '2 Portionen', en: '2 servings' },
@@ -314,15 +314,15 @@ const OWN_SAMPLES: Sample[] = [
       { de: 'Öl in einer Pfanne erhitzen und das Tempeh von jeder Seite 3–4 Minuten goldbraun braten.', en: 'Heat the oil in a pan and fry the tempeh for 3–4 minutes per side until golden.' },
       { de: 'Mit der restlichen Marinade ablöschen und kurz glasieren.', en: 'Deglaze with the remaining marinade and glaze briefly.' },
     ],
-    tips: [{ de: 'Selbstgemachtes Tempeh vorher 10 Minuten dämpfen — es wird dann besonders saftig.', en: 'Steam homemade tempeh for 10 minutes first — it turns out extra juicy.' }],
+    tips: [{ de: 'Selbstgemachtes Tempeh vorher 10 Minuten dämpfen, dann wird es besonders saftig.', en: 'Steam homemade tempeh for 10 minutes first, so it turns out extra juicy.' }],
   },
   {
     slug: 'kombucha-erste-fermentation',
     category: 'kombucha',
     title: { de: 'Kombucha: die erste Fermentation', en: 'Kombucha: The First Fermentation' },
     summary: {
-      de: 'Grundrezept für deinen ersten Kombucha — Tee, Zucker, SCOBY und etwas Geduld.',
-      en: 'Basic recipe for your first kombucha — tea, sugar, SCOBY and a little patience.',
+      de: 'Grundrezept für deinen ersten Kombucha: Tee, Zucker, SCOBY und etwas Geduld.',
+      en: 'Basic recipe for your first kombucha: tea, sugar, SCOBY and a little patience.',
     },
     prepMinutes: 20,
     fermentationDays: 10,
@@ -340,7 +340,7 @@ const OWN_SAMPLES: Sample[] = [
       { de: 'Tee mit 1 l heißem Wasser 10 Minuten ziehen lassen, abseihen und den Zucker darin auflösen.', en: 'Steep the tea in 1 l hot water for 10 minutes, strain and dissolve the sugar.' },
       { de: 'Mit 1 l kaltem Wasser auffüllen und auf Zimmertemperatur abkühlen lassen.', en: 'Top up with 1 l cold water and let it cool to room temperature.' },
       { de: 'Starterflüssigkeit und SCOBY ins Glas geben, mit einem Tuch abdecken.', en: 'Add the starter liquid and SCOBY to the jar and cover with a cloth.' },
-      { de: '7–12 Tage bei 22–26 °C fermentieren lassen. Ab Tag 7 probieren — fertig ist er, wenn er dir angenehm säuerlich schmeckt.', en: 'Ferment for 7–12 days at 22–26 °C. Taste from day 7 — it is ready when it tastes pleasantly tart to you.' },
+      { de: '7–12 Tage bei 22–26 °C fermentieren lassen. Ab Tag 7 probieren. Fertig ist er, wenn er dir angenehm säuerlich schmeckt.', en: 'Ferment for 7–12 days at 22–26 °C. Taste from day 7. It is ready when it tastes pleasantly tart to you.' },
     ],
     tips: [{ de: 'Kein Metall verwenden und das Glas nicht in die direkte Sonne stellen.', en: 'Avoid metal and keep the jar out of direct sunlight.' }],
   },
@@ -477,6 +477,12 @@ async function seedPageGlobal(payload: Awaited<ReturnType<typeof getPayload>>) {
  * Non-destructive: only fills fields that are still empty, keeps photos and
  * anything an editor already wrote. Runs every time (no --page needed).
  */
+/** Template words whose default changed: [old DE, old EN]. Replaced only while still unchanged. */
+const OLD_DEFAULTS: Record<string, { de: string; en: string }> = {
+  pinShort: { de: 'Merken', en: 'Save' }, // now "Pinnen" / "Pin it" — "Speichern" is the heart
+  savedHint: { de: 'Deine gespeicherten Rezepte bleiben auf diesem Gerät.', en: 'Your saved recipes stay on this device.' },
+}
+
 async function seedTemplateTexts(payload: Awaited<ReturnType<typeof getPayload>>) {
   // fallbackLocale: false → an empty English field reads as empty (not as the German text)
   const deDoc = await payload.findGlobal({ slug: 'recipes-page', locale: 'de', depth: 0, fallbackLocale: false })
@@ -486,7 +492,9 @@ async function seedTemplateTexts(payload: Awaited<ReturnType<typeof getPayload>>
     const out: Record<string, string> = {}
     for (const [k, v] of Object.entries(RECIPE_LABELS[lang])) {
       const has = typeof current[k] === 'string' && (current[k] as string).trim()
-      out[k] = has ? (current[k] as string) : v
+      // an old default nobody changed gets the new default (e.g. Pinterest "Merken" → "Pinnen")
+      const outdated = has && OLD_DEFAULTS[k]?.[lang] === (current[k] as string).trim()
+      out[k] = has && !outdated ? (current[k] as string) : v
     }
     return out
   }
