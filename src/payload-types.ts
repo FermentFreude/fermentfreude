@@ -76,6 +76,7 @@ export interface Config {
     workshops: Workshop;
     'workshop-locations': WorkshopLocation;
     'workshop-bookings': WorkshopBooking;
+    'contact-messages': ContactMessage;
     pages: Page;
     media: Media;
     posts: Post;
@@ -135,6 +136,7 @@ export interface Config {
     workshops: WorkshopsSelect<false> | WorkshopsSelect<true>;
     'workshop-locations': WorkshopLocationsSelect<false> | WorkshopLocationsSelect<true>;
     'workshop-bookings': WorkshopBookingsSelect<false> | WorkshopBookingsSelect<true>;
+    'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -1908,9 +1910,6 @@ export interface Page {
      * e.g. "No additives. No shortcuts. Just patience and care."
      */
     fermentationWhatMotto?: string | null;
-    /**
-     * e.g. "Ready to Learn?", "Our Story"
-     */
     fermentationWhatLinks?:
       | {
           label: string;
@@ -3117,6 +3116,14 @@ export interface ContactBlock {
      * Text on the submit button (e.g., "Submit Now").
      */
     submitButton: string;
+    /**
+     * Wird statt des Formulars gezeigt, sobald die Nachricht angekommen ist. Leer lassen = Standardtext.
+     */
+    successMessage?: string | null;
+    /**
+     * Wird gezeigt, wenn das Senden fehlschlägt. Die Kontakt-E-Mail wird automatisch dahinter angezeigt.
+     */
+    errorMessage?: string | null;
   };
   /**
    * Dark banner below the contact form (e.g., "For Chefs and Food Professionals").
@@ -6165,6 +6172,14 @@ export interface GastronomyInquiryBlock {
       | null;
   };
   submitLabel?: string | null;
+  /**
+   * Wird statt des Formulars gezeigt, sobald die Anfrage angekommen ist. Leer lassen = Standardtext.
+   */
+  successMessage?: string | null;
+  /**
+   * Wird gezeigt, wenn das Senden fehlschlägt. Die Kontakt-E-Mail wird automatisch dahinter angezeigt.
+   */
+  errorMessage?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'gastronomyInquiry';
@@ -6522,6 +6537,33 @@ export interface CancellationInvoice {
   refundStatus: 'offen' | 'erstattet' | 'verrechnet';
   refundDate?: string | null;
   refundMethodOrReference?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Normalerweise leer. Nachrichten aus den Kontaktformularen gehen per E-Mail an kontakt@fermentfreude.at und werden danach hier gelöscht. Steht hier etwas, ist die E-Mail fehlgeschlagen – bitte dem Kunden direkt antworten und den Eintrag dann löschen.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-messages".
+ */
+export interface ContactMessage {
+  id: string;
+  source: 'contact' | 'gastronomy';
+  /**
+   * Auf welcher Seite abgeschickt.
+   */
+  pagePath?: string | null;
+  locale?: string | null;
+  name: string;
+  email: string;
+  phone?: string | null;
+  company?: string | null;
+  subject?: string | null;
+  /**
+   * Zusätzliche Felder (z. B. Betriebsart, Menge bei Gastronomie-Anfragen).
+   */
+  details?: string | null;
+  message?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -7199,6 +7241,10 @@ export interface PayloadLockedDocument {
         value: string | WorkshopBooking;
       } | null)
     | ({
+        relationTo: 'contact-messages';
+        value: string | ContactMessage;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: string | Page;
       } | null)
@@ -7499,6 +7545,24 @@ export interface WorkshopBookingsSelect<T extends boolean = true> {
         by?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-messages_select".
+ */
+export interface ContactMessagesSelect<T extends boolean = true> {
+  source?: T;
+  pagePath?: T;
+  locale?: T;
+  name?: T;
+  email?: T;
+  phone?: T;
+  company?: T;
+  subject?: T;
+  details?: T;
+  message?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -8377,6 +8441,8 @@ export interface ContactBlockSelect<T extends boolean = true> {
                   };
             };
         submitButton?: T;
+        successMessage?: T;
+        errorMessage?: T;
       };
   ctaBanner?:
     | T
@@ -9490,6 +9556,8 @@ export interface GastronomyInquiryBlockSelect<T extends boolean = true> {
             };
       };
   submitLabel?: T;
+  successMessage?: T;
+  errorMessage?: T;
   id?: T;
   blockName?: T;
 }
