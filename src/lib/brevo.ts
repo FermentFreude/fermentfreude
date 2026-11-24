@@ -177,6 +177,8 @@ type SendTransactionalEmailParams = {
   to: BrevoRecipient[]
   subject: string
   htmlContent: string
+  /** Where "Reply" in the inbox goes (e.g. the customer who used the contact form). */
+  replyTo?: BrevoRecipient
 }
 
 /**
@@ -249,6 +251,7 @@ export async function sendTransactionalEmail({
   to,
   subject,
   htmlContent,
+  replyTo,
 }: SendTransactionalEmailParams): Promise<{ success: boolean; messageId?: string; blocked?: boolean }> {
   const safe = filterRecipients(to, `"${subject}"`)
   if (safe.allowed.length === 0) return { success: true, blocked: true }
@@ -272,6 +275,7 @@ export async function sendTransactionalEmail({
         to,
         subject,
         htmlContent,
+        ...(replyTo ? { replyTo } : {}),
       }),
     })
 

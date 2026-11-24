@@ -303,6 +303,26 @@ export const ContactBlock: Block = {
             description: 'Text on the submit button (e.g., "Submit Now").',
           },
         },
+        {
+          name: 'successMessage',
+          type: 'textarea',
+          localized: true,
+          label: 'Danke-Text nach dem Absenden',
+          admin: {
+            description:
+              'Wird statt des Formulars gezeigt, sobald die Nachricht angekommen ist. Leer lassen = Standardtext.',
+          },
+        },
+        {
+          name: 'errorMessage',
+          type: 'text',
+          localized: true,
+          label: 'Fehlertext',
+          admin: {
+            description:
+              'Wird gezeigt, wenn das Senden fehlschlägt. Die Kontakt-E-Mail wird automatisch dahinter angezeigt.',
+          },
+        },
       ],
     },
     {

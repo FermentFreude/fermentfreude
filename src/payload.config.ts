@@ -33,6 +33,7 @@ import { OnlineCourses } from '@/collections/OnlineCourses'
 import { Pages } from '@/collections/Pages'
 import { Posts } from '@/collections/Posts'
 import { Quotes } from '@/collections/Quotes'
+import { ContactMessages } from '@/collections/ContactMessages'
 import { RefundRequests } from '@/collections/RefundRequests'
 import { ReturnRequests } from '@/collections/ReturnRequests'
 import { Reviews } from '@/collections/Reviews'
@@ -175,6 +176,7 @@ export default buildConfig({
     Workshops,
     WorkshopLocations,
     WorkshopBookings,
+    ContactMessages,
     Pages,
     Media,
     Posts,
