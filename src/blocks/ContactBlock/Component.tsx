@@ -6,6 +6,21 @@ import { getLocale } from '@/utilities/getLocale'
 import { toKebabCase } from '@/utilities/toKebabCase'
 
 import { ContactCardAnimated } from './ContactCardAnimated'
+import { ContactForm } from './ContactForm'
+
+/** Fallbacks — editable per page in the CMS (Contact Form Fields → Danke-Text / Fehlertext). */
+const FORM_FEEDBACK = {
+  de: {
+    success:
+      'Danke für deine Nachricht! Sie ist bei uns angekommen – wir melden uns so schnell wie möglich bei dir.',
+    error: 'Das hat leider nicht geklappt. Bitte versuch es nochmal oder schreib uns direkt an',
+  },
+  en: {
+    success:
+      "Thanks for your message! It has reached us – we'll get back to you as soon as we can.",
+    error: "Sorry, that didn't work. Please try again or email us directly at",
+  },
+} as const
 
 const DEFAULTS_DE = {
   hero: {
@@ -34,12 +49,7 @@ const DEFAULTS_DE = {
     },
     subjectOptions: {
       default: 'Betreff',
-      options: [
-        'Allgemeine Anfrage',
-        'Workshop-Information',
-        'Frage zum Produkt',
-        'Partnerschaft',
-      ],
+      options: ['Allgemeine Anfrage', 'Workshop-Information', 'Frage zum Produkt', 'Partnerschaft'],
     },
     submitButton: 'Jetzt absenden',
   },
@@ -174,7 +184,10 @@ function sanitizeContactCopy(
   const deFormStrings = new Set(['frag uns alles', 'jetzt absenden', 'nachricht senden'])
 
   if (isDe) {
-    if (normLabel(contact.heading) === 'contact' || normLabel(contact.heading) === 'contact detail') {
+    if (
+      normLabel(contact.heading) === 'contact' ||
+      normLabel(contact.heading) === 'contact detail'
+    ) {
       contact.heading = defaultsDe.contact.heading
     }
     if (
@@ -311,8 +324,7 @@ export const ContactBlockComponent: React.FC<
     },
     subjectOptions: {
       default:
-        data?.contactForm?.subjectOptions?.default ??
-        defaults.contactForm.subjectOptions.default,
+        data?.contactForm?.subjectOptions?.default ?? defaults.contactForm.subjectOptions.default,
       options: subjectOptionsList,
     },
     submitButton: data?.contactForm?.submitButton ?? defaults.contactForm.submitButton,
@@ -562,73 +574,24 @@ export const ContactBlockComponent: React.FC<
                   <h2 className="text-section-heading font-bold tracking-tight text-ff-charcoal">
                     {contactForm.formHeading}
                   </h2>
-                  <form className="flex flex-col gap-3">
-                    {useSingleName ? (
-                      <input
-                        type="text"
-                        placeholder={
-                          contactForm.placeholders.name ?? defaults.contactForm.placeholders.name
-                        }
-                        className={inputBase}
-                      />
-                    ) : (
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <input
-                          type="text"
-                          placeholder={contactForm.placeholders.firstName}
-                          className={inputBase}
-                        />
-                        <input
-                          type="text"
-                          placeholder={contactForm.placeholders.lastName}
-                          className={inputBase}
-                        />
-                      </div>
-                    )}
-                    <input
-                      type="email"
-                      placeholder={contactForm.placeholders.email}
-                      className={inputBase}
-                      autoComplete="email"
-                    />
-                    <div className="relative">
-                      <select
-                        className={`${inputBase} appearance-none pr-10 [&::-ms-expand]:hidden`}
-                        defaultValue=""
-                      >
-                        <option value="" disabled>
-                          {contactForm.subjectOptions.default}
-                        </option>
-                        {contactForm.subjectOptions.options.map((opt, idx) => (
-                          <option key={idx} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ff-gray-text">
-                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden>
-                          <path
-                            d="M1 1.5L6 6.5L11 1.5"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                    <textarea
-                      placeholder={contactForm.placeholders.message}
-                      rows={5}
-                      className={`${inputBase} min-h-32 resize-y`}
-                    />
-                    <button
-                      type="submit"
-                      className="mt-2 w-full rounded-lg bg-ff-gold-accent px-6 py-3 font-display text-base font-bold text-black transition-all duration-300 hover:scale-[1.02] hover:bg-ff-gold-accent-dark active:scale-[0.98]"
-                    >
-                      {contactForm.submitButton}
-                    </button>
-                  </form>
+                  <ContactForm
+                    locale={isDe ? 'de' : 'en'}
+                    inputBase={inputBase}
+                    useSingleName={useSingleName}
+                    placeholders={contactForm.placeholders}
+                    subjectDefault={contactForm.subjectOptions.default}
+                    subjectOptions={contactForm.subjectOptions.options}
+                    submitButton={contactForm.submitButton}
+                    successMessage={
+                      data?.contactForm?.successMessage?.trim() ||
+                      FORM_FEEDBACK[isDe ? 'de' : 'en'].success
+                    }
+                    errorMessage={
+                      data?.contactForm?.errorMessage?.trim() ||
+                      FORM_FEEDBACK[isDe ? 'de' : 'en'].error
+                    }
+                    contactEmail={contact.email}
+                  />
                 </div>
               </div>
             </div>

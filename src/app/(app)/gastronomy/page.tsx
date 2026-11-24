@@ -94,46 +94,22 @@ export default async function GastronomyPage() {
         const key = String(block.id ?? `${block.blockType}-${index}`)
 
         if (block.blockType === 'gastronomyHero') {
-          return (
-            <Fragment key={key}>
-              {renderHero(block, isDe)}
-            </Fragment>
-          )
+          return <Fragment key={key}>{renderHero(block, isDe)}</Fragment>
         }
         if (block.blockType === 'gastronomyShowcase') {
-          return (
-            <Fragment key={key}>
-              {renderShowcase(block, isDe)}
-            </Fragment>
-          )
+          return <Fragment key={key}>{renderShowcase(block, isDe)}</Fragment>
         }
         if (block.blockType === 'gastronomyBenefits') {
-          return (
-            <Fragment key={key}>
-              {renderBenefits(block, isDe)}
-            </Fragment>
-          )
+          return <Fragment key={key}>{renderBenefits(block, isDe)}</Fragment>
         }
         if (block.blockType === 'gastronomyAudience') {
-          return (
-            <Fragment key={key}>
-              {renderAudience(block, isDe)}
-            </Fragment>
-          )
+          return <Fragment key={key}>{renderAudience(block, isDe)}</Fragment>
         }
         if (block.blockType === 'gastronomyProduct') {
-          return (
-            <Fragment key={key}>
-              {renderProduct(block, isDe)}
-            </Fragment>
-          )
+          return <Fragment key={key}>{renderProduct(block, isDe)}</Fragment>
         }
         if (block.blockType === 'gastronomyProof') {
-          return (
-            <Fragment key={key}>
-              {renderProof(block, isDe)}
-            </Fragment>
-          )
+          return <Fragment key={key}>{renderProof(block, isDe)}</Fragment>
         }
         if (block.blockType === 'gastronomyInquiry') {
           return <Fragment key={key}>{renderInquiry(block, isDe)}</Fragment>
@@ -149,14 +125,20 @@ function renderHero(block: GastronomyHeroBlock, isDe: boolean) {
     <GastronomyHero
       image={block.image}
       eyebrow={cmsText(block.eyebrow, isDe ? 'Für Restaurants' : 'For restaurants')}
-      title={cmsText(block.title, isDe ? 'Tempeh für Profiküchen.' : 'Tempeh for professional kitchens.')}
+      title={cmsText(
+        block.title,
+        isDe ? 'Tempeh für Profiküchen.' : 'Tempeh for professional kitchens.',
+      )}
       tagline={cmsText(
         block.tagline,
         isDe
           ? 'Käferbohnen-Tempeh mit nussigem Aroma, Umami und einer Textur, die sich vielseitig in moderne Küche integrieren lässt.'
           : 'Runner bean tempeh with a nutty aroma, umami, and a texture that belongs in a modern kitchen.',
       )}
-      ctaLabel={cmsText(block.ctaLabel, isDe ? 'Für Gastronomie anfragen' : 'Enquire for gastronomy')}
+      ctaLabel={cmsText(
+        block.ctaLabel,
+        isDe ? 'Für Gastronomie anfragen' : 'Enquire for gastronomy',
+      )}
       ctaUrl={cmsText(block.ctaUrl, '#contact')}
       secondaryLabel={cmsText(block.secondaryLabel, isDe ? 'Tempeh entdecken' : 'Discover tempeh')}
       secondaryUrl={cmsText(block.secondaryUrl, '/products/kaeferbohnen-tempeh')}
@@ -176,7 +158,10 @@ function renderShowcase(block: GastronomyShowcaseBlock, isDe: boolean) {
   if (slides.length === 0) return null
   return (
     <GastronomyShowcase
-      title={cmsText(block.title, isDe ? 'Was kann man daraus machen?' : 'What can you make with it?')}
+      title={cmsText(
+        block.title,
+        isDe ? 'Was kann man daraus machen?' : 'What can you make with it?',
+      )}
       slides={slides}
       locale={isDe ? 'de' : 'en'}
     />
@@ -195,7 +180,10 @@ function renderBenefits(block: GastronomyBenefitsBlock, isDe: boolean) {
   if (items.length === 0) return null
   return (
     <GastronomyBenefits
-      title={cmsText(block.title, isDe ? 'Warum Tempeh für deine Küche?' : 'Why tempeh for your kitchen?')}
+      title={cmsText(
+        block.title,
+        isDe ? 'Warum Tempeh für deine Küche?' : 'Why tempeh for your kitchen?',
+      )}
       items={items}
     />
   )
@@ -280,14 +268,31 @@ function renderInquiry(block: GastronomyInquiryBlock, isDe: boolean) {
         ),
         businessOptions: optionLabels(
           block.businessType,
-          isDe ? ['Restaurant', 'Hotel', 'Catering', 'Sonstiges'] : ['Restaurant', 'Hotel', 'Catering', 'Other'],
+          isDe
+            ? ['Restaurant', 'Hotel', 'Catering', 'Sonstiges']
+            : ['Restaurant', 'Hotel', 'Catering', 'Other'],
         ),
-        interest: cmsText(block.interest?.default, isDe ? 'Worum geht es?' : 'What are you interested in?'),
+        interest: cmsText(
+          block.interest?.default,
+          isDe ? 'Worum geht es?' : 'What are you interested in?',
+        ),
         interestOptions: optionLabels(
           block.interest,
           isDe
-            ? ['Tempeh / B2B-Bestellung', 'Produktinfo', 'Probe / Test', 'Team-Schulung', 'Sonstiges']
-            : ['Tempeh / B2B order', 'Product information', 'Samples / testing', 'Team training', 'Other'],
+            ? [
+                'Tempeh / B2B-Bestellung',
+                'Produktinfo',
+                'Probe / Test',
+                'Team-Schulung',
+                'Sonstiges',
+              ]
+            : [
+                'Tempeh / B2B order',
+                'Product information',
+                'Samples / testing',
+                'Team training',
+                'Other',
+              ],
         ),
         quantity: cmsText(
           placeholders?.quantity,
@@ -296,6 +301,21 @@ function renderInquiry(block: GastronomyInquiryBlock, isDe: boolean) {
         message: cmsText(placeholders?.message, isDe ? 'Nachricht' : 'Message'),
         submit: cmsText(block.submitLabel, isDe ? 'Anfrage senden' : 'Send enquiry'),
         contactLine: [email, phone].filter(Boolean).join(' · ') || null,
+        successMessage: cmsText(
+          block.successMessage,
+          isDe
+            ? 'Danke für eure Anfrage! Sie ist bei uns angekommen – wir melden uns so schnell wie möglich.'
+            : "Thanks for your enquiry! It has reached us – we'll get back to you as soon as we can.",
+        ),
+        errorMessage: cmsText(
+          block.errorMessage,
+          isDe
+            ? 'Das hat leider nicht geklappt. Bitte versucht es nochmal oder schreibt uns direkt an'
+            : "Sorry, that didn't work. Please try again or email us directly at",
+        ),
+        sending: isDe ? 'Wird gesendet …' : 'Sending …',
+        contactEmail: email || 'kontakt@fermentfreude.at',
+        locale: isDe ? 'de' : 'en',
       }}
     />
   )
