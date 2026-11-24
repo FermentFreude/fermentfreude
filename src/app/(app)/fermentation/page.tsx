@@ -2,7 +2,6 @@ import { LazyVideo } from '@/components/LazyVideo'
 import type { Metadata } from 'next'
 
 import { DangerAccordion } from '@/app/(app)/fermentation/DangerAccordion'
-import { FaqAccordion } from '@/app/(app)/fermentation/FaqAccordion'
 import { PracticeAccordion } from '@/app/(app)/fermentation/PracticeAccordion'
 import { WhySection } from '@/app/(app)/fermentation/WhySection'
 import { FadeIn } from '@/components/FadeIn'
@@ -75,7 +74,6 @@ const DEFAULT_WHAT_TITLE = 'What is fermentation?'
 const DEFAULT_WHAT_BODY =
   "This is an ancient food preservation technique. Why not learn how to get started? We'll help you master the art of fermentation in the comfort of your own kitchen."
 const DEFAULT_WHAT_MOTTO = 'No additives. No shortcuts. Just patience and care.'
-const DEFAULT_WHAT_LIST_ITEMS = ['Microbiome', 'Botanical', 'Living microorganisms']
 const DEFAULT_WHY_TITLE = 'Why is it so special?'
 const DEFAULT_WHY_ITEMS: Array<{ id?: string; title: string; description: string }> = [
   {
@@ -188,66 +186,6 @@ const DEFAULT_WORKSHOP_CARDS = [
     priceSuffix: '',
     buttonLabel: 'BOOK NOW',
     buttonUrl: '/workshops/vom-feld-ins-glas',
-  },
-]
-const DEFAULT_FAQ_TITLE = 'Frequently Asked Questions'
-const DEFAULT_FAQ_SUBTITLE = 'Common questions about fermentation answered.'
-const DEFAULT_FAQ_CTA_TITLE = 'Ready to Start Fermenting?'
-const DEFAULT_FAQ_CTA_BODY =
-  'Begin with simple vegetables like cabbage or cucumbers, use the proper salt ratio (2–3% by weight), and trust the process!'
-const DEFAULT_FAQ_MORE = "Can't find your answer?"
-const DEFAULT_FAQ_CONTACT = 'Contact Us'
-const DEFAULT_FAQ_CONTACT_URL = '/contact'
-const DEFAULT_FAQ_ITEMS: Array<{ id?: string; question: string; answer: string }> = [
-  {
-    question: 'What ingredients do I need?',
-    answer:
-      'Basic lacto-fermentation needs vegetables, salt (2–3% by weight), and water. No special equipment required.',
-  },
-  {
-    question: 'Do I need special equipment?',
-    answer:
-      'No. A clean jar, a weight to keep vegetables submerged, and a lid are enough. Our workshops cover simple setups.',
-  },
-  {
-    question: 'How long does fermentation take?',
-    answer:
-      'It varies. Sauerkraut can be ready in 1–2 weeks; kimchi in 3–5 days. Taste regularly to find your preference.',
-  },
-  {
-    question: 'What if I make a mistake?',
-    answer:
-      'Most mistakes are fixable. Mold on the surface can often be removed. Our workshops teach you how to troubleshoot.',
-  },
-  {
-    question: 'Is it safe to eat?',
-    answer:
-      'Yes. Fermentation creates an acidic environment that inhibits harmful bacteria. When done correctly, it is one of the safest preservation methods.',
-  },
-  {
-    question: 'Does fermentation kill bacteria?',
-    answer:
-      'Fermentation encourages beneficial bacteria (lactobacilli) while creating an acidic environment that inhibits harmful pathogens.',
-  },
-  {
-    question: 'Can I ferment at room temperature?',
-    answer:
-      'Yes. Most lacto-fermentation works best at 18–24°C (65–75°F). Cooler slows the process; warmer speeds it up.',
-  },
-  {
-    question: 'Is fermentation the same as pickling?',
-    answer:
-      'Not exactly. Pickling often uses vinegar (acid added). Fermentation creates acid naturally through bacteria.',
-  },
-  {
-    question: 'Can I eat fermented foods every day?',
-    answer:
-      'Yes. Many cultures consume fermented foods daily. Start small and increase gradually to let your gut adjust.',
-  },
-  {
-    question: 'Do fermented foods go bad?',
-    answer:
-      'They can. Signs: mold, off smell, slimy texture. Properly fermented foods stored in the fridge last months.',
   },
 ]
 
@@ -404,19 +342,6 @@ export default async function FermentationPage({ searchParams }: FermentationPag
     retouchDe.whatMotto,
     retouchEn.whatMotto ?? DEFAULT_WHAT_MOTTO,
   )
-  const whatLinks = f?.fermentationWhatLinks ?? []
-  const whatListItems =
-    whatLinks.length > 0
-      ? whatLinks
-          .map((l) =>
-            typeof l === 'object' && l !== null && 'label' in l
-              ? String((l as { label?: string }).label)
-              : '',
-          )
-          .filter(Boolean)
-      : retouchDe.whatListItems && retouchDe.whatListItems.length > 0
-        ? retouchDe.whatListItems
-        : DEFAULT_WHAT_LIST_ITEMS
   const whatImage = f?.fermentationWhatImage
 
   const whyTitle = resolveFermentationText(
@@ -598,44 +523,6 @@ export default async function FermentationPage({ searchParams }: FermentationPag
     nextDates,
   )
 
-  const faqTitle = resolveFermentationText(
-    f?.fermentationFaqTitle,
-    localeKey,
-    retouchDe.faqTitle,
-    retouchEn.faqTitle ?? DEFAULT_FAQ_TITLE,
-  )
-  const faqSubtitle = resolveFermentationText(
-    f?.fermentationFaqSubtitle,
-    localeKey,
-    retouchDe.faqSubtitle,
-    retouchEn.faqSubtitle ?? DEFAULT_FAQ_SUBTITLE,
-  )
-  const cmsFaqItems = (f?.fermentationFaqItems ?? []).filter(
-    (item) => item?.question?.trim() && item?.answer?.trim(),
-  )
-  const faqItems = resolveFermentationRows(
-    cmsFaqItems,
-    localeKey,
-    retouchDe.faqItems,
-    retouchEn.faqItems.length > 0 ? retouchEn.faqItems : DEFAULT_FAQ_ITEMS,
-    (rows) => rows.map((item) => `${item.question} ${item.answer}`).join(' '),
-  )
-  const faqCtaTitle = resolveFermentationText(
-    f?.fermentationFaqCtaTitle,
-    localeKey,
-    retouchDe.faqCtaTitle,
-    retouchEn.faqCtaTitle ?? DEFAULT_FAQ_CTA_TITLE,
-  )
-  const faqCtaBody = resolveFermentationText(
-    f?.fermentationFaqCtaBody,
-    localeKey,
-    retouchDe.faqCtaBody,
-    retouchEn.faqCtaBody ?? DEFAULT_FAQ_CTA_BODY,
-  )
-  const _faqMoreText = f?.fermentationFaqMoreText ?? DEFAULT_FAQ_MORE
-  const _faqContactLabel = f?.fermentationFaqContactLabel ?? DEFAULT_FAQ_CONTACT
-  const _faqContactUrl = f?.fermentationFaqContactUrl ?? DEFAULT_FAQ_CONTACT_URL
-
   return (
     <article className="overflow-x-clip font-sans">
       {/* Hero — title + description, image, 4 boxes overlapping */}
@@ -785,22 +672,9 @@ export default async function FermentationPage({ searchParams }: FermentationPag
                     {whatTitle}
                   </h2>
                   {whatBody && (
-                    <p className="mt-4 font-bold leading-relaxed text-ff-black text-base sm:mt-6 sm:text-lg md:text-xl lg:text-[1.5625rem]">
+                    <p className="mt-4 font-normal leading-relaxed text-ff-black text-base sm:mt-6 sm:text-lg md:text-xl lg:text-[1.5625rem]">
                       {whatBody}
                     </p>
-                  )}
-                  {whatListItems.length > 0 && (
-                    <ul className="mt-6 space-y-2 sm:mt-8">
-                      {whatListItems.map((item, i) => (
-                        <li
-                          key={i}
-                          className="flex items-center gap-2 text-body font-medium text-ff-black sm:text-lg"
-                        >
-                          <span className="size-1.5 shrink-0 rounded-full bg-[#E6BE68]" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
                   )}
                   {whatMotto && (
                     <div className="mt-8 sm:mt-10 md:mt-12">
@@ -912,41 +786,6 @@ export default async function FermentationPage({ searchParams }: FermentationPag
                     />
                   )}
                 </div>
-              </div>
-            </div>
-          </div>
-        </FadeIn>
-      </section>
-
-      {/* FAQ — accordion style */}
-      <section className="section-padding-sm bg-white">
-        <FadeIn delay={250}>
-          <div className="mx-auto max-w-379 px-4 sm:px-6">
-            <div className="mx-auto max-w-3xl text-center">
-              <h2 className="font-display text-section-heading font-bold text-ff-black">
-                {faqTitle}
-              </h2>
-              {faqSubtitle && (
-                <p className="mt-2 text-body text-ff-black/80 sm:text-body-lg">{faqSubtitle}</p>
-              )}
-            </div>
-            <div className="mx-auto mt-8 max-w-4xl">
-              <div className="overflow-hidden rounded-2xl border border-[#333333]/15 bg-[#E8E6E3] p-6 sm:p-8 md:p-10">
-                <FaqAccordion items={faqItems} type="single" />
-                {(faqCtaTitle || faqCtaBody) && (
-                  <div className="mt-8 rounded-xl bg-white p-6 text-center sm:mt-10 sm:p-8">
-                    {faqCtaTitle && (
-                      <h3 className="font-display text-subheading font-bold text-ff-black">
-                        {faqCtaTitle}
-                      </h3>
-                    )}
-                    {faqCtaBody && (
-                      <p className="mx-auto mt-3 max-w-2xl text-body leading-relaxed text-ff-black/90 sm:text-body-lg">
-                        {faqCtaBody}
-                      </p>
-                    )}
-                  </div>
-                )}
               </div>
             </div>
           </div>

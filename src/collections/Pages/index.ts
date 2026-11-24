@@ -1425,7 +1425,8 @@ export const Pages: CollectionConfig = {
                   minRows: 0,
                   maxRows: 3,
                   label: 'What Section Links',
-                  admin: { description: 'e.g. "Ready to Learn?", "Our Story"' },
+                  // Hidden: no longer shown on the page (looked like broken buttons). Data kept.
+                  admin: { hidden: true },
                   fields: [
                     {
                       name: 'label',
@@ -1700,7 +1701,8 @@ export const Pages: CollectionConfig = {
             {
               type: 'collapsible',
               label: '8. FAQ',
-              admin: { initCollapsed: false },
+              // Hidden: FAQ removed from /fermentation (Nov 2026) — the site has its own FAQ page. Data kept.
+              admin: { initCollapsed: false, condition: () => false },
               fields: [
                 {
                   name: 'fermentationFaqTitle',
@@ -1794,7 +1796,7 @@ export const Pages: CollectionConfig = {
             },
             {
               type: 'collapsible',
-              label: '9. Learn UNIQUE. FLAVOURS (Workshop)',
+              label: '8. Learn UNIQUE. FLAVOURS (Workshop)',
               admin: { initCollapsed: false },
               fields: [
                 {
