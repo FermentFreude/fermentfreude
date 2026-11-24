@@ -521,7 +521,7 @@ export function KombuchaBookingCard({
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <button
                     onClick={handleToggleDates}
-                    className="inline-flex flex-1 items-center justify-center gap-2.5 rounded-full px-8 py-4 font-display text-sm font-bold uppercase tracking-wider bg-(--ws) text-(--ws-on) transition-all duration-300 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
+                    className="inline-flex flex-1 items-center justify-center gap-2.5 rounded-full px-8 py-4 font-display text-sm font-bold uppercase tracking-wider bg-[#2D2F2C] text-[#FAF2E0] transition-all duration-300 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <CalendarIcon />
                     {showDates ? hideDatesLabel : viewDatesLabel}
@@ -702,7 +702,7 @@ export function KombuchaBookingCard({
                             className={`inline-block w-full sm:w-auto lg:w-full px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md transition-all duration-300 ${
                               isSoldOut
                                 ? 'bg-[#d0ccc6] text-[#9a9a9a] cursor-not-allowed'
-                                : 'bg-(--ws) text-(--ws-on) hover:bg-(--ws-hover) hover:text-(--ws-hover-on) hover:-translate-y-px hover:shadow-md'
+                                : 'bg-[#2D2F2C] text-[#FAF2E0] hover:bg-black hover:-translate-y-px hover:shadow-md'
                             }`}
                           >
                             {isSoldOut ? L.soldOut : L.book}

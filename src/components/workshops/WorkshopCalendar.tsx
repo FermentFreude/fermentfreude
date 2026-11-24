@@ -145,7 +145,8 @@ function WorkshopCard({
       <div className="flex flex-col flex-1 p-4 sm:p-6">
         {/* Workshop Type Badge */}
         <div className="mb-5 inline-flex flex-wrap items-center gap-2">
-          <span className="font-display text-xs sm:text-sm font-bold uppercase tracking-wider bg-(--ws) text-(--ws-on) px-3 py-1.5 rounded-full">
+          <span className="inline-flex items-center gap-2 font-display text-xs sm:text-sm font-bold uppercase tracking-wider bg-[#FAF2E0] text-[#2D2F2C] px-3 py-1.5 rounded-full">
+            <span className="size-2 rounded-full bg-(--ws)" aria-hidden="true" />
             {getWorkshopTypeLabel(workshop.workshopType)}
           </span>
           {lowSpotsText && (
@@ -252,7 +253,7 @@ function WorkshopCard({
           {/* Details Button */}
           <Link
             href={getWorkshopSlug(workshop.workshopType)}
-            className="inline-flex items-center justify-center px-3 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide rounded-md bg-[#FAF2E0] text-[#2D2F2C] hover:bg-(--ws) hover:text-(--ws-on) transition-all duration-300"
+            className="inline-flex items-center justify-center px-3 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide rounded-md bg-[#FAF2E0] text-[#2D2F2C] hover:bg-[#2D2F2C] hover:text-[#FAF2E0] transition-all duration-300"
           >
             {workshop.detailsLabel || 'Details'}
           </Link>
@@ -266,7 +267,7 @@ function WorkshopCard({
             className={`inline-flex items-center justify-center px-3 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide rounded-md transition-all duration-300 ${
               isFullySoldOut || hasNoDates
                 ? 'bg-[#d0ccc6] text-[#6b6b6b] cursor-not-allowed'
-                : 'bg-(--ws) text-(--ws-on) hover:opacity-90'
+                : 'bg-[#2D2F2C] text-[#FAF2E0] hover:bg-black'
             }`}
           >
             {isFullySoldOut
@@ -668,7 +669,7 @@ export function WorkshopCalendar({
             className={`inline-block w-full sm:w-auto lg:w-full px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md transition-all duration-300 ${
               date.availableSpots === 0
                 ? 'bg-[#d0ccc6] text-[#5a5a5a] cursor-not-allowed'
-                : 'bg-(--ws) text-(--ws-on) hover:bg-(--ws-hover) hover:text-(--ws-hover-on) hover:-translate-y-px hover:shadow-md'
+                : 'bg-[#2D2F2C] text-[#FAF2E0] hover:bg-black hover:-translate-y-px hover:shadow-md'
             }`}
           >
             {date.availableSpots === 0
@@ -795,13 +796,11 @@ export function WorkshopCalendar({
                   style={workshopColorVars(type)}
                   className={`inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full font-display font-semibold text-xs sm:text-sm uppercase tracking-wide transition-all duration-300 ${
                     selectedType === type
-                      ? 'bg-(--ws) text-(--ws-on)'
-                      : 'bg-[#FAF2E0] text-[#2D2F2C] hover:bg-(--ws) hover:text-(--ws-on)'
+                      ? 'bg-[#2D2F2C] text-[#FAF2E0]'
+                      : 'bg-[#FAF2E0] text-[#2D2F2C] hover:bg-[#2D2F2C] hover:text-[#FAF2E0]'
                   }`}
                 >
-                  {selectedType !== type && (
-                    <span className="size-2 rounded-full bg-(--ws)" aria-hidden="true" />
-                  )}
+                  <span className="size-2 rounded-full bg-(--ws)" aria-hidden="true" />
                   {getWorkshopTypeLabel(type).split(' ')[0]} ({bookableCount(type)})
                 </button>
               ))}
