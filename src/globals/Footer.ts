@@ -178,6 +178,12 @@ export const Footer: GlobalConfig = {
           type: 'text',
           label: 'LinkedIn URL',
         },
+        {
+          name: 'pinterest',
+          type: 'text',
+          label: 'Pinterest URL',
+          admin: { description: 'Profil-Link, z. B. https://www.pinterest.at/fermentfreude/ (leer = dieser Standard-Link).' },
+        },
       ],
     },
   ],

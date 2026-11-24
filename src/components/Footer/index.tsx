@@ -8,6 +8,9 @@ import Link from 'next/link'
 import { FooterBrand } from './FooterBrand'
 import NewsletterForm from './NewsletterForm'
 
+/** Fermentfreude on Pinterest (David's profile); the Footer global can override it. */
+const DEFAULT_PINTEREST_URL = 'https://www.pinterest.at/fermentfreude/'
+
 const DEFAULTS_DE = {
   newsletterHeading: 'Werde Teil der Fermentfreude Bewegung',
   freeRecipesLabel: 'Kostenlose Workshop-Rezepte',
@@ -92,6 +95,7 @@ export async function Footer() {
   const accentColor = accentColorValue?.trim() || '#e6be68'
   const footerStyle = { '--footer-accent': accentColor } as CSSProperties
   const social = footer.socialMedia
+  const pinterestUrl = social?.pinterest || DEFAULT_PINTEREST_URL
 
   // Resolve a CMS link field (reference or custom URL) to an href string
   const resolveHref = (link: {
@@ -248,6 +252,14 @@ export async function Footer() {
                 >
                   LinkedIn
                 </a>
+                <a
+                  href={pinterestUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-sans text-sm hover:text-(--footer-accent) transition-colors"
+                >
+                  Pinterest
+                </a>
               </nav>
             </div>
           </div>
@@ -295,6 +307,17 @@ export async function Footer() {
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+              </svg>
+            </a>
+            <a
+              href={pinterestUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Pinterest"
+              className="text-[#1d1d1d] hover:text-(--footer-accent) transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0a12 12 0 0 0-4.37 23.17c-.1-.94-.2-2.4.04-3.43l1.4-5.94s-.36-.72-.36-1.78c0-1.67.97-2.92 2.17-2.92 1.03 0 1.52.77 1.52 1.69 0 1.03-.65 2.57-.99 4-.28 1.2.6 2.17 1.78 2.17 2.13 0 3.77-2.25 3.77-5.5 0-2.87-2.07-4.88-5.02-4.88a5.2 5.2 0 0 0-5.43 5.22c0 1.03.4 2.14.89 2.74a.36.36 0 0 1 .08.35l-.33 1.36c-.05.22-.18.27-.41.16-1.5-.7-2.44-2.89-2.44-4.65 0-3.79 2.75-7.27 7.93-7.27 4.16 0 7.4 2.97 7.4 6.93 0 4.13-2.6 7.46-6.22 7.46-1.22 0-2.36-.63-2.75-1.38l-.75 2.85c-.27 1.04-1 2.35-1.49 3.15A12 12 0 1 0 12 0Z" />
               </svg>
             </a>
           </div>

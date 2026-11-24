@@ -16,6 +16,7 @@ import {
   Star,
   User,
   XCircle,
+  Heart,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -35,6 +36,7 @@ const NAV_GROUPS: { key: keyof AccountTranslations; items: NavItem[] }[] = [
       { key: 'orders', href: '/account/orders', icon: ShoppingBag },
       { key: 'myLearning', href: '/account/learning', icon: GraduationCap },
       { key: 'downloads', href: '/account/downloads', icon: Download },
+      { key: 'savedRecipes', href: '/account/saved-recipes', icon: Heart },
     ],
   },
   {

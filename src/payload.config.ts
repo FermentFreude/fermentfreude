@@ -34,6 +34,7 @@ import { Pages } from '@/collections/Pages'
 import { Posts } from '@/collections/Posts'
 import { Quotes } from '@/collections/Quotes'
 import { Recipes } from '@/collections/Recipes'
+import { RecipeRatings } from '@/collections/RecipeRatings'
 import { RefundRequests } from '@/collections/RefundRequests'
 import { ReturnRequests } from '@/collections/ReturnRequests'
 import { Reviews } from '@/collections/Reviews'
@@ -186,6 +187,7 @@ export default buildConfig({
     Media,
     Posts,
     Recipes,
+    RecipeRatings,
     Categories,
     Vouchers,
     DiscountCodes,

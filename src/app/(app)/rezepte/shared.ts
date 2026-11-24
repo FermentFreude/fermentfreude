@@ -74,7 +74,7 @@ function isoDuration(minutes?: number | null, days?: number | null) {
 /** schema.org/Recipe — read by Google rich results and Pinterest rich pins. */
 export function buildRecipeJsonLd(
   recipe: Recipe,
-  opts: { url: string; baseUrl: string; categoryLabel?: string; locale: AppLocale },
+  opts: { url: string; baseUrl: string; categoryLabel?: string; locale: AppLocale; rating?: { count: number; average: number } },
 ) {
   const images = [recipe.heroImage, recipe.pinterestImage]
     .map((img) => absoluteMediaUrl(img, opts.baseUrl))
@@ -114,6 +114,11 @@ export function buildRecipeJsonLd(
     keywords: recipe.keywords || undefined,
     recipeIngredient: ingredients.length ? ingredients : undefined,
     recipeInstructions: steps.length ? steps : undefined,
+    // Google recipe stars: only real votes, never invented
+    aggregateRating:
+      opts.rating && opts.rating.count > 0
+        ? { '@type': 'AggregateRating', ratingValue: opts.rating.average, ratingCount: opts.rating.count, bestRating: 5, worstRating: 1 }
+        : undefined,
   }
 
   // Drop undefined keys so the output stays clean

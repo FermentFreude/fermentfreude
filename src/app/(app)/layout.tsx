@@ -20,7 +20,11 @@ import './globals.css'
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
 
 /** Absolute base so relative canonical / OG URLs resolve to full addresses */
-export const metadata: Metadata = { metadataBase: new URL(getServerSideURL()) }
+export const metadata: Metadata = {
+  metadataBase: new URL(getServerSideURL()),
+  // Pinterest "claim website" (David's Fermentfreude business account): pins show our name, Rich Pins work
+  other: { 'p:domain_verify': '24601816c2d4417b5b166a88ccb4f4e5' },
+}
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale()

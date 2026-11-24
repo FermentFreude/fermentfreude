@@ -160,6 +160,19 @@ export const Users: CollectionConfig = {
       },
     },
     {
+      // ♥ on /rezepte: set by POST /api/recipes/saved (logged-in customers only)
+      name: 'savedRecipes',
+      label: 'Gespeicherte Rezepte',
+      type: 'relationship',
+      relationTo: 'recipes',
+      hasMany: true,
+      access: { create: adminOnlyFieldAccess, update: adminOnlyFieldAccess },
+      admin: {
+        readOnly: true,
+        description: 'Rezepte, die diese Person auf der Website mit dem Herz gespeichert hat (neueste zuerst). Wird automatisch gesetzt.',
+      },
+    },
+    {
       name: 'stripeCustomerId',
       type: 'text',
       admin: { readOnly: true },

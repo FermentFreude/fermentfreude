@@ -62,6 +62,8 @@ export const Recipes: CollectionConfig = {
       'Rezepte für /rezepte. Jedes Rezept bekommt eine eigene Seite (/rezepte/[slug]) im gleichen Layout. Google- und Pinterest-Rezeptdaten werden automatisch aus den Feldern erzeugt.',
     defaultColumns: ['title', 'category', '_status', 'updatedAt'],
     pagination: { defaultLimit: 25 },
+    // "Vorschau" button: opens /rezepte/<slug>; drafts are visible there for logged-in admins only
+    preview: (doc) => (doc?.slug ? `${process.env.NEXT_PUBLIC_SERVER_URL || ''}/rezepte/${doc.slug}` : null),
     components: {
       // shortcut to /admin/rezepte-import (many recipes from a spreadsheet)
       beforeListTable: ['/components/admin/RecipeImportLink#RecipeImportLink'],
@@ -129,7 +131,12 @@ export const Recipes: CollectionConfig = {
       name: 'publishedAt',
       type: 'date',
       label: 'Veröffentlicht am',
-      admin: { position: 'sidebar', date: { pickerAppearance: 'dayOnly' } },
+      admin: {
+        position: 'sidebar',
+        date: { pickerAppearance: 'dayOnly' },
+        description:
+          'Nur das Datum. Wird beim ersten Veröffentlichen automatisch gesetzt (leer lassen). Online geht das Rezept erst mit dem Button „Veröffentlichen" oben rechts.',
+      },
     },
 
     {
