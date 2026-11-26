@@ -1112,7 +1112,7 @@ export const CheckoutPage: React.FC = () => {
           </p>
         )}
         <p>{t.cartEmpty}</p>
-        <Link href="/search">{t.continueShopping}</Link>
+        <Link href="/shop">{t.continueShopping}</Link>
       </div>
     )
   }
