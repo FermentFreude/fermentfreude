@@ -14,6 +14,24 @@ export async function buildStornoData(
     unitPrice: typeof item.unitPriceCents === 'number' ? item.unitPriceCents : 0,
   }))
 
+  // A Rabattcode on the original order (e.g. FREUDE26) names the discount line
+  let discountLabel: string | undefined
+  const orderRef = cancellation.order
+  const orderId = typeof orderRef === 'object' && orderRef !== null ? (orderRef as { id?: unknown }).id : orderRef
+  if (orderId) {
+    try {
+      const order = (await payload.findByID({
+        collection: 'orders',
+        id: String(orderId),
+        depth: 0,
+        overrideAccess: true,
+      })) as unknown as { discountCode?: string | null }
+      if (order?.discountCode) discountLabel = `Rabatt ${order.discountCode}`
+    } catch {
+      /* order gone — the line is then labelled "Gutschein" */
+    }
+  }
+
   let business: CancellationDocumentData['business']
   try {
     const biz = (await payload.findGlobal({
@@ -55,6 +73,7 @@ export async function buildStornoData(
     reason: (cancellation.reason as string | undefined) || undefined,
     items,
     totalCents: typeof cancellation.totalCents === 'number' ? cancellation.totalCents : 0,
+    discountLabel,
     refundStatus: (cancellation.refundStatus as CancellationDocumentData['refundStatus']) ?? 'offen',
     refundDate: cancellation.refundDate ? new Date(cancellation.refundDate as string) : undefined,
     refundMethodOrReference: (cancellation.refundMethodOrReference as string | undefined) || undefined,

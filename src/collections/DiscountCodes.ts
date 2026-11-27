@@ -44,7 +44,7 @@ export const DiscountCodes: CollectionConfig = {
       index: true,
       admin: {
         description:
-          'Was Kund:innen eintippen, z. B. FREUDE26. Groß-/Kleinschreibung und Leerzeichen sind egal.',
+          'Was Kund:innen eintippen, z. B. WINTER10. Groß-/Kleinschreibung und Leerzeichen sind egal.',
       },
       hooks: {
         beforeValidate: [

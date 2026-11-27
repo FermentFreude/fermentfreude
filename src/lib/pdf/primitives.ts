@@ -396,6 +396,8 @@ export interface CancellationDocumentData {
   /** Positive quantities — amounts are negated at render time. */
   items: ReceiptLikeItem[]
   totalCents: number // positive; rendered negative
+  /** Label of the discount line when the items add up to more than the total (e.g. "Rabatt FREUDE26"). */
+  discountLabel?: string
   refundStatus: 'offen' | 'erstattet' | 'verrechnet'
   refundDate?: Date
   refundMethodOrReference?: string

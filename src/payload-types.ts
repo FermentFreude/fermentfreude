@@ -921,7 +921,7 @@ export interface Order {
    */
   purchasedVoucher?: (string | null) | Voucher;
   /**
-   * Rabattcode beim Gutscheinkauf (z. B. FREUDE26). Die Rechnung zeigt den Rabatt als eigene Zeile.
+   * Rabattcode beim Gutscheinkauf (z. B. WINTER10). Die Rechnung zeigt den Rabatt als eigene Zeile.
    */
   discountCode?: string | null;
   updatedAt: string;
@@ -6591,7 +6591,7 @@ export interface RecipeRating {
 export interface DiscountCode {
   id: string;
   /**
-   * Was Kund:innen eintippen, z. B. FREUDE26. Groß-/Kleinschreibung und Leerzeichen sind egal.
+   * Was Kund:innen eintippen, z. B. WINTER10. Groß-/Kleinschreibung und Leerzeichen sind egal.
    */
   code: string;
   /**

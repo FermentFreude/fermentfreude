@@ -1346,7 +1346,7 @@ export async function getOrderDetail(orderId: string): Promise<OrderDetail> {
     voucherDoc =
       (candidates.docs.find(
         (v) =>
-          Math.round(Number(v.value) * 100) === Number(od.amount) &&
+          Math.round((Number(v.value) - Number(v.discountAmount ?? 0)) * 100) === Number(od.amount) &&
           Math.abs(new Date(v.createdAt).getTime() - created) < 60 * 60 * 1000,
       ) as unknown as Record<string, unknown>) ?? null
   }
