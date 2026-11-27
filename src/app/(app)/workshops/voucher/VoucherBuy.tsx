@@ -195,7 +195,7 @@ export function VoucherBuyProvider({
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent
           side="right"
-          className="top-0 w-full gap-0 overflow-y-auto border-l-0 bg-[#FFFEF9] p-0 sm:max-w-120"
+          className="w-full gap-0 overflow-y-auto border-l-0 bg-[#FFFEF9] p-0 sm:max-w-120"
         >
           <form onSubmit={submit} className="flex min-h-full flex-col">
             <div className="px-6 pb-6 pt-8 sm:px-8">

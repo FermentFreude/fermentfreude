@@ -206,7 +206,7 @@ export async function buildOrderReceiptData(
       legacyVoucher =
         (candidates.docs.find(
           (v) =>
-            Math.round(Number(v.value) * 100) === Number(order.amount) &&
+            Math.round((Number(v.value) - Number(v.discountAmount ?? 0)) * 100) === Number(order.amount) &&
             Math.abs(new Date(v.createdAt).getTime() - created) < 60 * 60 * 1000,
         ) as unknown as Record<string, unknown>) ?? null
     } catch {

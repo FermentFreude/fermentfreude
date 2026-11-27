@@ -505,7 +505,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       giftVouchers.docs.find(
         (v) =>
           v.purchaserEmail?.toLowerCase() === email &&
-          Math.round(Number(v.value) * 100) === o.amount &&
+          Math.round((Number(v.value) - Number(v.discountAmount ?? 0)) * 100) === o.amount &&
           Math.abs(new Date(v.createdAt).getTime() - at) < 60 * 60 * 1000,
       ) ?? null
     )
@@ -537,7 +537,9 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       })
       .join(', ')
     const boughtVoucher = itemsSummary ? null : voucherForOrder({ ...od, createdAt: od.createdAt })
-    const voucherSummary = boughtVoucher ? `Gutschein €${Number(boughtVoucher.value)} · ${boughtVoucher.code}` : ''
+    const voucherSummary = boughtVoucher
+      ? `Gutschein €${Number(boughtVoucher.value)} · ${boughtVoucher.code}${boughtVoucher.discountCode ? ` · Rabatt ${boughtVoucher.discountCode}` : ''}`
+      : ''
 
     const cancellation = cancellationByOrderId.get(String(o.id)) ?? null
 

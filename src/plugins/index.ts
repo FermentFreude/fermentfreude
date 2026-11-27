@@ -470,7 +470,7 @@ export const plugins: Plugin[] = [
               readOnly: true,
               condition: (data) => Boolean(data?.discountCode),
               description:
-                'Rabattcode beim Gutscheinkauf (z. B. FREUDE26). Die Rechnung zeigt den Rabatt als eigene Zeile.',
+                'Rabattcode beim Gutscheinkauf (z. B. WINTER10). Die Rechnung zeigt den Rabatt als eigene Zeile.',
             },
           },
         ],

@@ -137,6 +137,24 @@ export async function generateStornoPDF(data: CancellationDocumentData): Promise
   // ─── Line items (negated) ──────────────────────────────────────────────
   const negatedItems = data.items.map((item) => ({ ...item, unitPrice: -Math.abs(item.unitPrice) }))
   y = drawLineItemsTable(doc, { y, items: negatedItems, locale: data.locale })
+
+  // Discount on the original invoice (Rabattcode or redeemed voucher): the
+  // lines add up to more than what was paid, so show the difference the same
+  // way the original invoice does — reversed, as a positive amount.
+  const itemsGrossCents = data.items.reduce((sum, i) => sum + Math.abs(i.unitPrice) * i.qty, 0)
+  const discountCents = itemsGrossCents - Math.abs(data.totalCents)
+  if (discountCents > 0) {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(...COLORS.darkText)
+    doc.text(data.discountLabel || 'Gutschein', MARGIN_L + 3, y)
+    doc.text(formatCurrency(discountCents), rightX - 3, y, { align: 'right' })
+    y += 6
+    doc.setDrawColor(...COLORS.divider)
+    doc.setLineWidth(0.3)
+    doc.line(MARGIN_L, y, rightX, y)
+    y += 6
+  }
   y += 6
 
   doc.setDrawColor(...COLORS.darkText)
