@@ -1,44 +1,29 @@
 'use client'
 
 import { useAuth } from '@/providers/Auth'
-import Link from 'next/link'
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 
+/**
+ * Logs the visitor out and sends them straight to the home page.
+ * If the logout request fails (e.g. already logged out), they still go home —
+ * the header then shows their real login state.
+ */
 export const LogoutPage: React.FC = () => {
   const { logout } = useAuth()
-  const [success, setSuccess] = useState('')
-  const [error, setError] = useState('')
 
   useEffect(() => {
     const performLogout = async () => {
       try {
         await logout()
-        setSuccess('Logged out successfully.')
       } catch (_) {
-        setError('You are already logged out.')
+        // Already logged out or request failed — go home either way
       }
+      // Full page load (not client navigation) so no logged-in state lingers on the page
+      window.location.replace('/')
     }
 
     void performLogout()
   }, [logout])
 
-  return (
-    <Fragment>
-      {(error || success) && (
-        <div className="prose dark:prose-invert">
-          <h1>{error || success}</h1>
-          <p>
-            What would you like to do next?
-            <Fragment>
-              {' '}
-              <Link href="/search">Click here</Link>
-              {` to shop.`}
-            </Fragment>
-            {` To log back in, `}
-            <Link href="/login">click here</Link>.
-          </p>
-        </div>
-      )}
-    </Fragment>
-  )
+  return null
 }
